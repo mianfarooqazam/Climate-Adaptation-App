@@ -19,7 +19,9 @@ import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import GameButton from '@/components/game/GameButton';
+import LanguageToggle from '@/components/game/LanguageToggle';
 import { useGame } from '@/context/GameContext';
+import { useLanguage } from '@/context/LanguageContext';
 import {
   GameColors,
   Spacing,
@@ -95,6 +97,7 @@ function FloatingEmoji({
 export default function TitleScreen() {
   const router = useRouter();
   const { totalStars, player } = useGame();
+  const { t } = useLanguage();
 
   // Logo bounce animation
   const bounce = useRef(new Animated.Value(0)).current;
@@ -131,19 +134,24 @@ export default function TitleScreen() {
       <FloatingEmoji emoji={'\u{1F331}'} delay={2400} startX={width * 0.8} duration={3800} />
       <FloatingEmoji emoji={'\u{2601}'} delay={600} startX={width * 0.2} duration={5500} />
 
+      {/* Language toggle (top-right) */}
+      <View style={styles.langToggle}>
+        <LanguageToggle />
+      </View>
+
       {/* Logo area */}
       <Animated.View
         style={[styles.logoContainer, { transform: [{ translateY: bounce }] }]}
       >
         <Text style={styles.logoEmoji}>{'\u{1F30D}'}</Text>
-        <Text style={styles.logoTitle}>EcoHero</Text>
-        <Text style={styles.logoSubtitle}>Flood Fighters</Text>
+        <Text style={styles.logoTitle}>{t('appTitle')}</Text>
+        <Text style={styles.logoSubtitle}>{t('appSubtitle')}</Text>
       </Animated.View>
 
       {/* Tagline */}
       <View style={styles.taglineBox}>
         <Text style={styles.tagline}>
-          Learn green skills. Save EcoVille!
+          {t('tagline')}
         </Text>
       </View>
 
@@ -151,8 +159,8 @@ export default function TitleScreen() {
       {totalStars > 0 && (
         <View style={styles.statsPill}>
           <Text style={styles.statsText}>
-            {'\u2B50'} {totalStars} stars {'  '} {'\u{1F33F}'}{' '}
-            {player.greenScore} Green Score
+            {'\u2B50'} {totalStars} {t('stars')} {'  '} {'\u{1F33F}'}{' '}
+            {player.greenScore} {t('greenScore')}
           </Text>
         </View>
       )}
@@ -160,7 +168,7 @@ export default function TitleScreen() {
       {/* Buttons */}
       <View style={styles.buttons}>
         <GameButton
-          title="Play"
+          title={t('play')}
           emoji={'\u{1F3AE}'}
           onPress={() => router.push('/world-map')}
           size="lg"
@@ -169,7 +177,7 @@ export default function TitleScreen() {
         />
 
         <GameButton
-          title="My Profile"
+          title={t('myProfile')}
           emoji={'\u{1F9B8}'}
           onPress={() => router.push('/profile')}
           size="md"
@@ -179,7 +187,7 @@ export default function TitleScreen() {
       </View>
 
       <Text style={styles.footer}>
-        Mainstreaming Green Skills for Climate Adaptation
+        {t('footer')}
       </Text>
 
       <StatusBar style="light" />
@@ -257,6 +265,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     maxWidth: 300,
+  },
+  langToggle: {
+    position: 'absolute',
+    top: 16,
+    right: 20,
+    zIndex: 10,
   },
   footer: {
     position: 'absolute',

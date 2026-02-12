@@ -21,8 +21,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 import BadgeView from '@/components/game/Badge';
 import GameButton from '@/components/game/GameButton';
+import LanguageToggle from '@/components/game/LanguageToggle';
 import ProgressBar from '@/components/game/ProgressBar';
 import { useGame } from '@/context/GameContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { BADGES, LEVELS, WORLDS, getLevelsForWorld } from '@/constants/gameData';
 import { getTotalStars } from '@/utils/storage';
 import {
@@ -37,6 +39,7 @@ import {
 export default function ProfileScreen() {
   const router = useRouter();
   const { player, totalStars, resetProgress } = useGame();
+  const { t } = useLanguage();
 
   const completedLevels = Object.values(player.levelProgress).filter(
     (lp) => lp.completed,
@@ -74,8 +77,8 @@ export default function ProfileScreen() {
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <Text style={styles.backText}>{'\u2190'}</Text>
         </Pressable>
-        <Text style={styles.headerTitle}>My Profile</Text>
-        <View style={{ width: 40 }} />
+        <Text style={styles.headerTitle}>{t('myProfile')}</Text>
+        <LanguageToggle variant="dark" />
       </View>
 
       <ScrollView
@@ -96,12 +99,12 @@ export default function ProfileScreen() {
           <View style={[styles.statCard, Shadow.sm]}>
             <Text style={styles.statEmoji}>{'\u{1F33F}'}</Text>
             <Text style={styles.statValue}>{player.greenScore}</Text>
-            <Text style={styles.statLabel}>Green Score</Text>
+            <Text style={styles.statLabel}>{t('greenScore')}</Text>
           </View>
           <View style={[styles.statCard, Shadow.sm]}>
             <Text style={styles.statEmoji}>{'\u2B50'}</Text>
             <Text style={styles.statValue}>{totalStars}</Text>
-            <Text style={styles.statLabel}>Stars</Text>
+            <Text style={styles.statLabel}>{t('stars')}</Text>
           </View>
           <View style={[styles.statCard, Shadow.sm]}>
             <Text style={styles.statEmoji}>{'\u2705'}</Text>
@@ -171,7 +174,7 @@ export default function ProfileScreen() {
         {/* Badges */}
         <View style={[styles.badgeSection, Shadow.sm]}>
           <Text style={styles.sectionTitle}>
-            {'\u{1F3C5}'} Badge Collection ({player.badges.length}/{BADGES.length})
+            {'\u{1F3C5}'} {t('badges')} ({player.badges.length}/{BADGES.length})
           </Text>
           <View style={styles.badgeGrid}>
             {BADGES.map((badge) => (
@@ -188,7 +191,7 @@ export default function ProfileScreen() {
         {/* Reset */}
         <View style={styles.resetArea}>
           <GameButton
-            title="Reset Progress"
+            title={t('resetProgress')}
             onPress={handleReset}
             color={GameColors.danger}
             size="sm"

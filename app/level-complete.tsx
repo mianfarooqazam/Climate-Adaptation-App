@@ -20,7 +20,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 import GameButton from '@/components/game/GameButton';
 import StarRating from '@/components/game/StarRating';
+import LanguageToggle from '@/components/game/LanguageToggle';
 import { useGame } from '@/context/GameContext';
+import { useLanguage } from '@/context/LanguageContext';
 import {
   getLevelById,
   getWorldById,
@@ -45,6 +47,7 @@ export default function LevelCompleteScreen() {
     maxScore: string;
   }>();
   const { isLevelUnlocked } = useGame();
+  const { t } = useLanguage();
 
   const level = getLevelById(levelId ?? '');
   const world = getWorldById(level?.worldId ?? '');
@@ -89,10 +92,10 @@ export default function LevelCompleteScreen() {
   }, []);
 
   const getMessage = () => {
-    if (starCount === 3) return '\u{1F31F} Perfect Score!';
-    if (starCount === 2) return '\u{1F44F} Great Job!';
-    if (starCount === 1) return '\u{1F4AA} Good Effort!';
-    return '\u{1F914} Try Again!';
+    if (starCount === 3) return `\u{1F31F} ${t('perfectScore')}`;
+    if (starCount === 2) return `\u{1F44F} ${t('greatJob')}`;
+    if (starCount === 1) return `\u{1F4AA} ${t('goodEffort')}`;
+    return `\u{1F914} ${t('tryAgain')}`;
   };
 
   return (
@@ -105,6 +108,11 @@ export default function LevelCompleteScreen() {
         }
         style={StyleSheet.absoluteFill}
       />
+
+      {/* Language toggle */}
+      <View style={styles.langToggle}>
+        <LanguageToggle />
+      </View>
 
       <Animated.View
         style={[
@@ -126,7 +134,7 @@ export default function LevelCompleteScreen() {
 
         {/* Score */}
         <View style={styles.scoreRow}>
-          <Text style={styles.scoreLabel}>Score</Text>
+          <Text style={styles.scoreLabel}>{t('score')}</Text>
           <Text style={styles.scoreValue}>
             {scoreNum} / {maxScoreNum}
           </Text>
@@ -142,7 +150,7 @@ export default function LevelCompleteScreen() {
       <View style={styles.buttons}>
         {nextLevel && nextUnlocked && (
           <GameButton
-            title="Next Level"
+            title={t('nextLevel')}
             emoji={'\u{27A1}'}
             onPress={() => {
               const typeRoute: Record<string, string> = {
@@ -163,7 +171,7 @@ export default function LevelCompleteScreen() {
         )}
 
         <GameButton
-          title="Retry"
+          title={t('retry')}
           emoji={'\u{1F504}'}
           onPress={() => {
             const typeRoute: Record<string, string> = {
@@ -184,7 +192,7 @@ export default function LevelCompleteScreen() {
         />
 
         <GameButton
-          title="World Map"
+          title={t('worldMapBtn')}
           emoji={'\u{1F5FA}'}
           onPress={() => router.replace('/world-map')}
           color="rgba(255,255,255,0.3)"
@@ -202,6 +210,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: Spacing.lg,
+  },
+  langToggle: {
+    position: 'absolute',
+    top: 16,
+    right: 20,
+    zIndex: 10,
   },
 
   // Card

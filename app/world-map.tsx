@@ -20,7 +20,9 @@ import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { useGame } from '@/context/GameContext';
+import { useLanguage } from '@/context/LanguageContext';
 import StarRating from '@/components/game/StarRating';
+import LanguageToggle from '@/components/game/LanguageToggle';
 import {
   WORLDS,
   getLevelsForWorld,
@@ -54,6 +56,7 @@ function WorldCard({
   totalStars: number;
   onPress: () => void;
 }) {
+  const { t } = useLanguage();
   const scale = useRef(new Animated.Value(1)).current;
 
   const pressIn = () =>
@@ -110,7 +113,7 @@ function WorldCard({
               </View>
             ) : (
               <Text style={styles.lockText}>
-                {'\u{1F512}'} Need {world.starsToUnlock} stars to unlock
+                {'\u{1F512}'} {world.starsToUnlock} {t('starsNeeded')}
               </Text>
             )}
           </View>
@@ -131,6 +134,7 @@ function WorldCard({
 export default function WorldMapScreen() {
   const router = useRouter();
   const { isWorldUnlocked, player, totalStars } = useGame();
+  const { t } = useLanguage();
 
   return (
     <View style={styles.container}>
@@ -145,14 +149,17 @@ export default function WorldMapScreen() {
           <Text style={styles.backText}>{'\u2190'}</Text>
         </Pressable>
         <View style={styles.headerCenter}>
-          <Text style={styles.headerTitle}>World Map</Text>
+          <Text style={styles.headerTitle}>{t('worldMap')}</Text>
           <Text style={styles.headerStars}>
-            {'\u2B50'} {totalStars} total stars
+            {'\u2B50'} {totalStars} {t('stars')}
           </Text>
         </View>
-        <Pressable onPress={() => router.push('/profile')} style={styles.profileBtn}>
-          <Text style={styles.profileEmoji}>{'\u{1F9B8}'}</Text>
-        </Pressable>
+        <View style={styles.headerRight}>
+          <LanguageToggle variant="dark" />
+          <Pressable onPress={() => router.push('/profile')} style={styles.profileBtn}>
+            <Text style={styles.profileEmoji}>{'\u{1F9B8}'}</Text>
+          </Pressable>
+        </View>
       </View>
 
       <ScrollView
@@ -226,6 +233,11 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.sm,
     color: GameColors.textSecondary,
     fontWeight: '600',
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   profileBtn: {
     width: 40,

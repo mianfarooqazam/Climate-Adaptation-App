@@ -18,7 +18,9 @@ import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { useGame } from '@/context/GameContext';
+import { useLanguage } from '@/context/LanguageContext';
 import StarRating from '@/components/game/StarRating';
+import LanguageToggle from '@/components/game/LanguageToggle';
 import {
   getWorldById,
   getLevelsForWorld,
@@ -86,7 +88,7 @@ export default function LevelsScreen() {
           <Text style={styles.headerTitle}>{world.title}</Text>
           <Text style={styles.headerSubtitle}>{world.subtitle}</Text>
         </View>
-        <View style={{ width: 40 }} />
+        <LanguageToggle />
       </View>
 
       {/* Levels list */}

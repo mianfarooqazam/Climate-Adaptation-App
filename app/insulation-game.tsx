@@ -25,7 +25,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 import GameButton from '@/components/game/GameButton';
 import Thermometer from '@/components/game/Thermometer';
+import LanguageToggle from '@/components/game/LanguageToggle';
 import { useGame } from '@/context/GameContext';
+import { useLanguage } from '@/context/LanguageContext';
 import {
   getLevelById,
   getWorldById,
@@ -113,12 +115,12 @@ const ZONES: ZoneVis[] = [
 
 interface Mood { label: string; bg: string; skin: string; cheek: string; mouth: 'frown' | 'neutral' | 'smile' | 'grin'; sweat: boolean; eyeStyle: 'squint' | 'normal' | 'happy'; }
 
-function mood(temp: number): Mood {
-  if (temp >= 35) return { label: 'Too hot!', bg: '#FFCDD2', skin: '#FFAB91', cheek: '#EF5350', mouth: 'frown', sweat: true, eyeStyle: 'squint' };
-  if (temp >= 30) return { label: 'Very warm', bg: '#FFE0B2', skin: '#FFCC80', cheek: '#FF7043', mouth: 'neutral', sweat: true, eyeStyle: 'squint' };
-  if (temp >= 26) return { label: 'Warm', bg: '#FFF9C4', skin: '#FFE0B2', cheek: '#FFB74D', mouth: 'smile', sweat: false, eyeStyle: 'normal' };
-  if (temp >= 22) return { label: 'Comfortable!', bg: '#C8E6C9', skin: '#FFCCBC', cheek: '#EF9A9A', mouth: 'grin', sweat: false, eyeStyle: 'happy' };
-  return { label: 'Nice & cool!', bg: '#BBDEFB', skin: '#FFCCBC', cheek: '#EF9A9A', mouth: 'grin', sweat: false, eyeStyle: 'happy' };
+function moodData(temp: number): Omit<Mood, 'label'> & { labelKey: 'tooHot' | 'veryWarm' | 'warm' | 'comfortable' | 'niceCool' } {
+  if (temp >= 35) return { labelKey: 'tooHot', bg: '#FFCDD2', skin: '#FFAB91', cheek: '#EF5350', mouth: 'frown', sweat: true, eyeStyle: 'squint' };
+  if (temp >= 30) return { labelKey: 'veryWarm', bg: '#FFE0B2', skin: '#FFCC80', cheek: '#FF7043', mouth: 'neutral', sweat: true, eyeStyle: 'squint' };
+  if (temp >= 26) return { labelKey: 'warm', bg: '#FFF9C4', skin: '#FFE0B2', cheek: '#FFB74D', mouth: 'smile', sweat: false, eyeStyle: 'normal' };
+  if (temp >= 22) return { labelKey: 'comfortable', bg: '#C8E6C9', skin: '#FFCCBC', cheek: '#EF9A9A', mouth: 'grin', sweat: false, eyeStyle: 'happy' };
+  return { labelKey: 'niceCool', bg: '#BBDEFB', skin: '#FFCCBC', cheek: '#EF9A9A', mouth: 'grin', sweat: false, eyeStyle: 'happy' };
 }
 
 // ---------------------------------------------------------------------------
@@ -189,6 +191,7 @@ export default function InsulationGameScreen() {
   const { levelId } = useLocalSearchParams<{ levelId: string }>();
   const { completeLevel } = useGame();
 
+  const { t } = useLanguage();
   const level = getLevelById(levelId ?? '');
   const world = getWorldById(level?.worldId ?? '');
   const config = INSULATION_LEVEL_CONFIGS[levelId ?? ''];
@@ -210,7 +213,8 @@ export default function InsulationGameScreen() {
     return Math.max(startTemp - cool, 12);
   }, [insulatedZones, startTemp]);
 
-  const moodVal = mood(currentTemp);
+  const moodRaw = moodData(currentTemp);
+  const moodVal: Mood = { ...moodRaw, label: t(moodRaw.labelKey) };
   const allDone = config ? config.activeZones.every((z) => insulatedZones[z]) : false;
   const activeSet = useMemo(() => new Set(config?.activeZones ?? []), [config]);
 
@@ -363,8 +367,9 @@ export default function InsulationGameScreen() {
         <Text style={styles.headerTitle}>{level.title}</Text>
         <View style={{ flex: 1 }} />
         <Text style={styles.headerSub}>
-          {Object.keys(insulatedZones).length}/{config.activeZones.length} insulated
+          {Object.keys(insulatedZones).length}/{config.activeZones.length} {t('insulated')}
         </Text>
+        <LanguageToggle />
       </View>
 
       {/* ===== SCENE ===== */}
@@ -385,6 +390,11 @@ export default function InsulationGameScreen() {
           <View style={styles.sunGlow1} />
           <Text style={styles.sunEmoji}>{'\u2600\uFE0F'}</Text>
         </Animated.View>
+
+        {/* Urdu label near the sun */}
+        <View style={styles.sunLabel}>
+          <Text style={styles.sunLabelText}>{t('sunScorching')}</Text>
+        </View>
 
         {/* Rays */}
         {RAYS.filter((r) => activeSet.has(r.zone)).map((r) => (
@@ -577,12 +587,12 @@ export default function InsulationGameScreen() {
                       <View key={i} style={styles.insulationStrip} />
                     ))}
                   </View>
-                  <Text style={styles.zoneDoneTxt}>Insulated</Text>
+                  <Text style={styles.zoneDoneTxt}>{t('insulatedLabel')}</Text>
                 </View>
               ) : (
                 <Animated.View style={[styles.zoneActive, styles.zoneWait, { opacity: zonePulse }]}>
-                  <Text style={styles.zoneLbl}>{zone.label}</Text>
-                  <Text style={styles.zoneHint}>Drop here!</Text>
+                  <Text style={styles.zoneLbl}>{zone.id === 'roof' ? t('roof') : t('rightWall')}</Text>
+                  <Text style={styles.zoneHint}>{t('dropHere')}</Text>
                 </Animated.View>
               )}
             </View>
@@ -603,7 +613,7 @@ export default function InsulationGameScreen() {
         {remaining > 0 && selectedMaterial ? (
           <>
             <Text style={styles.trayLabel}>
-              Drag insulation to the house {'\u2191'}
+              {t('dragInsulation')} {'\u2191'}
             </Text>
 
             {/* One draggable brick per active zone that is not yet insulated */}
@@ -625,7 +635,7 @@ export default function InsulationGameScreen() {
                     ))}
                   </View>
                 </View>
-                <Text style={styles.dragLabel}>Roof</Text>
+                <Text style={styles.dragLabel}>{t('roof')}</Text>
               </Animated.View>
             )}
 
@@ -647,14 +657,14 @@ export default function InsulationGameScreen() {
                     ))}
                   </View>
                 </View>
-                <Text style={styles.dragLabel}>Wall</Text>
+                <Text style={styles.dragLabel}>{t('wall')}</Text>
               </Animated.View>
             )}
           </>
         ) : !allDone ? (
           <Text style={styles.trayLabel}>Select a material to begin</Text>
         ) : (
-          <Text style={styles.trayLabel}>All zones insulated!</Text>
+          <Text style={styles.trayLabel}>{t('allInsulated')}</Text>
         )}
       </View>
     </View>
@@ -695,6 +705,25 @@ const styles = StyleSheet.create({
   sunGlow2: { position: 'absolute', width: 100, height: 100, borderRadius: 50, backgroundColor: 'rgba(255,235,59,0.2)' },
   sunGlow1: { position: 'absolute', width: 82, height: 82, borderRadius: 41, backgroundColor: 'rgba(255,235,59,0.35)' },
   sunEmoji: { fontSize: 58 },
+
+  // Urdu sun label
+  sunLabel: {
+    position: 'absolute',
+    right: THERMO_W + 16,
+    top: 88,
+    backgroundColor: 'rgba(255,111,0,0.85)',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 12,
+    zIndex: 11,
+  },
+  sunLabelText: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#fff',
+    writingDirection: 'rtl',
+    textAlign: 'center',
+  },
 
   // Rays
   ray: { position: 'absolute', height: 9, borderRadius: 5, overflow: 'hidden', transformOrigin: 'left center', zIndex: 5 },
