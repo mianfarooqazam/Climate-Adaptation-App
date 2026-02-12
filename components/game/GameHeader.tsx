@@ -56,8 +56,8 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingTop: 54,
-    paddingBottom: Spacing.md,
+    paddingTop: 12,
+    paddingBottom: Spacing.sm,
     paddingHorizontal: Spacing.md,
   },
   backBtn: {

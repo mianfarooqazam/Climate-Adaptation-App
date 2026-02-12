@@ -3,7 +3,7 @@
     "name": "EcoHero: Flood Fighters",
     "slug": "ecohero-flood-fighters",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "landscape",
     "icon": "./assets/images/icon.png",
     "scheme": "ecohero",
     "userInterfaceStyle": "light",
