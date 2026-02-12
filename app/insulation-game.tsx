@@ -132,12 +132,140 @@ const ZONES: ZoneVis[] = [
 // People mood
 // ---------------------------------------------------------------------------
 
-function mood(temp: number) {
-  if (temp >= 35) return { emoji: '\u{1F975}', label: 'Too hot!', bg: '#FFCDD2' };
-  if (temp >= 30) return { emoji: '\u{1F613}', label: 'Very warm', bg: '#FFE0B2' };
-  if (temp >= 26) return { emoji: '\u{1F60C}', label: 'Warm', bg: '#FFF9C4' };
-  if (temp >= 22) return { emoji: '\u{1F60A}', label: 'Comfortable!', bg: '#C8E6C9' };
-  return { emoji: '\u{1F60E}', label: 'Nice & cool!', bg: '#BBDEFB' };
+interface Mood {
+  label: string;
+  bg: string;
+  skin: string;
+  cheek: string;
+  mouth: 'frown' | 'neutral' | 'smile' | 'grin';
+  sweat: boolean;
+  eyeStyle: 'squint' | 'normal' | 'happy';
+}
+
+function mood(temp: number): Mood {
+  if (temp >= 35) return { label: 'Too hot!', bg: '#FFCDD2', skin: '#FFAB91', cheek: '#EF5350', mouth: 'frown', sweat: true, eyeStyle: 'squint' };
+  if (temp >= 30) return { label: 'Very warm', bg: '#FFE0B2', skin: '#FFCC80', cheek: '#FF7043', mouth: 'neutral', sweat: true, eyeStyle: 'squint' };
+  if (temp >= 26) return { label: 'Warm', bg: '#FFF9C4', skin: '#FFE0B2', cheek: '#FFB74D', mouth: 'smile', sweat: false, eyeStyle: 'normal' };
+  if (temp >= 22) return { label: 'Comfortable!', bg: '#C8E6C9', skin: '#FFCCBC', cheek: '#EF9A9A', mouth: 'grin', sweat: false, eyeStyle: 'happy' };
+  return { label: 'Nice & cool!', bg: '#BBDEFB', skin: '#FFCCBC', cheek: '#EF9A9A', mouth: 'grin', sweat: false, eyeStyle: 'happy' };
+}
+
+// ---------------------------------------------------------------------------
+// Cartoon person (drawn with Views — no emojis)
+// ---------------------------------------------------------------------------
+
+interface PersonProps {
+  m: Mood;
+  shirt: string;
+  pants: string;
+  hair: string;
+  isChild?: boolean;
+}
+
+function CartoonPerson({ m, shirt, pants, hair, isChild }: PersonProps) {
+  const scale = isChild ? 0.78 : 1;
+  const h = (v: number) => v * scale;
+
+  return (
+    <View style={{ alignItems: 'center', width: h(52), height: h(110) }}>
+      {/* Hair */}
+      <View style={{
+        width: h(32), height: h(14), backgroundColor: hair,
+        borderTopLeftRadius: h(16), borderTopRightRadius: h(16),
+        marginBottom: -h(4), zIndex: 2,
+      }} />
+      {/* Head */}
+      <View style={{
+        width: h(30), height: h(30), borderRadius: h(15),
+        backgroundColor: m.skin, zIndex: 1,
+        alignItems: 'center', justifyContent: 'center',
+      }}>
+        {/* Eyes */}
+        <View style={{ flexDirection: 'row', gap: h(8), marginTop: -h(2) }}>
+          {m.eyeStyle === 'squint' ? (
+            <>
+              <View style={{ width: h(7), height: h(3), backgroundColor: '#5D4037', borderRadius: h(2) }} />
+              <View style={{ width: h(7), height: h(3), backgroundColor: '#5D4037', borderRadius: h(2) }} />
+            </>
+          ) : m.eyeStyle === 'happy' ? (
+            <>
+              <View style={{ width: h(7), height: h(4), borderTopWidth: h(2.5), borderColor: '#5D4037', borderTopLeftRadius: h(5), borderTopRightRadius: h(5), backgroundColor: 'transparent' }} />
+              <View style={{ width: h(7), height: h(4), borderTopWidth: h(2.5), borderColor: '#5D4037', borderTopLeftRadius: h(5), borderTopRightRadius: h(5), backgroundColor: 'transparent' }} />
+            </>
+          ) : (
+            <>
+              <View style={{ width: h(5), height: h(5), borderRadius: h(3), backgroundColor: '#5D4037' }} />
+              <View style={{ width: h(5), height: h(5), borderRadius: h(3), backgroundColor: '#5D4037' }} />
+            </>
+          )}
+        </View>
+        {/* Cheeks */}
+        <View style={{ flexDirection: 'row', gap: h(14), marginTop: h(1) }}>
+          <View style={{ width: h(6), height: h(4), borderRadius: h(3), backgroundColor: m.cheek, opacity: 0.5 }} />
+          <View style={{ width: h(6), height: h(4), borderRadius: h(3), backgroundColor: m.cheek, opacity: 0.5 }} />
+        </View>
+        {/* Mouth */}
+        <View style={{ marginTop: h(1) }}>
+          {m.mouth === 'frown' ? (
+            <View style={{ width: h(10), height: h(5), borderBottomWidth: h(2.5), borderColor: '#5D4037', borderBottomLeftRadius: h(6), borderBottomRightRadius: h(6), transform: [{ rotate: '180deg' }] }} />
+          ) : m.mouth === 'neutral' ? (
+            <View style={{ width: h(8), height: h(2.5), backgroundColor: '#5D4037', borderRadius: h(1) }} />
+          ) : m.mouth === 'smile' ? (
+            <View style={{ width: h(10), height: h(5), borderBottomWidth: h(2.5), borderColor: '#5D4037', borderBottomLeftRadius: h(6), borderBottomRightRadius: h(6) }} />
+          ) : (
+            <View style={{ width: h(12), height: h(7), backgroundColor: '#5D4037', borderBottomLeftRadius: h(6), borderBottomRightRadius: h(6) }} />
+          )}
+        </View>
+        {/* Sweat drop */}
+        {m.sweat && (
+          <View style={{
+            position: 'absolute', right: -h(2), top: h(6),
+            width: h(6), height: h(9), borderRadius: h(3),
+            backgroundColor: '#64B5F6',
+          }} />
+        )}
+      </View>
+      {/* Body / torso */}
+      <View style={{
+        width: h(26), height: h(28), backgroundColor: shirt,
+        borderTopLeftRadius: h(4), borderTopRightRadius: h(4),
+        marginTop: h(1), alignItems: 'center',
+      }}>
+        {/* Shirt line */}
+        <View style={{ width: h(2), height: h(22), backgroundColor: 'rgba(0,0,0,0.08)', marginTop: h(2) }} />
+      </View>
+      {/* Arms */}
+      <View style={{
+        position: 'absolute', top: h(46),
+        flexDirection: 'row', width: h(52), justifyContent: 'space-between',
+      }}>
+        <View style={{
+          width: h(9), height: h(22), backgroundColor: m.skin,
+          borderRadius: h(4), transform: [{ rotate: '12deg' }],
+        }} />
+        <View style={{
+          width: h(9), height: h(22), backgroundColor: m.skin,
+          borderRadius: h(4), transform: [{ rotate: '-12deg' }],
+        }} />
+      </View>
+      {/* Legs / pants */}
+      <View style={{ flexDirection: 'row', gap: h(3) }}>
+        <View style={{
+          width: h(11), height: h(24), backgroundColor: pants,
+          borderBottomLeftRadius: h(4), borderBottomRightRadius: h(4),
+        }} />
+        <View style={{
+          width: h(11), height: h(24), backgroundColor: pants,
+          borderBottomLeftRadius: h(4), borderBottomRightRadius: h(4),
+        }} />
+      </View>
+      {/* Shoes */}
+      <View style={{ flexDirection: 'row', gap: h(3), marginTop: -h(1) }}>
+        <View style={{ width: h(13), height: h(5), backgroundColor: '#5D4037', borderRadius: h(3) }} />
+        <View style={{ width: h(13), height: h(5), backgroundColor: '#5D4037', borderRadius: h(3) }} />
+      </View>
+    </View>
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -374,18 +502,25 @@ export default function InsulationGameScreen() {
                   <View style={styles.tableTop} />
                   <View style={styles.tableLeg} />
                 </View>
-                {/* People */}
+                {/* People (drawn cartoon figures) */}
                 <View style={styles.peopleRow}>
-                  <Text style={styles.person}>{m.emoji}</Text>
-                  <Text style={styles.person}>{m.emoji}</Text>
+                  <CartoonPerson m={m} shirt="#42A5F5" pants="#1565C0" hair="#5D4037" />
+                  <CartoonPerson m={m} shirt="#EF5350" pants="#455A64" hair="#3E2723" />
                   {config.activeZones.length > 1 && (
-                    <Text style={styles.person}>{m.emoji}</Text>
+                    <CartoonPerson m={m} shirt="#66BB6A" pants="#4E342E" hair="#FF8F00" isChild />
                   )}
                 </View>
                 <Text style={[styles.moodLabel, { color: m.bg === '#C8E6C9' ? '#2E7D32' : m.bg === '#FFCDD2' ? '#C62828' : '#E65100' }]}>
                   {m.label}
                 </Text>
-                {currentTemp >= 32 && <Text style={styles.heatWaves}>{'\u{1F525}\u{1F525}\u{1F525}'}</Text>}
+                {currentTemp >= 32 && (
+                  <View style={styles.heatWavesRow}>
+                    {/* Wavy heat lines drawn with Views */}
+                    {[0, 1, 2].map((i) => (
+                      <View key={i} style={styles.heatWaveLine} />
+                    ))}
+                  </View>
+                )}
                 {/* Decorative window (left side, non-interactive) */}
                 <View style={styles.decoWindowL}>
                   <View style={styles.windowPane} />
@@ -695,13 +830,22 @@ const styles = StyleSheet.create({
     height: 3, backgroundColor: '#8D6E63',
   },
 
-  peopleRow: { flexDirection: 'row', gap: 8, zIndex: 2 },
-  person: { fontSize: 42 },
+  peopleRow: {
+    flexDirection: 'row', gap: 10, zIndex: 2,
+    alignItems: 'flex-end', justifyContent: 'center',
+  },
   moodLabel: {
     fontFamily: Fonts.rounded, fontSize: FontSizes.md,
-    fontWeight: '800', zIndex: 2,
+    fontWeight: '800', zIndex: 2, marginTop: 2,
   },
-  heatWaves: { fontSize: 18 },
+  heatWavesRow: {
+    flexDirection: 'row', gap: 6, marginTop: 2,
+  },
+  heatWaveLine: {
+    width: 3, height: 14, backgroundColor: '#FF7043',
+    borderRadius: 2, opacity: 0.6,
+    transform: [{ rotate: '8deg' }],
+  },
 
   doorWrap: { alignItems: 'center', marginTop: -2 },
   door: {
