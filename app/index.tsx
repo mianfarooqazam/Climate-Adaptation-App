@@ -30,7 +30,7 @@ import {
   Shadow,
 } from '@/constants/theme';
 
-const { width } = Dimensions.get('window');
+const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 
 // Floating decorative elements
 function FloatingEmoji({
@@ -55,7 +55,7 @@ function FloatingEmoji({
         Animated.delay(delay),
         Animated.parallel([
           Animated.timing(y, {
-            toValue: -300,
+            toValue: -250,
             duration,
             easing: Easing.inOut(Easing.sin),
             useNativeDriver: true,
@@ -105,7 +105,7 @@ export default function TitleScreen() {
     Animated.loop(
       Animated.sequence([
         Animated.timing(bounce, {
-          toValue: -12,
+          toValue: -8,
           duration: 1200,
           easing: Easing.inOut(Easing.sin),
           useNativeDriver: true,
@@ -128,62 +128,67 @@ export default function TitleScreen() {
       />
 
       {/* Floating decoration */}
-      <FloatingEmoji emoji={'\u{1F343}'} delay={0} startX={width * 0.1} duration={4000} />
-      <FloatingEmoji emoji={'\u{2601}'} delay={800} startX={width * 0.6} duration={5000} />
-      <FloatingEmoji emoji={'\u{1F30A}'} delay={1600} startX={width * 0.35} duration={4500} />
-      <FloatingEmoji emoji={'\u{1F331}'} delay={2400} startX={width * 0.8} duration={3800} />
-      <FloatingEmoji emoji={'\u{2601}'} delay={600} startX={width * 0.2} duration={5500} />
+      <FloatingEmoji emoji={'\u{1F343}'} delay={0} startX={SCREEN_W * 0.05} duration={4000} />
+      <FloatingEmoji emoji={'\u{2601}'} delay={800} startX={SCREEN_W * 0.55} duration={5000} />
+      <FloatingEmoji emoji={'\u{1F30A}'} delay={1600} startX={SCREEN_W * 0.3} duration={4500} />
+      <FloatingEmoji emoji={'\u{1F331}'} delay={2400} startX={SCREEN_W * 0.85} duration={3800} />
+      <FloatingEmoji emoji={'\u{2601}'} delay={600} startX={SCREEN_W * 0.15} duration={5500} />
 
       {/* Language toggle (top-right) */}
       <View style={styles.langToggle}>
         <LanguageToggle />
       </View>
 
-      {/* Logo area */}
-      <Animated.View
-        style={[styles.logoContainer, { transform: [{ translateY: bounce }] }]}
-      >
-        <Text style={styles.logoEmoji}>{'\u{1F30D}'}</Text>
-        <Text style={styles.logoTitle}>{t('appTitle')}</Text>
-        <Text style={styles.logoSubtitle}>{t('appSubtitle')}</Text>
-      </Animated.View>
+      {/* ---- Main row: Logo left | Buttons right ---- */}
+      <View style={styles.mainRow}>
+        {/* Left side: branding */}
+        <View style={styles.leftSide}>
+          <Animated.View
+            style={[styles.logoContainer, { transform: [{ translateY: bounce }] }]}
+          >
+            <Text style={styles.logoEmoji}>{'\u{1F30D}'}</Text>
+            <Text style={styles.logoTitle}>{t('appTitle')}</Text>
+            <Text style={styles.logoSubtitle}>{t('appSubtitle')}</Text>
+          </Animated.View>
 
-      {/* Tagline */}
-      <View style={styles.taglineBox}>
-        <Text style={styles.tagline}>
-          {t('tagline')}
-        </Text>
-      </View>
-
-      {/* Stats pill */}
-      {totalStars > 0 && (
-        <View style={styles.statsPill}>
-          <Text style={styles.statsText}>
-            {'\u2B50'} {totalStars} {t('stars')} {'  '} {'\u{1F33F}'}{' '}
-            {player.greenScore} {t('greenScore')}
-          </Text>
+          {/* Tagline */}
+          <View style={styles.taglineBox}>
+            <Text style={styles.tagline}>
+              {t('tagline')}
+            </Text>
+          </View>
         </View>
-      )}
 
-      {/* Buttons */}
-      <View style={styles.buttons}>
-        <GameButton
-          title={t('play')}
-          emoji={'\u{1F3AE}'}
-          onPress={() => router.push('/world-map')}
-          size="lg"
-          color={GameColors.sun}
-          textColor={GameColors.primaryDark}
-        />
+        {/* Right side: stats + buttons */}
+        <View style={styles.rightSide}>
+          {/* Stats pill */}
+          {totalStars > 0 && (
+            <View style={styles.statsPill}>
+              <Text style={styles.statsText}>
+                {'\u2B50'} {totalStars} {t('stars')} {'  '} {'\u{1F33F}'}{' '}
+                {player.greenScore} {t('greenScore')}
+              </Text>
+            </View>
+          )}
 
-        <GameButton
-          title={t('myProfile')}
-          emoji={'\u{1F9B8}'}
-          onPress={() => router.push('/profile')}
-          size="md"
-          color="rgba(255,255,255,0.25)"
-          textColor="#fff"
-        />
+          <GameButton
+            title={t('play')}
+            emoji={'\u{1F3AE}'}
+            onPress={() => router.push('/world-map')}
+            size="lg"
+            color={GameColors.sun}
+            textColor={GameColors.primaryDark}
+          />
+
+          <GameButton
+            title={t('myProfile')}
+            emoji={'\u{1F9B8}'}
+            onPress={() => router.push('/profile')}
+            size="md"
+            color="rgba(255,255,255,0.25)"
+            textColor="#fff"
+          />
+        </View>
       </View>
 
       <Text style={styles.footer}>
@@ -204,20 +209,41 @@ const styles = StyleSheet.create({
   },
   floatingEmoji: {
     position: 'absolute',
-    bottom: 80,
-    fontSize: 32,
+    bottom: 40,
+    fontSize: 28,
   },
+
+  /* --- Landscape row layout --- */
+  mainRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    maxWidth: 700,
+    gap: Spacing.xl,
+  },
+  leftSide: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  rightSide: {
+    flex: 1,
+    alignItems: 'center',
+    gap: Spacing.md,
+  },
+
+  /* --- Logo --- */
   logoContainer: {
     alignItems: 'center',
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.sm,
   },
   logoEmoji: {
-    fontSize: 80,
-    marginBottom: Spacing.sm,
+    fontSize: 60,
+    marginBottom: Spacing.xs,
   },
   logoTitle: {
     fontFamily: Fonts.rounded,
-    fontSize: FontSizes.title + 10,
+    fontSize: FontSizes.title,
     fontWeight: '900',
     color: '#fff',
     letterSpacing: 2,
@@ -227,18 +253,17 @@ const styles = StyleSheet.create({
   },
   logoSubtitle: {
     fontFamily: Fonts.rounded,
-    fontSize: FontSizes.xl,
+    fontSize: FontSizes.xl - 2,
     fontWeight: '700',
     color: GameColors.sunLight,
     letterSpacing: 1,
-    marginTop: -4,
+    marginTop: -2,
   },
   taglineBox: {
     backgroundColor: 'rgba(255,255,255,0.15)',
     borderRadius: 16,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    marginBottom: Spacing.lg,
+    paddingHorizontal: 18,
+    paddingVertical: 8,
   },
   tagline: {
     fontFamily: Fonts.rounded,
@@ -251,8 +276,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.15)',
     borderRadius: 20,
     paddingHorizontal: 16,
-    paddingVertical: 8,
-    marginBottom: Spacing.lg,
+    paddingVertical: 6,
   },
   statsText: {
     fontFamily: Fonts.rounded,
@@ -260,21 +284,15 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '600',
   },
-  buttons: {
-    gap: Spacing.md,
-    alignItems: 'center',
-    width: '100%',
-    maxWidth: 300,
-  },
   langToggle: {
     position: 'absolute',
-    top: 16,
+    top: 14,
     right: 20,
     zIndex: 10,
   },
   footer: {
     position: 'absolute',
-    bottom: 40,
+    bottom: 14,
     fontFamily: Fonts.rounded,
     fontSize: FontSizes.xs,
     color: 'rgba(255,255,255,0.6)',
