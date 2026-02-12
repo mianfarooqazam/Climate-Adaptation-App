@@ -14,7 +14,7 @@
  * - Score based on total green points / maximum possible
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -29,6 +29,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import GameHeader from '@/components/game/GameHeader';
 import GameButton from '@/components/game/GameButton';
 import ProgressBar from '@/components/game/ProgressBar';
+import Thermometer from '@/components/game/Thermometer';
 import { useGame } from '@/context/GameContext';
 import {
   getLevelById,
@@ -105,6 +106,16 @@ export default function EcoBuilderScreen() {
   );
   const slotsUsed = Object.keys(placedItems).length;
 
+  // --- Thermometer: temperature starts high, drops with each placed item ---
+  const BASE_TEMP = 38; // °C — an uninsulated, inefficient house
+  const currentTemp = useMemo(() => {
+    const cooling = Object.values(placedItems).reduce(
+      (sum, item) => sum + item.tempEffect,
+      0,
+    );
+    return Math.max(BASE_TEMP - cooling, 12); // floor at 12 °C
+  }, [placedItems]);
+
   const handleSlotPress = useCallback(
     (slot: BuildSlot) => {
       if (!selectedItem) return;
@@ -174,51 +185,59 @@ export default function EcoBuilderScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        {/* House area */}
-        <View style={styles.houseArea}>
-          {/* House base shape */}
-          <View style={styles.houseBody}>
-            {/* Roof */}
-            <View style={styles.roof}>
-              <Text style={styles.roofEmoji}>{'\u{1F3E0}'}</Text>
-            </View>
-            {/* Walls */}
-            <View style={styles.walls}>
-              <View style={styles.door}>
-                <Text style={styles.doorEmoji}>{'\u{1F6AA}'}</Text>
-              </View>
-            </View>
+        {/* House area + Thermometer side-by-side */}
+        <View style={styles.houseRow}>
+          {/* Thermometer on the left */}
+          <View style={styles.thermometerWrapper}>
+            <Thermometer temperature={currentTemp} />
           </View>
 
-          {/* Slot buttons overlaid */}
-          {BUILDING_SLOTS.slice(0, maxSlots).map((slot) => {
-            const placed = placedItems[slot.id];
-            const isCompatible =
-              selectedItem && selectedItem.category === slot.category;
+          {/* House area */}
+          <View style={styles.houseArea}>
+            {/* House base shape */}
+            <View style={styles.houseBody}>
+              {/* Roof */}
+              <View style={styles.roof}>
+                <Text style={styles.roofEmoji}>{'\u{1F3E0}'}</Text>
+              </View>
+              {/* Walls */}
+              <View style={styles.walls}>
+                <View style={styles.door}>
+                  <Text style={styles.doorEmoji}>{'\u{1F6AA}'}</Text>
+                </View>
+              </View>
+            </View>
 
-            return (
-              <Pressable
-                key={slot.id}
-                onPress={() => handleSlotPress(slot)}
-                style={[
-                  styles.slot,
-                  {
-                    left: `${slot.x - 8}%`,
-                    top: `${slot.y - 5}%`,
-                  },
-                  placed && styles.slotFilled,
-                  isCompatible && !placed && styles.slotHighlight,
-                ]}
-              >
-                <Text style={styles.slotEmoji}>
-                  {placed ? placed.emoji : slot.emoji}
-                </Text>
-                <Text style={styles.slotLabel}>
-                  {placed ? placed.name : slot.label}
-                </Text>
-              </Pressable>
-            );
-          })}
+            {/* Slot buttons overlaid */}
+            {BUILDING_SLOTS.slice(0, maxSlots).map((slot) => {
+              const placed = placedItems[slot.id];
+              const isCompatible =
+                selectedItem && selectedItem.category === slot.category;
+
+              return (
+                <Pressable
+                  key={slot.id}
+                  onPress={() => handleSlotPress(slot)}
+                  style={[
+                    styles.slot,
+                    {
+                      left: `${slot.x - 8}%`,
+                      top: `${slot.y - 5}%`,
+                    },
+                    placed && styles.slotFilled,
+                    isCompatible && !placed && styles.slotHighlight,
+                  ]}
+                >
+                  <Text style={styles.slotEmoji}>
+                    {placed ? placed.emoji : slot.emoji}
+                  </Text>
+                  <Text style={styles.slotLabel}>
+                    {placed ? placed.name : slot.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
         </View>
 
         {/* Info about last placed item */}
@@ -230,9 +249,14 @@ export default function EcoBuilderScreen() {
               <Text style={styles.infoDesc}>
                 {lastPlaced.description}
               </Text>
-              <Text style={styles.infoPoints}>
-                +{lastPlaced.greenPoints} green points
-              </Text>
+              <View style={styles.infoStatsRow}>
+                <Text style={styles.infoPoints}>
+                  +{lastPlaced.greenPoints} green pts
+                </Text>
+                <Text style={styles.infoTemp}>
+                  {'\u{1F321}\u{FE0F}'} -{lastPlaced.tempEffect}°C
+                </Text>
+              </View>
             </View>
           </View>
         )}
@@ -255,6 +279,9 @@ export default function EcoBuilderScreen() {
               <Text style={styles.itemName}>{item.name}</Text>
               <Text style={styles.itemPoints}>
                 +{item.greenPoints} pts
+              </Text>
+              <Text style={styles.itemTemp}>
+                -{item.tempEffect}°C
               </Text>
             </Pressable>
           ))}
@@ -282,17 +309,27 @@ const styles = StyleSheet.create({
     paddingBottom: 60,
   },
 
-  // House
+  // House + Thermometer row
+  houseRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Spacing.lg,
+  },
+  thermometerWrapper: {
+    width: 80,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: Spacing.xs,
+  },
   houseArea: {
-    width: '100%',
+    flex: 1,
     height: 300,
     position: 'relative',
-    marginBottom: Spacing.lg,
   },
   houseBody: {
     position: 'absolute',
-    left: '20%',
-    right: '20%',
+    left: '15%',
+    right: '15%',
     top: '10%',
     bottom: '15%',
     alignItems: 'center',
@@ -384,12 +421,23 @@ const styles = StyleSheet.create({
     color: GameColors.textSecondary,
     marginTop: 2,
   },
+  infoStatsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    marginTop: 4,
+  },
   infoPoints: {
     fontFamily: Fonts.rounded,
     fontSize: FontSizes.sm,
     fontWeight: '700',
     color: GameColors.primaryLight,
-    marginTop: 4,
+  },
+  infoTemp: {
+    fontFamily: Fonts.rounded,
+    fontSize: FontSizes.sm,
+    fontWeight: '700',
+    color: GameColors.water,
   },
 
   // Toolbar
@@ -434,6 +482,12 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.xs,
     fontWeight: '700',
     color: GameColors.primaryLight,
+  },
+  itemTemp: {
+    fontFamily: Fonts.rounded,
+    fontSize: FontSizes.xs,
+    fontWeight: '700',
+    color: GameColors.water,
   },
 
   // Finish

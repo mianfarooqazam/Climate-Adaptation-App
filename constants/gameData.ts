@@ -30,6 +30,8 @@ export interface EcoBuilderItem {
   emoji: string;
   description: string;
   greenPoints: number;
+  /** How many degrees (°C) this item drops the house temperature. */
+  tempEffect: number;
   category: 'insulation' | 'energy' | 'water' | 'nature';
 }
 
@@ -818,6 +820,7 @@ export const ECO_BUILDER_ITEMS: EcoBuilderItem[] = [
     emoji: '\u{2600}', // ☀
     description: 'Generates clean electricity from sunlight.',
     greenPoints: 15,
+    tempEffect: 3,
     category: 'energy',
   },
   {
@@ -826,6 +829,7 @@ export const ECO_BUILDER_ITEMS: EcoBuilderItem[] = [
     emoji: '\u{1F33F}', // 🌿
     description: 'Plants on the roof absorb rain and insulate.',
     greenPoints: 20,
+    tempEffect: 4,
     category: 'water',
   },
   {
@@ -834,6 +838,7 @@ export const ECO_BUILDER_ITEMS: EcoBuilderItem[] = [
     emoji: '\u{1F9F1}', // 🧱
     description: 'Keeps warmth in and cold out, saving energy.',
     greenPoints: 15,
+    tempEffect: 5,
     category: 'insulation',
   },
   {
@@ -842,6 +847,7 @@ export const ECO_BUILDER_ITEMS: EcoBuilderItem[] = [
     emoji: '\u{1F33A}', // 🌺
     description: 'Collects rainwater and lets it soak into the ground.',
     greenPoints: 15,
+    tempEffect: 2,
     category: 'water',
   },
   {
@@ -850,6 +856,7 @@ export const ECO_BUILDER_ITEMS: EcoBuilderItem[] = [
     emoji: '\u{1FA9F}', // 🪟
     description: 'Two layers of glass reduce heat loss through windows.',
     greenPoints: 10,
+    tempEffect: 4,
     category: 'insulation',
   },
   {
@@ -858,6 +865,7 @@ export const ECO_BUILDER_ITEMS: EcoBuilderItem[] = [
     emoji: '\u{1FAA3}', // 🪣
     description: 'Collects roof water for garden use.',
     greenPoints: 10,
+    tempEffect: 1,
     category: 'water',
   },
   {
@@ -866,6 +874,7 @@ export const ECO_BUILDER_ITEMS: EcoBuilderItem[] = [
     emoji: '\u{1F333}', // 🌳
     description: 'Provides shade, absorbs CO\u2082, and reduces runoff.',
     greenPoints: 15,
+    tempEffect: 3,
     category: 'nature',
   },
   {
@@ -874,6 +883,7 @@ export const ECO_BUILDER_ITEMS: EcoBuilderItem[] = [
     emoji: '\u{1F532}', // 🔲
     description: 'Lets water drain through instead of running off.',
     greenPoints: 10,
+    tempEffect: 1,
     category: 'water',
   },
 ];
