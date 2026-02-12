@@ -66,10 +66,23 @@ const LEVEL_TITLE_KEY: Record<string, 'roofShield' | 'hotWalls' | 'fullProtectio
   'w1-l2': 'hotWalls',
   'w1-l3': 'fullProtection',
 };
-const LEVEL_DESC_KEY: Record<string, 'roofShieldDesc' | 'hotWallsDesc' | 'fullProtectionDesc'> = {
-  'w1-l1': 'roofShieldDesc',
-  'w1-l2': 'hotWallsDesc',
-  'w1-l3': 'fullProtectionDesc',
+const WORLD_TITLE_KEY: Record<string, 'w1Title' | 'w2Title' | 'w3Title' | 'w4Title'> = {
+  w1: 'w1Title',
+  w2: 'w2Title',
+  w3: 'w3Title',
+  w4: 'w4Title',
+};
+const WORLD_SUBTITLE_KEY: Record<string, 'w1Subtitle' | 'w2Subtitle' | 'w3Subtitle' | 'w4Subtitle'> = {
+  w1: 'w1Subtitle',
+  w2: 'w2Subtitle',
+  w3: 'w3Subtitle',
+  w4: 'w4Subtitle',
+};
+const WORLD_DESC_KEY: Record<string, 'w1Description' | 'w2Description' | 'w3Description' | 'w4Description'> = {
+  w1: 'w1Description',
+  w2: 'w2Description',
+  w3: 'w3Description',
+  w4: 'w4Description',
 };
 
 export default function LevelsScreen() {
@@ -98,8 +111,8 @@ export default function LevelsScreen() {
         </Pressable>
         <View style={styles.headerCenter}>
           <Text style={styles.headerEmoji}>{world.emoji}</Text>
-          <Text style={styles.headerTitle}>{worldId === 'w1' ? t('w1Title') : world.title}</Text>
-          <Text style={styles.headerSubtitle}>{worldId === 'w1' ? t('w1Subtitle') : world.subtitle}</Text>
+          <Text style={styles.headerTitle}>{t(WORLD_TITLE_KEY[worldId ?? 'w1'] ?? 'w1Title')}</Text>
+          <Text style={styles.headerSubtitle}>{t(WORLD_SUBTITLE_KEY[worldId ?? 'w1'] ?? 'w1Subtitle')}</Text>
         </View>
         <LanguageToggle />
       </View>
@@ -174,7 +187,7 @@ export default function LevelsScreen() {
         {/* World description */}
         <View style={styles.descriptionBox}>
           <Text style={[styles.descriptionText, lang === 'ur' && { writingDirection: 'rtl' }]}>
-            {worldId === 'w1' ? t('w1Description') : world.description}
+            {t(WORLD_DESC_KEY[worldId ?? 'w1'] ?? 'w1Description')}
           </Text>
         </View>
 

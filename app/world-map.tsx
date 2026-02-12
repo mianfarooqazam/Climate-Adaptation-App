@@ -58,6 +58,18 @@ function WorldCard({
 }) {
   const { t } = useLanguage();
   const scale = useRef(new Animated.Value(1)).current;
+  const worldTitleKeyMap: Record<string, 'w1Title' | 'w2Title' | 'w3Title' | 'w4Title'> = {
+    w1: 'w1Title',
+    w2: 'w2Title',
+    w3: 'w3Title',
+    w4: 'w4Title',
+  };
+  const worldSubtitleKeyMap: Record<string, 'w1Subtitle' | 'w2Subtitle' | 'w3Subtitle' | 'w4Subtitle'> = {
+    w1: 'w1Subtitle',
+    w2: 'w2Subtitle',
+    w3: 'w3Subtitle',
+    w4: 'w4Subtitle',
+  };
 
   const pressIn = () =>
     Animated.spring(scale, {
@@ -98,11 +110,11 @@ function WorldCard({
 
           <View style={styles.cardContent}>
             <Text style={styles.worldOrder}>
-              World {world.order}
+              {t('worldLabel')} {world.order}
             </Text>
-            <Text style={styles.worldTitle}>{world.title}</Text>
+            <Text style={styles.worldTitle}>{t(worldTitleKeyMap[world.id] ?? 'w1Title')}</Text>
             <Text style={styles.worldSubtitle}>
-              {world.subtitle}
+              {t(worldSubtitleKeyMap[world.id] ?? 'w1Subtitle')}
             </Text>
 
             {unlocked ? (

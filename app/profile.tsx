@@ -46,6 +46,12 @@ export default function ProfileScreen() {
   ).length;
   const totalLevels = LEVELS.length;
   const maxStars = totalLevels * 3;
+  const worldTitleKeyMap: Record<string, 'w1Title' | 'w2Title' | 'w3Title' | 'w4Title'> = {
+    w1: 'w1Title',
+    w2: 'w2Title',
+    w3: 'w3Title',
+    w4: 'w4Title',
+  };
 
   const handleReset = () => {
     Alert.alert(
@@ -155,7 +161,7 @@ export default function ProfileScreen() {
                 </Text>
                 <View style={styles.worldProgressInfo}>
                   <Text style={styles.worldProgressName}>
-                    {world.title}
+                    {t(worldTitleKeyMap[world.id] ?? 'w1Title')}
                   </Text>
                   <ProgressBar
                     progress={completed / levels.length}
