@@ -1,9 +1,12 @@
 /**
  * EcoHero: Flood Fighters — Insulation Game (Landscape Tablet)
  *
- * Full-screen scene. Drag the insulation brick from the tray at the bottom
- * onto the glowing zones (roof / right wall) to block the sun's rays.
+ * Full-screen scene with a 3D isometric house. Drag the insulation brick
+ * from the tray onto glowing zones (roof / right wall) to block rays.
  * Thermometer on the right. No side panels.
+ *
+ * The house is drawn in isometric 3D using manually positioned Views
+ * with skewY transforms to create visible depth on the right side.
  */
 
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
@@ -46,22 +49,24 @@ import {
 
 const { width: SCR_W, height: SCR_H } = Dimensions.get('window');
 const HEADER_H = 48;
-const TRAY_H = 90;                               // drag-tray at the bottom
+const TRAY_H = 90;
 const SCENE_W = SCR_W;
 const SCENE_H = SCR_H - HEADER_H - TRAY_H;
 
-// Thermometer column inset (right side, inside the scene)
 const THERMO_W = 80;
 
-// House dimensions
-const H_W = Math.min((SCENE_W - THERMO_W - 40) * 0.48, 400);
-const H_H = Math.min(SCENE_H * 0.62, 330);
-const H_LEFT = (SCENE_W - THERMO_W - H_W) / 2;  // center in area left of thermometer
-const H_TOP = SCENE_H * 0.24;
+// 3D depth
+const SIDE_D = 50;
 
-// Roof
-const ROOF_H = 72;
-const ROOF_OVERHANG = 26;
+// House front-face dimensions
+const H_W = Math.min((SCENE_W - THERMO_W - 60 - SIDE_D) * 0.46, 360);
+const H_H = Math.min(SCENE_H * 0.6, 320);
+const H_LEFT = (SCENE_W - THERMO_W - H_W - SIDE_D) / 2;
+const H_TOP = SCENE_H * 0.26;
+
+const ROOF_H = 70;
+const ROOF_OVERHANG = 24;
+const WALL_H = H_H - ROOF_H - 14;
 
 // Sun
 const SUN_CX = (SCENE_W - THERMO_W) * 0.86;
@@ -76,26 +81,30 @@ interface RayDef { id: string; zone: InsulationZoneId; startX: number; startY: n
 function rayAngle(r: RayDef) { return Math.atan2(r.endY - r.startY, r.endX - r.startX) * (180 / Math.PI); }
 function rayLength(r: RayDef) { return Math.sqrt((r.endX - r.startX) ** 2 + (r.endY - r.startY) ** 2); }
 
+// Rays: roof rays hit the front roof, wall rays hit the 3D side wall
 const RAYS: RayDef[] = [
   { id: 'r1', zone: 'roof', startX: SUN_CX - 6,  startY: SUN_CY + 18, endX: H_LEFT + H_W * 0.12, endY: H_TOP },
   { id: 'r2', zone: 'roof', startX: SUN_CX,       startY: SUN_CY + 22, endX: H_LEFT + H_W * 0.32, endY: H_TOP + 6 },
-  { id: 'r3', zone: 'roof', startX: SUN_CX + 5,   startY: SUN_CY + 26, endX: H_LEFT + H_W * 0.52, endY: H_TOP + 10 },
-  { id: 'r4', zone: 'roof', startX: SUN_CX + 8,   startY: SUN_CY + 30, endX: H_LEFT + H_W * 0.72, endY: H_TOP + 16 },
-  { id: 'w1', zone: 'right-wall', startX: SUN_CX - 4, startY: SUN_CY + 34, endX: H_LEFT + H_W + 4, endY: H_TOP + ROOF_H + 30 },
-  { id: 'w2', zone: 'right-wall', startX: SUN_CX,     startY: SUN_CY + 38, endX: H_LEFT + H_W + 4, endY: H_TOP + ROOF_H + 80 },
-  { id: 'w3', zone: 'right-wall', startX: SUN_CX + 4, startY: SUN_CY + 42, endX: H_LEFT + H_W + 4, endY: H_TOP + ROOF_H + 130 },
-  { id: 'w4', zone: 'right-wall', startX: SUN_CX + 8, startY: SUN_CY + 46, endX: H_LEFT + H_W + 2, endY: H_TOP + H_H - 20 },
+  { id: 'r3', zone: 'roof', startX: SUN_CX + 5,   startY: SUN_CY + 26, endX: H_LEFT + H_W * 0.55, endY: H_TOP + 10 },
+  { id: 'r4', zone: 'roof', startX: SUN_CX + 8,   startY: SUN_CY + 30, endX: H_LEFT + H_W * 0.78, endY: H_TOP + 18 },
+  // Wall rays hit the right side (3D face)
+  { id: 'w1', zone: 'right-wall', startX: SUN_CX - 4, startY: SUN_CY + 34, endX: H_LEFT + H_W + SIDE_D * 0.6, endY: H_TOP + ROOF_H + 20 },
+  { id: 'w2', zone: 'right-wall', startX: SUN_CX,     startY: SUN_CY + 38, endX: H_LEFT + H_W + SIDE_D * 0.7, endY: H_TOP + ROOF_H + 70 },
+  { id: 'w3', zone: 'right-wall', startX: SUN_CX + 4, startY: SUN_CY + 42, endX: H_LEFT + H_W + SIDE_D * 0.8, endY: H_TOP + ROOF_H + 120 },
+  { id: 'w4', zone: 'right-wall', startX: SUN_CX + 8, startY: SUN_CY + 46, endX: H_LEFT + H_W + SIDE_D * 0.6, endY: H_TOP + H_H - 30 },
 ];
 
 // ---------------------------------------------------------------------------
-// Zone hit-boxes (relative to scene origin)
+// Zone hit-boxes (relative to scene)
 // ---------------------------------------------------------------------------
 
 interface ZoneVis { id: InsulationZoneId; label: string; left: number; top: number; width: number; height: number; }
 
 const ZONES: ZoneVis[] = [
-  { id: 'roof', label: 'Roof', left: H_LEFT - ROOF_OVERHANG / 2, top: H_TOP - 6, width: H_W + ROOF_OVERHANG, height: ROOF_H + 10 },
-  { id: 'right-wall', label: 'Right Wall', left: H_LEFT + H_W - 22, top: H_TOP + ROOF_H + 2, width: 56, height: H_H - ROOF_H - 16 },
+  // Roof zone covers the front triangle + side roof face
+  { id: 'roof', label: 'Roof', left: H_LEFT - ROOF_OVERHANG / 2, top: H_TOP - 6, width: H_W + ROOF_OVERHANG + SIDE_D, height: ROOF_H + 12 },
+  // Right-wall zone covers the 3D side wall
+  { id: 'right-wall', label: 'Right Wall', left: H_LEFT + H_W - 6, top: H_TOP + ROOF_H, width: SIDE_D + 14, height: WALL_H },
 ];
 
 // ---------------------------------------------------------------------------
@@ -237,15 +246,15 @@ export default function InsulationGameScreen() {
     ])).start();
   }, []);
 
-  // ---- Drag & drop state ----
-  const dragPos = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
-  const dragScale = useRef(new Animated.Value(1)).current;
-  const [isDragging, setIsDragging] = useState(false);
+  // ---- Drag & drop (one draggable per active zone) ----
+  // Each zone gets its own Animated position, scale, dragging state, and PanResponder.
+  const dragRoof = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
+  const dragRoofScale = useRef(new Animated.Value(1)).current;
+  const [isDraggingRoof, setIsDraggingRoof] = useState(false);
 
-  // The tray origin (where the brick sits) — bottom-left area.
-  // We offset relative to the tray item's resting position.
-  // The drag position is tracked in absolute screen coordinates via gesture.
-  const latestDragRef = useRef({ x: 0, y: 0 });
+  const dragWall = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
+  const dragWallScale = useRef(new Animated.Value(1)).current;
+  const [isDraggingWall, setIsDraggingWall] = useState(false);
 
   const applyInsulation = useCallback((zoneId: InsulationZoneId) => {
     if (!selectedMaterial || insulatedZones[zoneId] || finished) return;
@@ -257,7 +266,6 @@ export default function InsulationGameScreen() {
     shieldFlash.setValue(1);
     Animated.timing(shieldFlash, { toValue: 0, duration: 900, useNativeDriver: true }).start();
 
-    // If all zones are now insulated, go straight to results after a brief pause
     const allNowDone = config ? config.activeZones.every((z) => newZones[z]) : false;
     if (allNowDone) {
       setTimeout(() => {
@@ -273,50 +281,60 @@ export default function InsulationGameScreen() {
         const maxSc = Math.round(maxPts * 1.3);
         const st = completeLevel(levelId ?? '', sc, maxSc);
         router.replace({ pathname: '/level-complete', params: { levelId: levelId ?? '', stars: String(st), score: String(sc), maxScore: String(maxSc) } });
-      }, 800); // short delay so the child sees the last ray fade out
+      }, 800);
     }
   }, [selectedMaterial, insulatedZones, finished, config, startTemp, availableMaterials, levelId]);
 
-  const panResponder = useRef(
+  // Helper: try to drop on a specific target zone
+  const tryDrop = useCallback((targetZoneId: InsulationZoneId, dropX: number, dropY: number) => {
+    const zone = ZONES.find((z) => z.id === targetZoneId);
+    if (!zone || !activeSet.has(zone.id) || insulatedZones[zone.id]) return;
+    const sy = dropY - HEADER_H; // scene-relative Y
+    if (dropX >= zone.left && dropX <= zone.left + zone.width && sy >= zone.top && sy <= zone.top + zone.height) {
+      applyInsulation(zone.id);
+    }
+  }, [activeSet, insulatedZones, applyInsulation]);
+
+  // PanResponder for the ROOF brick
+  const roofPanResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: () => true,
       onPanResponderGrant: () => {
-        setIsDragging(true);
-        dragPos.setOffset({ x: (dragPos.x as any)._value ?? 0, y: (dragPos.y as any)._value ?? 0 });
-        dragPos.setValue({ x: 0, y: 0 });
-        Animated.spring(dragScale, { toValue: 1.2, useNativeDriver: true }).start();
+        setIsDraggingRoof(true);
+        dragRoof.setOffset({ x: (dragRoof.x as any)._value ?? 0, y: (dragRoof.y as any)._value ?? 0 });
+        dragRoof.setValue({ x: 0, y: 0 });
+        Animated.spring(dragRoofScale, { toValue: 1.2, useNativeDriver: true }).start();
       },
-      onPanResponderMove: (_, g) => {
-        dragPos.setValue({ x: g.dx, y: g.dy });
-        latestDragRef.current = { x: g.moveX, y: g.moveY };
-      },
+      onPanResponderMove: (_, g) => { dragRoof.setValue({ x: g.dx, y: g.dy }); },
       onPanResponderRelease: (_, g) => {
-        setIsDragging(false);
-        dragPos.flattenOffset();
-        Animated.spring(dragScale, { toValue: 1, useNativeDriver: true }).start();
+        setIsDraggingRoof(false);
+        dragRoof.flattenOffset();
+        Animated.spring(dragRoofScale, { toValue: 1, useNativeDriver: true }).start();
+        tryDrop('roof', g.moveX, g.moveY);
+        Animated.spring(dragRoof, { toValue: { x: 0, y: 0 }, useNativeDriver: true }).start();
+      },
+    }),
+  ).current;
 
-        // Check if dropped on a zone
-        // The zones are positioned relative to the scene which starts at y = HEADER_H
-        const dropX = g.moveX;
-        const dropY = g.moveY - HEADER_H; // convert to scene-relative Y
-
-        let hit = false;
-        for (const zone of ZONES) {
-          if (!activeSet.has(zone.id)) continue;
-          if (insulatedZones[zone.id]) continue;
-          if (
-            dropX >= zone.left && dropX <= zone.left + zone.width &&
-            dropY >= zone.top && dropY <= zone.top + zone.height
-          ) {
-            applyInsulation(zone.id);
-            hit = true;
-            break;
-          }
-        }
-
-        // Snap back to origin
-        Animated.spring(dragPos, { toValue: { x: 0, y: 0 }, useNativeDriver: true }).start();
+  // PanResponder for the WALL brick
+  const wallPanResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderGrant: () => {
+        setIsDraggingWall(true);
+        dragWall.setOffset({ x: (dragWall.x as any)._value ?? 0, y: (dragWall.y as any)._value ?? 0 });
+        dragWall.setValue({ x: 0, y: 0 });
+        Animated.spring(dragWallScale, { toValue: 1.2, useNativeDriver: true }).start();
+      },
+      onPanResponderMove: (_, g) => { dragWall.setValue({ x: g.dx, y: g.dy }); },
+      onPanResponderRelease: (_, g) => {
+        setIsDraggingWall(false);
+        dragWall.flattenOffset();
+        Animated.spring(dragWallScale, { toValue: 1, useNativeDriver: true }).start();
+        tryDrop('right-wall', g.moveX, g.moveY);
+        Animated.spring(dragWall, { toValue: { x: 0, y: 0 }, useNativeDriver: true }).start();
       },
     }),
   ).current;
@@ -331,9 +349,6 @@ export default function InsulationGameScreen() {
     );
   }
 
-  const WALL_H = H_H - ROOF_H - 14;
-
-  // How many active zones left to insulate
   const remaining = config.activeZones.filter((z) => !insulatedZones[z]).length;
 
   return (
@@ -352,7 +367,7 @@ export default function InsulationGameScreen() {
         </Text>
       </View>
 
-      {/* ===== SCENE (full width) ===== */}
+      {/* ===== SCENE ===== */}
       <View style={styles.scene}>
         <LinearGradient colors={['#81D4FA', '#B3E5FC', '#E8F5E9']} locations={[0, 0.55, 1]} style={StyleSheet.absoluteFill} />
 
@@ -389,24 +404,87 @@ export default function InsulationGameScreen() {
           </Animated.View>
         ))}
 
-        {/* ======= HOUSE ======= */}
-        <View style={[styles.house, { left: H_LEFT, top: H_TOP, width: H_W, height: H_H }]}>
-          {/* Chimney */}
+        {/* ======= 3D HOUSE ======= */}
+        <View style={styles.houseWrap}>
+
+          {/* ---- GROUND SHADOW ---- */}
+          <View style={styles.groundShadow} />
+
+          {/* ---- 3D: RIGHT SIDE WALL (behind front, zIndex 1) ---- */}
+          <View style={styles.sideWall}>
+            {Array.from({ length: Math.floor(WALL_H / 16) }).map((_, i) => (
+              <View key={i} style={[styles.sideBrickRow, i % 2 === 1 && { paddingLeft: 8 }]}>
+                {Array.from({ length: 3 }).map((__, j) => (
+                  <View key={j} style={styles.sideBrick} />
+                ))}
+              </View>
+            ))}
+          </View>
+
+          {/* ---- 3D: RIGHT ROOF FACE (behind front roof, zIndex 1) ---- */}
+          {/* A darker parallelogram representing the side slope of the roof */}
+          <View style={styles.sideRoof}>
+            <LinearGradient
+              colors={['#6D4C41', '#5D4037']}
+              style={StyleSheet.absoluteFill}
+            />
+            {/* Roof tile lines */}
+            {Array.from({ length: 4 }).map((_, i) => (
+              <View
+                key={i}
+                style={{
+                  position: 'absolute',
+                  left: 0, right: 0,
+                  top: 8 + i * 16,
+                  height: 2,
+                  backgroundColor: 'rgba(0,0,0,0.12)',
+                }}
+              />
+            ))}
+          </View>
+
+          {/* ---- 3D: FOUNDATION SIDE EDGE ---- */}
+          <View style={styles.foundationSide} />
+
+          {/* ---- CHIMNEY (front face) ---- */}
           <View style={styles.chimney}>
             <View style={styles.chimneyTop} />
-            <View style={styles.chimneyBody} />
+            <View style={styles.chimneyFront} />
+            {/* Chimney 3D side */}
+            <View style={styles.chimneySide} />
           </View>
-          {/* Roof */}
-          <View style={styles.roofRow}>
+
+          {/* ---- FRONT ROOF (triangle, zIndex 2) ---- */}
+          <View style={styles.frontRoof}>
             <View style={[styles.roofTriangle, {
               borderLeftWidth: (H_W + ROOF_OVERHANG) / 2,
               borderRightWidth: (H_W + ROOF_OVERHANG) / 2,
               borderBottomWidth: ROOF_H,
             }]} />
+            {/* Ridge cap */}
             <View style={[styles.roofRidge, { width: H_W * 0.08 }]} />
+            {/* Roof tile lines (decorative) */}
+            {[0.3, 0.55, 0.8].map((pct, i) => (
+              <View
+                key={i}
+                style={{
+                  position: 'absolute',
+                  top: ROOF_H * pct,
+                  left: ROOF_OVERHANG / 2 + H_W * (0.5 - pct * 0.48),
+                  right: ROOF_OVERHANG / 2 + H_W * (0.5 - pct * 0.48),
+                  height: 2,
+                  backgroundColor: 'rgba(0,0,0,0.08)',
+                  borderRadius: 1,
+                }}
+              />
+            ))}
+            {/* Roof overhang shadow */}
+            <View style={styles.roofShadow} />
           </View>
-          {/* Walls */}
-          <View style={[styles.wallsOuter, { height: WALL_H }]}>
+
+          {/* ---- FRONT WALLS (zIndex 2) ---- */}
+          <View style={styles.frontWalls}>
+            {/* Left brick panel */}
             <View style={styles.wallPanel}>
               {Array.from({ length: Math.floor(WALL_H / 18) }).map((_, i) => (
                 <View key={i} style={[styles.brickRow, i % 2 === 1 && { paddingLeft: 12 }]}>
@@ -416,9 +494,15 @@ export default function InsulationGameScreen() {
                 </View>
               ))}
             </View>
+
+            {/* Interior */}
             <View style={[styles.interior, { backgroundColor: moodVal.bg }]}>
               <View style={styles.floorLine} />
-              <View style={styles.table}><View style={styles.tableTop} /><View style={styles.tableLeg} /></View>
+              <View style={styles.table}>
+                <View style={styles.tableTop} />
+                <View style={styles.tableLeg} />
+              </View>
+              {/* People */}
               <View style={styles.peopleRow}>
                 <CartoonPerson m={moodVal} shirt="#42A5F5" pants="#1565C0" hair="#5D4037" />
                 <CartoonPerson m={moodVal} shirt="#EF5350" pants="#455A64" hair="#3E2723" />
@@ -434,12 +518,15 @@ export default function InsulationGameScreen() {
                   {[0, 1, 2].map((i) => <View key={i} style={styles.heatWaveLine} />)}
                 </View>
               )}
+              {/* Decorative window */}
               <View style={styles.decoWindowL}>
                 <View style={styles.windowPane} />
                 <View style={styles.windowCross} />
                 <View style={styles.windowCrossH} />
               </View>
             </View>
+
+            {/* Right brick panel (front face edge) */}
             <View style={styles.wallPanelR}>
               {Array.from({ length: Math.floor(WALL_H / 18) }).map((_, i) => (
                 <View key={i} style={[styles.brickRow, i % 2 === 1 && { paddingLeft: 10 }]}>
@@ -448,13 +535,20 @@ export default function InsulationGameScreen() {
               ))}
             </View>
           </View>
-          {/* Door */}
+
+          {/* ---- DOOR (on front face) ---- */}
           <View style={styles.doorWrap}>
             <View style={styles.door}>
-              <View style={styles.doorInner}><View style={styles.doorKnob} /></View>
+              <View style={styles.doorInner}>
+                <View style={styles.doorKnob} />
+              </View>
               <View style={styles.doorArch} />
             </View>
+            {/* 3D door step */}
+            <View style={styles.doorStep} />
           </View>
+
+          {/* ---- FOUNDATION (front) ---- */}
           <View style={styles.foundation} />
         </View>
 
@@ -463,11 +557,11 @@ export default function InsulationGameScreen() {
           <LinearGradient colors={['#66BB6A', '#43A047']} style={StyleSheet.absoluteFill} />
         </View>
         <Text style={[styles.tree, { left: H_LEFT - 60, bottom: SCENE_H - H_TOP - H_H + 6 }]}>{'\u{1F333}'}</Text>
-        <Text style={[styles.tree, { left: H_LEFT + H_W + 20, bottom: SCENE_H - H_TOP - H_H + 10 }]}>{'\u{1F333}'}</Text>
+        <Text style={[styles.tree, { left: H_LEFT + H_W + SIDE_D + 20, bottom: SCENE_H - H_TOP - H_H + 10 }]}>{'\u{1F333}'}</Text>
         <Text style={[styles.bush, { left: H_LEFT - 20 }]}>{'\u{1F33F}'}</Text>
-        <Text style={[styles.bush, { left: H_LEFT + H_W + 60 }]}>{'\u{1F33F}'}</Text>
+        <Text style={[styles.bush, { left: H_LEFT + H_W + SIDE_D + 60 }]}>{'\u{1F33F}'}</Text>
 
-        {/* Zone overlays — visual only (drop targets, not tappable) */}
+        {/* Zone overlays (visual drop targets) */}
         {ZONES.filter((z) => activeSet.has(z.id)).map((zone) => {
           const done = !!insulatedZones[zone.id];
           return (
@@ -495,48 +589,67 @@ export default function InsulationGameScreen() {
           );
         })}
 
-        {/* Thermometer (right side of scene) */}
+        {/* Thermometer (right) */}
         <View style={styles.thermoPos}>
           <Thermometer temperature={currentTemp} />
         </View>
 
-        {/* Flash overlay */}
+        {/* Flash */}
         <Animated.View style={[styles.flash, { opacity: shieldFlash }]} pointerEvents="none" />
-
-        {/* (Results shown automatically after last zone is insulated) */}
       </View>
 
-      {/* ===== DRAG TRAY (bottom bar) ===== */}
+      {/* ===== DRAG TRAY ===== */}
       <View style={styles.tray}>
         {remaining > 0 && selectedMaterial ? (
           <>
             <Text style={styles.trayLabel}>
-              Drag the insulation to the house {'\u2191'}
+              Drag insulation to the house {'\u2191'}
             </Text>
-            {/* Draggable brick */}
-            <Animated.View
-              {...panResponder.panHandlers}
-              style={[
-                styles.dragItem,
-                {
-                  transform: [
-                    ...dragPos.getTranslateTransform(),
-                    { scale: dragScale },
-                  ],
-                  zIndex: isDragging ? 100 : 10,
-                },
-              ]}
-            >
-              <View style={styles.dragBrick}>
-                {/* Insulation visual: layered strips */}
-                <View style={styles.dragBrickInner}>
-                  {Array.from({ length: 3 }).map((_, i) => (
-                    <View key={i} style={styles.dragStrip} />
-                  ))}
+
+            {/* One draggable brick per active zone that is not yet insulated */}
+            {activeSet.has('roof') && !insulatedZones['roof'] && (
+              <Animated.View
+                {...roofPanResponder.panHandlers}
+                style={[
+                  styles.dragItem,
+                  {
+                    transform: [...dragRoof.getTranslateTransform(), { scale: dragRoofScale }],
+                    zIndex: isDraggingRoof ? 100 : 10,
+                  },
+                ]}
+              >
+                <View style={[styles.dragBrick, styles.dragBrickRoof]}>
+                  <View style={styles.dragBrickInner}>
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <View key={i} style={styles.dragStrip} />
+                    ))}
+                  </View>
                 </View>
-              </View>
-              <Text style={styles.dragLabel}>Insulation</Text>
-            </Animated.View>
+                <Text style={styles.dragLabel}>Roof</Text>
+              </Animated.View>
+            )}
+
+            {activeSet.has('right-wall') && !insulatedZones['right-wall'] && (
+              <Animated.View
+                {...wallPanResponder.panHandlers}
+                style={[
+                  styles.dragItem,
+                  {
+                    transform: [...dragWall.getTranslateTransform(), { scale: dragWallScale }],
+                    zIndex: isDraggingWall ? 100 : 10,
+                  },
+                ]}
+              >
+                <View style={[styles.dragBrick, styles.dragBrickWall]}>
+                  <View style={styles.dragBrickInner}>
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <View key={i} style={[styles.dragStrip, { backgroundColor: '#FF8A65' }]} />
+                    ))}
+                  </View>
+                </View>
+                <Text style={styles.dragLabel}>Wall</Text>
+              </Animated.View>
+            )}
           </>
         ) : !allDone ? (
           <Text style={styles.trayLabel}>Select a material to begin</Text>
@@ -586,17 +699,153 @@ const styles = StyleSheet.create({
   // Rays
   ray: { position: 'absolute', height: 9, borderRadius: 5, overflow: 'hidden', transformOrigin: 'left center', zIndex: 5 },
 
-  // House
-  house: { position: 'absolute', zIndex: 3 },
-  chimney: { position: 'absolute', left: '15%', top: -30, zIndex: 4, alignItems: 'center' },
-  chimneyTop: { width: 32, height: 8, backgroundColor: '#5D4037', borderRadius: 3 },
-  chimneyBody: { width: 24, height: 34, backgroundColor: '#795548', borderBottomLeftRadius: 2, borderBottomRightRadius: 2 },
-  roofRow: { alignItems: 'center', zIndex: 4 },
-  roofTriangle: { width: 0, height: 0, borderLeftColor: 'transparent', borderRightColor: 'transparent', borderBottomColor: '#8D6E63', borderStyle: 'solid' },
-  roofRidge: { height: 6, backgroundColor: '#6D4C41', borderRadius: 3, marginTop: -ROOF_H - 3 },
-  wallsOuter: { flexDirection: 'row', overflow: 'hidden', borderBottomLeftRadius: 3, borderBottomRightRadius: 3 },
+  // ---- 3D HOUSE ----
+  houseWrap: {
+    position: 'absolute',
+    left: H_LEFT,
+    top: H_TOP,
+    width: H_W + SIDE_D + 10,
+    height: H_H + 30,
+    zIndex: 3,
+  },
+
+  // Ground shadow
+  groundShadow: {
+    position: 'absolute',
+    left: 10,
+    top: H_H + 4,
+    width: H_W + SIDE_D - 10,
+    height: 18,
+    backgroundColor: 'rgba(0,0,0,0.12)',
+    borderRadius: 100,
+    zIndex: 0,
+  },
+
+  // ---- 3D: Side wall ----
+  sideWall: {
+    position: 'absolute',
+    left: H_W,
+    top: ROOF_H,
+    width: SIDE_D,
+    height: WALL_H,
+    backgroundColor: '#BCAAA4',
+    transform: [{ skewY: '-6deg' }],
+    overflow: 'hidden',
+    zIndex: 1,
+    borderRightWidth: 2,
+    borderBottomWidth: 1,
+    borderColor: '#8D6E63',
+  },
+  sideBrickRow: { flexDirection: 'row', gap: 2, marginBottom: 2 },
+  sideBrick: {
+    width: 16, height: 12,
+    backgroundColor: '#A1887F',
+    borderRadius: 1,
+    borderWidth: 1,
+    borderColor: '#8D6E63',
+  },
+
+  // ---- 3D: Side roof face ----
+  sideRoof: {
+    position: 'absolute',
+    left: H_W + ROOF_OVERHANG / 2 - 2,
+    top: 2,
+    width: SIDE_D + 4,
+    height: ROOF_H - 2,
+    backgroundColor: '#6D4C41',
+    transform: [{ skewY: '-12deg' }],
+    overflow: 'hidden',
+    zIndex: 1,
+    borderRightWidth: 2,
+    borderColor: '#4E342E',
+    borderTopRightRadius: 2,
+  },
+
+  // ---- 3D: Foundation side ----
+  foundationSide: {
+    position: 'absolute',
+    left: H_W,
+    top: H_H - 14,
+    width: SIDE_D,
+    height: 10,
+    backgroundColor: '#607D8B',
+    transform: [{ skewY: '-6deg' }],
+    zIndex: 1,
+    borderRightWidth: 2,
+    borderColor: '#455A64',
+  },
+
+  // ---- Chimney ----
+  chimney: {
+    position: 'absolute',
+    left: H_W * 0.17,
+    top: -28,
+    zIndex: 5,
+  },
+  chimneyTop: {
+    width: 32, height: 8, backgroundColor: '#5D4037',
+    borderRadius: 3, zIndex: 2,
+  },
+  chimneyFront: {
+    width: 24, height: 34, backgroundColor: '#795548',
+    borderBottomLeftRadius: 2, borderBottomRightRadius: 2,
+    marginLeft: 4,
+  },
+  chimneySide: {
+    position: 'absolute',
+    left: 28,
+    top: 8,
+    width: 10,
+    height: 34,
+    backgroundColor: '#5D4037',
+    transform: [{ skewY: '-6deg' }],
+    borderBottomRightRadius: 2,
+  },
+
+  // ---- Front roof ----
+  frontRoof: {
+    position: 'absolute',
+    left: -ROOF_OVERHANG / 2,
+    top: 0,
+    width: H_W + ROOF_OVERHANG,
+    height: ROOF_H,
+    alignItems: 'center',
+    zIndex: 2,
+  },
+  roofTriangle: {
+    width: 0, height: 0,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderBottomColor: '#8D6E63',
+    borderStyle: 'solid',
+  },
+  roofRidge: {
+    height: 6, backgroundColor: '#6D4C41',
+    borderRadius: 3, marginTop: -ROOF_H - 3,
+  },
+  roofShadow: {
+    position: 'absolute',
+    bottom: -4,
+    left: ROOF_OVERHANG / 2,
+    right: ROOF_OVERHANG / 2,
+    height: 4,
+    backgroundColor: 'rgba(0,0,0,0.08)',
+  },
+
+  // ---- Front walls ----
+  frontWalls: {
+    position: 'absolute',
+    left: 0,
+    top: ROOF_H,
+    width: H_W,
+    height: WALL_H,
+    flexDirection: 'row',
+    overflow: 'hidden',
+    borderBottomLeftRadius: 3,
+    zIndex: 2,
+  },
   wallPanel: { width: 28, backgroundColor: '#D7CCC8', overflow: 'hidden' },
-  wallPanelR: { width: 28, backgroundColor: '#D7CCC8', overflow: 'hidden' },
+  wallPanelR: { width: 16, backgroundColor: '#D7CCC8', overflow: 'hidden' },
   brickRow: { flexDirection: 'row', gap: 2, marginBottom: 2 },
   brick: { width: 22, height: 14, backgroundColor: '#BCAAA4', borderRadius: 2, borderWidth: 1, borderColor: '#A1887F' },
   interior: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 4, position: 'relative' },
@@ -615,12 +864,55 @@ const styles = StyleSheet.create({
   moodLabel: { fontFamily: Fonts.rounded, fontSize: FontSizes.md, fontWeight: '800', zIndex: 2, marginTop: 2 },
   heatWavesRow: { flexDirection: 'row', gap: 6, marginTop: 2 },
   heatWaveLine: { width: 3, height: 14, backgroundColor: '#FF7043', borderRadius: 2, opacity: 0.6, transform: [{ rotate: '8deg' }] },
-  doorWrap: { alignItems: 'center', marginTop: -2 },
-  door: { width: 40, height: 58, backgroundColor: '#5D4037', borderTopLeftRadius: 20, borderTopRightRadius: 20, alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 6, overflow: 'hidden' },
-  doorInner: { width: 32, height: 44, backgroundColor: '#4E342E', borderTopLeftRadius: 16, borderTopRightRadius: 16, alignItems: 'flex-end', justifyContent: 'center', paddingRight: 6 },
+
+  // ---- Door ----
+  doorWrap: {
+    position: 'absolute',
+    left: H_W / 2 - 22,
+    top: H_H - 72,
+    alignItems: 'center',
+    zIndex: 3,
+  },
+  door: {
+    width: 40, height: 58, backgroundColor: '#5D4037',
+    borderTopLeftRadius: 20, borderTopRightRadius: 20,
+    alignItems: 'center', justifyContent: 'flex-end',
+    paddingBottom: 6, overflow: 'hidden',
+  },
+  doorInner: {
+    width: 32, height: 44, backgroundColor: '#4E342E',
+    borderTopLeftRadius: 16, borderTopRightRadius: 16,
+    alignItems: 'flex-end', justifyContent: 'center', paddingRight: 6,
+  },
   doorKnob: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#FFD54F' },
-  doorArch: { position: 'absolute', top: 0, left: 2, right: 2, height: 22, borderTopLeftRadius: 18, borderTopRightRadius: 18, backgroundColor: 'rgba(255,255,255,0.06)' },
-  foundation: { height: 10, backgroundColor: '#78909C', borderRadius: 2, marginTop: 1 },
+  doorArch: {
+    position: 'absolute', top: 0, left: 2, right: 2,
+    height: 22, borderTopLeftRadius: 18, borderTopRightRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+  },
+  doorStep: {
+    width: 52, height: 8,
+    backgroundColor: '#78909C',
+    borderRadius: 2,
+    marginTop: 1,
+    // 3D step depth
+    borderBottomWidth: 3,
+    borderBottomColor: '#546E7A',
+    borderRightWidth: 3,
+    borderRightColor: '#607D8B',
+  },
+
+  // ---- Foundation (front) ----
+  foundation: {
+    position: 'absolute',
+    left: 0,
+    top: H_H - 14,
+    width: H_W,
+    height: 10,
+    backgroundColor: '#78909C',
+    borderRadius: 2,
+    zIndex: 2,
+  },
 
   // Ground
   ground: { position: 'absolute', bottom: 0, left: 0, right: 0, height: SCENE_H * 0.16, zIndex: 2 },
@@ -642,53 +934,41 @@ const styles = StyleSheet.create({
     position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
     flexDirection: 'row', flexWrap: 'wrap', gap: 2, padding: 3, opacity: 0.5,
   },
-  insulationStrip: {
-    width: '100%', height: 8,
-    backgroundColor: '#FFB74D', borderRadius: 2,
-  },
+  insulationStrip: { width: '100%', height: 8, backgroundColor: '#FFB74D', borderRadius: 2 },
   zoneDoneTxt: { fontFamily: Fonts.rounded, fontSize: 11, fontWeight: '800', color: '#E65100', textAlign: 'center', zIndex: 2 },
 
-  // Thermometer (right side)
+  // Thermometer
   thermoPos: {
     position: 'absolute', right: 10, top: 0, bottom: 0,
-    width: THERMO_W, alignItems: 'center', justifyContent: 'center',
-    zIndex: 20,
+    width: THERMO_W, alignItems: 'center', justifyContent: 'center', zIndex: 20,
   },
 
   flash: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(102,187,106,0.15)', zIndex: 25 },
 
   // Drag tray
   tray: {
-    height: TRAY_H,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.xl,
-    gap: Spacing.xl,
+    height: TRAY_H, flexDirection: 'row', alignItems: 'center',
+    paddingHorizontal: Spacing.xl, gap: Spacing.xl,
     backgroundColor: 'rgba(62,39,35,0.88)',
   },
-  trayLabel: {
-    fontFamily: Fonts.rounded, fontSize: FontSizes.md,
-    fontWeight: '700', color: '#FFE0B2',
-  },
-  dragItem: {
-    alignItems: 'center', gap: 4,
-  },
+  trayLabel: { fontFamily: Fonts.rounded, fontSize: FontSizes.md, fontWeight: '700', color: '#FFE0B2' },
+  dragItem: { alignItems: 'center', gap: 4 },
   dragBrick: {
-    width: 64, height: 50,
-    backgroundColor: '#FFB74D',
+    width: 64, height: 50, backgroundColor: '#FFB74D',
     borderRadius: 8, borderWidth: 2, borderColor: '#F57C00',
-    overflow: 'hidden',
-    ...Shadow.md,
+    overflow: 'hidden', ...Shadow.md,
   },
-  dragBrickInner: {
-    flex: 1, justifyContent: 'center', gap: 3, padding: 6,
+  dragBrickRoof: {
+    backgroundColor: '#FFB74D',
+    borderColor: '#F57C00',
   },
-  dragStrip: {
-    height: 6, backgroundColor: '#FFA726', borderRadius: 2,
+  dragBrickWall: {
+    backgroundColor: '#FFAB91',
+    borderColor: '#E64A19',
   },
-  dragLabel: {
-    fontFamily: Fonts.rounded, fontSize: 11, fontWeight: '800', color: '#FFE0B2',
-  },
+  dragBrickInner: { flex: 1, justifyContent: 'center', gap: 3, padding: 6 },
+  dragStrip: { height: 6, backgroundColor: '#FFA726', borderRadius: 2 },
+  dragLabel: { fontFamily: Fonts.rounded, fontSize: 11, fontWeight: '800', color: '#FFE0B2' },
 
   // Error
   errorContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: Spacing.lg },
