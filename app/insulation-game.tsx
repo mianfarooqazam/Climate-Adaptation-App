@@ -115,11 +115,14 @@ const ZONES: ZoneVis[] = [
 
 interface Mood { label: string; bg: string; skin: string; cheek: string; mouth: 'frown' | 'neutral' | 'smile' | 'grin'; sweat: boolean; eyeStyle: 'squint' | 'normal' | 'happy'; }
 
-function moodData(temp: number): Omit<Mood, 'label'> & { labelKey: 'tooHot' | 'veryWarm' | 'warm' | 'comfortable' | 'niceCool' } {
+function moodData(temp: number, allInsulated: boolean): Omit<Mood, 'label'> & { labelKey: 'tooHot' | 'veryWarm' | 'warm' | 'comfortable' | 'niceCool' } {
+  // When all insulation is applied — always happy
+  if (allInsulated) return { labelKey: 'niceCool', bg: '#BBDEFB', skin: '#FFCCBC', cheek: '#EF9A9A', mouth: 'grin', sweat: false, eyeStyle: 'happy' };
+  // No insulation yet or partially done — sad/uncomfortable
   if (temp >= 35) return { labelKey: 'tooHot', bg: '#FFCDD2', skin: '#FFAB91', cheek: '#EF5350', mouth: 'frown', sweat: true, eyeStyle: 'squint' };
-  if (temp >= 30) return { labelKey: 'veryWarm', bg: '#FFE0B2', skin: '#FFCC80', cheek: '#FF7043', mouth: 'neutral', sweat: true, eyeStyle: 'squint' };
-  if (temp >= 26) return { labelKey: 'warm', bg: '#FFF9C4', skin: '#FFE0B2', cheek: '#FFB74D', mouth: 'smile', sweat: false, eyeStyle: 'normal' };
-  if (temp >= 22) return { labelKey: 'comfortable', bg: '#C8E6C9', skin: '#FFCCBC', cheek: '#EF9A9A', mouth: 'grin', sweat: false, eyeStyle: 'happy' };
+  if (temp >= 30) return { labelKey: 'veryWarm', bg: '#FFE0B2', skin: '#FFCC80', cheek: '#FF7043', mouth: 'frown', sweat: true, eyeStyle: 'squint' };
+  if (temp >= 26) return { labelKey: 'warm', bg: '#FFF9C4', skin: '#FFE0B2', cheek: '#FFB74D', mouth: 'neutral', sweat: false, eyeStyle: 'normal' };
+  if (temp >= 22) return { labelKey: 'comfortable', bg: '#C8E6C9', skin: '#FFCCBC', cheek: '#EF9A9A', mouth: 'smile', sweat: false, eyeStyle: 'normal' };
   return { labelKey: 'niceCool', bg: '#BBDEFB', skin: '#FFCCBC', cheek: '#EF9A9A', mouth: 'grin', sweat: false, eyeStyle: 'happy' };
 }
 
@@ -127,41 +130,81 @@ function moodData(temp: number): Omit<Mood, 'label'> & { labelKey: 'tooHot' | 'v
 // Cartoon person (drawn with Views)
 // ---------------------------------------------------------------------------
 
-interface PersonProps { m: Mood; shirt: string; pants: string; hair: string; isChild?: boolean; }
+interface PersonProps { m: Mood; shirt: string; pants: string; hair: string; isChild?: boolean; isFemale?: boolean; hairBow?: string; }
 
-function CartoonPerson({ m, shirt, pants, hair, isChild }: PersonProps) {
-  const s = isChild ? 0.78 : 1;
+function CartoonPerson({ m, shirt, pants, hair, isChild, isFemale, hairBow }: PersonProps) {
+  const s = isChild ? 0.72 : 1;
   const h = (v: number) => v * s;
   return (
     <View style={{ alignItems: 'center', width: h(52), height: h(110) }}>
-      <View style={{ width: h(32), height: h(14), backgroundColor: hair, borderTopLeftRadius: h(16), borderTopRightRadius: h(16), marginBottom: -h(4), zIndex: 2 }} />
+      {/* Hair */}
+      {isFemale ? (
+        <>
+          {/* Longer hair for females */}
+          <View style={{ width: h(34), height: h(18), backgroundColor: hair, borderTopLeftRadius: h(17), borderTopRightRadius: h(17), marginBottom: -h(6), zIndex: 2 }} />
+          {/* Side hair strands */}
+          <View style={{ position: 'absolute', top: h(12), left: h(4), width: h(8), height: h(28), backgroundColor: hair, borderBottomLeftRadius: h(6), zIndex: 0 }} />
+          <View style={{ position: 'absolute', top: h(12), right: h(4), width: h(8), height: h(28), backgroundColor: hair, borderBottomRightRadius: h(6), zIndex: 0 }} />
+          {/* Hair bow for girls */}
+          {hairBow && <View style={{ position: 'absolute', top: h(2), right: h(6), width: h(10), height: h(10), backgroundColor: hairBow, borderRadius: h(5), zIndex: 3, borderWidth: 1, borderColor: 'rgba(0,0,0,0.1)' }} />}
+        </>
+      ) : (
+        <View style={{ width: h(32), height: h(14), backgroundColor: hair, borderTopLeftRadius: h(16), borderTopRightRadius: h(16), marginBottom: -h(4), zIndex: 2 }} />
+      )}
+      {/* Head */}
       <View style={{ width: h(30), height: h(30), borderRadius: h(15), backgroundColor: m.skin, zIndex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        {/* Eyes */}
         <View style={{ flexDirection: 'row', gap: h(8), marginTop: -h(2) }}>
           {m.eyeStyle === 'squint' ? (<><View style={{ width: h(7), height: h(3), backgroundColor: '#5D4037', borderRadius: h(2) }} /><View style={{ width: h(7), height: h(3), backgroundColor: '#5D4037', borderRadius: h(2) }} /></>) : m.eyeStyle === 'happy' ? (<><View style={{ width: h(7), height: h(4), borderTopWidth: h(2.5), borderColor: '#5D4037', borderTopLeftRadius: h(5), borderTopRightRadius: h(5), backgroundColor: 'transparent' }} /><View style={{ width: h(7), height: h(4), borderTopWidth: h(2.5), borderColor: '#5D4037', borderTopLeftRadius: h(5), borderTopRightRadius: h(5), backgroundColor: 'transparent' }} /></>) : (<><View style={{ width: h(5), height: h(5), borderRadius: h(3), backgroundColor: '#5D4037' }} /><View style={{ width: h(5), height: h(5), borderRadius: h(3), backgroundColor: '#5D4037' }} /></>)}
         </View>
+        {/* Cheeks */}
         <View style={{ flexDirection: 'row', gap: h(14), marginTop: h(1) }}>
           <View style={{ width: h(6), height: h(4), borderRadius: h(3), backgroundColor: m.cheek, opacity: 0.5 }} />
           <View style={{ width: h(6), height: h(4), borderRadius: h(3), backgroundColor: m.cheek, opacity: 0.5 }} />
         </View>
+        {/* Mouth */}
         <View style={{ marginTop: h(1) }}>
           {m.mouth === 'frown' ? <View style={{ width: h(10), height: h(5), borderBottomWidth: h(2.5), borderColor: '#5D4037', borderBottomLeftRadius: h(6), borderBottomRightRadius: h(6), transform: [{ rotate: '180deg' }] }} /> : m.mouth === 'neutral' ? <View style={{ width: h(8), height: h(2.5), backgroundColor: '#5D4037', borderRadius: h(1) }} /> : m.mouth === 'smile' ? <View style={{ width: h(10), height: h(5), borderBottomWidth: h(2.5), borderColor: '#5D4037', borderBottomLeftRadius: h(6), borderBottomRightRadius: h(6) }} /> : <View style={{ width: h(12), height: h(7), backgroundColor: '#5D4037', borderBottomLeftRadius: h(6), borderBottomRightRadius: h(6) }} />}
         </View>
+        {/* Sweat */}
         {m.sweat && <View style={{ position: 'absolute', right: -h(2), top: h(6), width: h(6), height: h(9), borderRadius: h(3), backgroundColor: '#64B5F6' }} />}
       </View>
-      <View style={{ width: h(26), height: h(28), backgroundColor: shirt, borderTopLeftRadius: h(4), borderTopRightRadius: h(4), marginTop: h(1), alignItems: 'center' }}>
-        <View style={{ width: h(2), height: h(22), backgroundColor: 'rgba(0,0,0,0.08)', marginTop: h(2) }} />
-      </View>
+      {/* Body */}
+      {isFemale ? (
+        <>
+          {/* Top */}
+          <View style={{ width: h(26), height: h(18), backgroundColor: shirt, borderTopLeftRadius: h(4), borderTopRightRadius: h(4), marginTop: h(1), alignItems: 'center' }}>
+            <View style={{ width: h(2), height: h(14), backgroundColor: 'rgba(0,0,0,0.08)', marginTop: h(2) }} />
+          </View>
+          {/* Skirt */}
+          <View style={{ width: h(34), height: h(16), backgroundColor: pants, borderBottomLeftRadius: h(12), borderBottomRightRadius: h(12) }} />
+        </>
+      ) : (
+        <View style={{ width: h(26), height: h(28), backgroundColor: shirt, borderTopLeftRadius: h(4), borderTopRightRadius: h(4), marginTop: h(1), alignItems: 'center' }}>
+          <View style={{ width: h(2), height: h(22), backgroundColor: 'rgba(0,0,0,0.08)', marginTop: h(2) }} />
+        </View>
+      )}
+      {/* Arms */}
       <View style={{ position: 'absolute', top: h(46), flexDirection: 'row', width: h(52), justifyContent: 'space-between' }}>
         <View style={{ width: h(9), height: h(22), backgroundColor: m.skin, borderRadius: h(4), transform: [{ rotate: '12deg' }] }} />
         <View style={{ width: h(9), height: h(22), backgroundColor: m.skin, borderRadius: h(4), transform: [{ rotate: '-12deg' }] }} />
       </View>
-      <View style={{ flexDirection: 'row', gap: h(3) }}>
-        <View style={{ width: h(11), height: h(24), backgroundColor: pants, borderBottomLeftRadius: h(4), borderBottomRightRadius: h(4) }} />
-        <View style={{ width: h(11), height: h(24), backgroundColor: pants, borderBottomLeftRadius: h(4), borderBottomRightRadius: h(4) }} />
-      </View>
+      {/* Legs */}
+      {isFemale ? (
+        <View style={{ flexDirection: 'row', gap: h(3) }}>
+          <View style={{ width: h(9), height: h(18), backgroundColor: m.skin, borderBottomLeftRadius: h(4), borderBottomRightRadius: h(4) }} />
+          <View style={{ width: h(9), height: h(18), backgroundColor: m.skin, borderBottomLeftRadius: h(4), borderBottomRightRadius: h(4) }} />
+        </View>
+      ) : (
+        <View style={{ flexDirection: 'row', gap: h(3) }}>
+          <View style={{ width: h(11), height: h(24), backgroundColor: pants, borderBottomLeftRadius: h(4), borderBottomRightRadius: h(4) }} />
+          <View style={{ width: h(11), height: h(24), backgroundColor: pants, borderBottomLeftRadius: h(4), borderBottomRightRadius: h(4) }} />
+        </View>
+      )}
+      {/* Shoes */}
       <View style={{ flexDirection: 'row', gap: h(3), marginTop: -h(1) }}>
-        <View style={{ width: h(13), height: h(5), backgroundColor: '#5D4037', borderRadius: h(3) }} />
-        <View style={{ width: h(13), height: h(5), backgroundColor: '#5D4037', borderRadius: h(3) }} />
+        <View style={{ width: h(13), height: h(5), backgroundColor: isFemale ? '#AD1457' : '#5D4037', borderRadius: h(3) }} />
+        <View style={{ width: h(13), height: h(5), backgroundColor: isFemale ? '#AD1457' : '#5D4037', borderRadius: h(3) }} />
       </View>
     </View>
   );
@@ -213,9 +256,9 @@ export default function InsulationGameScreen() {
     return Math.max(startTemp - cool, 12);
   }, [insulatedZones, startTemp]);
 
-  const moodRaw = moodData(currentTemp);
-  const moodVal: Mood = { ...moodRaw, label: t(moodRaw.labelKey) };
   const allDone = config ? config.activeZones.every((z) => insulatedZones[z]) : false;
+  const moodRaw = moodData(currentTemp, allDone);
+  const moodVal: Mood = { ...moodRaw, label: t(moodRaw.labelKey) };
   const activeSet = useMemo(() => new Set(config?.activeZones ?? []), [config]);
 
   // ---- Animations ----
@@ -260,12 +303,18 @@ export default function InsulationGameScreen() {
   const dragWallScale = useRef(new Animated.Value(1)).current;
   const [isDraggingWall, setIsDraggingWall] = useState(false);
 
+  // Use a ref to always hold the latest insulatedZones so PanResponder closures aren't stale
+  const insulatedZonesRef = useRef(insulatedZones);
+  useEffect(() => { insulatedZonesRef.current = insulatedZones; }, [insulatedZones]);
+
   const applyInsulation = useCallback((zoneId: InsulationZoneId) => {
-    if (!selectedMaterial || insulatedZones[zoneId] || finished) return;
+    const currentZones = insulatedZonesRef.current;
+    if (!selectedMaterial || currentZones[zoneId] || finished) return;
     if (!selectedMaterial.applicableTo.includes(zoneId)) return;
 
-    const newZones = { ...insulatedZones, [zoneId]: selectedMaterial };
+    const newZones = { ...currentZones, [zoneId]: selectedMaterial };
     setInsulatedZones(newZones);
+    insulatedZonesRef.current = newZones;
     Animated.timing(rayOpacities[zoneId], { toValue: 0, duration: 700, useNativeDriver: true }).start();
     shieldFlash.setValue(1);
     Animated.timing(shieldFlash, { toValue: 0, duration: 900, useNativeDriver: true }).start();
@@ -285,21 +334,28 @@ export default function InsulationGameScreen() {
         const maxSc = Math.round(maxPts * 1.3);
         const st = completeLevel(levelId ?? '', sc, maxSc);
         router.replace({ pathname: '/level-complete', params: { levelId: levelId ?? '', stars: String(st), score: String(sc), maxScore: String(maxSc) } });
-      }, 800);
+      }, 3000);
     }
-  }, [selectedMaterial, insulatedZones, finished, config, startTemp, availableMaterials, levelId]);
+  }, [selectedMaterial, finished, config, startTemp, availableMaterials, levelId]);
 
-  // Helper: try to drop on a specific target zone
+  // Keep a ref to the latest applyInsulation so PanResponders always call the current version
+  const applyRef = useRef(applyInsulation);
+  useEffect(() => { applyRef.current = applyInsulation; }, [applyInsulation]);
+
+  // Helper: try to drop on a specific target zone (reads from refs, never stale)
   const tryDrop = useCallback((targetZoneId: InsulationZoneId, dropX: number, dropY: number) => {
     const zone = ZONES.find((z) => z.id === targetZoneId);
-    if (!zone || !activeSet.has(zone.id) || insulatedZones[zone.id]) return;
+    if (!zone || !activeSet.has(zone.id) || insulatedZonesRef.current[zone.id]) return;
     const sy = dropY - HEADER_H; // scene-relative Y
     if (dropX >= zone.left && dropX <= zone.left + zone.width && sy >= zone.top && sy <= zone.top + zone.height) {
-      applyInsulation(zone.id);
+      applyRef.current(zone.id);
     }
-  }, [activeSet, insulatedZones, applyInsulation]);
+  }, [activeSet]);
 
-  // PanResponder for the ROOF brick
+  const tryDropRef = useRef(tryDrop);
+  useEffect(() => { tryDropRef.current = tryDrop; }, [tryDrop]);
+
+  // PanResponder for the ROOF brick — calls through refs to avoid stale closures
   const roofPanResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
@@ -315,13 +371,13 @@ export default function InsulationGameScreen() {
         setIsDraggingRoof(false);
         dragRoof.flattenOffset();
         Animated.spring(dragRoofScale, { toValue: 1, useNativeDriver: true }).start();
-        tryDrop('roof', g.moveX, g.moveY);
+        tryDropRef.current('roof', g.moveX, g.moveY);
         Animated.spring(dragRoof, { toValue: { x: 0, y: 0 }, useNativeDriver: true }).start();
       },
     }),
   ).current;
 
-  // PanResponder for the WALL brick
+  // PanResponder for the WALL brick — calls through refs to avoid stale closures
   const wallPanResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
@@ -337,7 +393,7 @@ export default function InsulationGameScreen() {
         setIsDraggingWall(false);
         dragWall.flattenOffset();
         Animated.spring(dragWallScale, { toValue: 1, useNativeDriver: true }).start();
-        tryDrop('right-wall', g.moveX, g.moveY);
+        tryDropRef.current('right-wall', g.moveX, g.moveY);
         Animated.spring(dragWall, { toValue: { x: 0, y: 0 }, useNativeDriver: true }).start();
       },
     }),
@@ -512,13 +568,12 @@ export default function InsulationGameScreen() {
                 <View style={styles.tableTop} />
                 <View style={styles.tableLeg} />
               </View>
-              {/* People */}
+              {/* People: 1 man, 1 woman, 1 boy, 1 girl */}
               <View style={styles.peopleRow}>
                 <CartoonPerson m={moodVal} shirt="#42A5F5" pants="#1565C0" hair="#5D4037" />
-                <CartoonPerson m={moodVal} shirt="#EF5350" pants="#455A64" hair="#3E2723" />
-                {config.activeZones.length > 1 && (
-                  <CartoonPerson m={moodVal} shirt="#66BB6A" pants="#4E342E" hair="#FF8F00" isChild />
-                )}
+                <CartoonPerson m={moodVal} shirt="#EC407A" pants="#880E4F" hair="#3E2723" isFemale />
+                <CartoonPerson m={moodVal} shirt="#66BB6A" pants="#33691E" hair="#4E342E" isChild />
+                <CartoonPerson m={moodVal} shirt="#FFB74D" pants="#E91E63" hair="#5D4037" isChild isFemale hairBow="#FF4081" />
               </View>
               <Text style={[styles.moodLabel, { color: moodVal.bg === '#C8E6C9' ? '#2E7D32' : moodVal.bg === '#FFCDD2' ? '#C62828' : '#E65100' }]}>
                 {moodVal.label}
@@ -891,7 +946,7 @@ const styles = StyleSheet.create({
   windowPane: { ...StyleSheet.absoluteFillObject, backgroundColor: '#B3E5FC' },
   windowCross: { position: 'absolute', left: '48%', top: 0, bottom: 0, width: 3, backgroundColor: '#8D6E63' },
   windowCrossH: { position: 'absolute', top: '48%', left: 0, right: 0, height: 3, backgroundColor: '#8D6E63' },
-  peopleRow: { flexDirection: 'row', gap: 10, zIndex: 2, alignItems: 'flex-end', justifyContent: 'center' },
+  peopleRow: { flexDirection: 'row', gap: 6, zIndex: 2, alignItems: 'flex-end', justifyContent: 'center' },
   moodLabel: { fontFamily: Fonts.rounded, fontSize: FontSizes.md, fontWeight: '800', zIndex: 2, marginTop: 2 },
   heatWavesRow: { flexDirection: 'row', gap: 6, marginTop: 2 },
   heatWaveLine: { width: 3, height: 14, backgroundColor: '#FF7043', borderRadius: 2, opacity: 0.6, transform: [{ rotate: '8deg' }] },
