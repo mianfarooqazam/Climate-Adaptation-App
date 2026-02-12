@@ -14,7 +14,6 @@ import {
   Text,
   StyleSheet,
   Animated,
-  Easing,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -63,9 +62,6 @@ export default function LevelCompleteScreen() {
   const containerScale = useRef(new Animated.Value(0.8)).current;
   const containerOpacity = useRef(new Animated.Value(0)).current;
   const starScale = useRef(new Animated.Value(0)).current;
-  const factSlide = useRef(new Animated.Value(50)).current;
-  const factOpacity = useRef(new Animated.Value(0)).current;
-
   useEffect(() => {
     Animated.sequence([
       // Card entrance
@@ -89,20 +85,6 @@ export default function LevelCompleteScreen() {
         speed: 8,
         bounciness: 15,
       }),
-      // Fact slide up
-      Animated.parallel([
-        Animated.timing(factSlide, {
-          toValue: 0,
-          duration: 500,
-          useNativeDriver: true,
-          easing: Easing.out(Easing.cubic),
-        }),
-        Animated.timing(factOpacity, {
-          toValue: 1,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-      ]),
     ]).start();
   }, []);
 
@@ -155,25 +137,6 @@ export default function LevelCompleteScreen() {
           {level?.title ?? 'Level'}
         </Text>
       </Animated.View>
-
-      {/* Educational Fact */}
-      {level?.fact && (
-        <Animated.View
-          style={[
-            styles.factBox,
-            Shadow.md,
-            {
-              transform: [{ translateY: factSlide }],
-              opacity: factOpacity,
-            },
-          ]}
-        >
-          <Text style={styles.factLabel}>
-            {'\u{1F4A1}'} Did You Know?
-          </Text>
-          <Text style={styles.factText}>{level.fact}</Text>
-        </Animated.View>
-      )}
 
       {/* Buttons */}
       <View style={styles.buttons}>
@@ -280,29 +243,6 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.sm,
     fontWeight: '600',
     color: GameColors.textMuted,
-  },
-
-  // Fact
-  factBox: {
-    backgroundColor: 'rgba(255,255,255,0.9)',
-    borderRadius: Radius.lg,
-    padding: Spacing.lg,
-    marginTop: Spacing.lg,
-    width: '100%',
-    maxWidth: 340,
-  },
-  factLabel: {
-    fontFamily: Fonts.rounded,
-    fontSize: FontSizes.md,
-    fontWeight: '700',
-    color: GameColors.sun,
-    marginBottom: Spacing.xs,
-  },
-  factText: {
-    fontFamily: Fonts.rounded,
-    fontSize: FontSizes.sm,
-    color: GameColors.textSecondary,
-    lineHeight: 20,
   },
 
   // Buttons
