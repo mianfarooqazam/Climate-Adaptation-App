@@ -33,8 +33,8 @@ const translations = {
   },
 
   // ---- Insulation level titles ----
-  roofShield: { en: 'Roof Shield', ur: '\u0686\u06BE\u062A \u06A9\u06CC \u0688\u06BE\u0644' },
-  hotWalls: { en: 'Hot Walls', ur: '\u06AF\u0631\u0645 \u062F\u06CC\u0648\u0627\u0631\u06CC\u06BA' },
+  roofShield: { en: 'Roof', ur: '\u0686\u06BE\u062A' },
+  hotWalls: { en: 'Walls', ur: '\u062F\u06CC\u0648\u0627\u0631\u06CC\u06BA' },
   fullProtection: { en: 'Full Protection', ur: '\u0645\u06A9\u0645\u0644 \u062A\u062D\u0641\u0638' },
 
   // ---- Insulation level descriptions ----
