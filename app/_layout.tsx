@@ -1,24 +1,40 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+/**
+ * EcoHero: Flood Fighters — Root Layout
+ *
+ * Wraps the entire app in the GameProvider for global state.
+ * Uses a Stack navigator with no headers (each screen handles its own).
+ */
+
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
+import { GameProvider } from '@/context/GameContext';
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+    <GameProvider>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          animation: 'slide_from_right',
+          contentStyle: { backgroundColor: '#E8F5E9' },
+        }}
+      >
+        <Stack.Screen name="index" />
+        <Stack.Screen name="world-map" />
+        <Stack.Screen name="levels" />
+        <Stack.Screen name="quiz" />
+        <Stack.Screen name="flood-defense" />
+        <Stack.Screen name="eco-builder" />
+        <Stack.Screen name="sorting" />
+        <Stack.Screen
+          name="level-complete"
+          options={{ animation: 'fade' }}
+        />
+        <Stack.Screen name="profile" />
       </Stack>
       <StatusBar style="auto" />
-    </ThemeProvider>
+    </GameProvider>
   );
 }
