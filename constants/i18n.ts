@@ -27,7 +27,7 @@ const translations = {
   // ---- Insulation game ----
   insulated: { en: 'insulated', ur: '\u0627\u0646\u0633\u0648\u0644\u06CC\u0679\u0688' },
   sunScorching: { en: 'THE SUN IS SCORCHING', ur: '\u0633\u0648\u0631\u062C \u062A\u067E \u0631\u06C1\u0627 \u06C1\u06D2' },
-  dropHere: { en: 'Drop here!', ur: '\u06CC\u06C1\u0627\u06BA \u0686\u06BE\u0648\u0691\u06CC\u06BA!' },
+  dropHere: { en: 'Bring insulation here!', ur: '\u06CC\u06C1\u0627\u06BA \u0627\u0646\u0633\u0648\u0644\u06CC\u0634\u0646 \u0644\u0627\u0626\u06CC\u06BA!' },
   insulatedLabel: { en: 'Insulated', ur: '\u0627\u0646\u0633\u0648\u0644\u06CC\u0679\u0688' },
   dragInsulation: { en: 'Drag insulation to the house', ur: '\u0627\u0646\u0633\u0648\u0644\u06CC\u0634\u0646 \u06A9\u0648 \u06AF\u06BE\u0631 \u06A9\u06CC \u0637\u0631\u0641 \u06A9\u06BE\u06CC\u0646\u0686\u06CC\u06BA' },
   roof: { en: 'Roof', ur: '\u0686\u06BE\u062A' },

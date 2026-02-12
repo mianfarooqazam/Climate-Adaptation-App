@@ -105,8 +105,8 @@ interface ZoneVis { id: InsulationZoneId; label: string; left: number; top: numb
 const ZONES: ZoneVis[] = [
   // Roof zone covers the front triangle + side roof face
   { id: 'roof', label: 'Roof', left: H_LEFT - ROOF_OVERHANG / 2, top: H_TOP - 6, width: H_W + ROOF_OVERHANG + SIDE_D, height: ROOF_H + 12 },
-  // Right-wall zone covers the 3D side wall
-  { id: 'right-wall', label: 'Right Wall', left: H_LEFT + H_W - 6, top: H_TOP + ROOF_H, width: SIDE_D + 14, height: WALL_H },
+  // Right-wall zone covers the 3D side wall (wider for better text display)
+  { id: 'right-wall', label: 'Right Wall', left: H_LEFT + H_W - 14, top: H_TOP + ROOF_H - 4, width: SIDE_D + 30, height: WALL_H + 8 },
 ];
 
 // ---------------------------------------------------------------------------
@@ -574,6 +574,7 @@ export default function InsulationGameScreen() {
         {/* Zone overlays (visual drop targets) */}
         {ZONES.filter((z) => activeSet.has(z.id)).map((zone) => {
           const done = !!insulatedZones[zone.id];
+          const isRoof = zone.id === 'roof';
           return (
             <View
               key={zone.id}
@@ -587,12 +588,15 @@ export default function InsulationGameScreen() {
                       <View key={i} style={styles.insulationStrip} />
                     ))}
                   </View>
-                  <Text style={styles.zoneDoneTxt}>{t('insulatedLabel')}</Text>
+                  <View style={styles.zoneDoneBadge}>
+                    <Text style={styles.zoneDoneTxt}>{'\u2705'} {t('insulatedLabel')}</Text>
+                  </View>
                 </View>
               ) : (
-                <Animated.View style={[styles.zoneActive, styles.zoneWait, { opacity: zonePulse }]}>
-                  <Text style={styles.zoneLbl}>{zone.id === 'roof' ? t('roof') : t('rightWall')}</Text>
-                  <Text style={styles.zoneHint}>{t('dropHere')}</Text>
+                <Animated.View style={[styles.zoneActive, isRoof ? styles.zoneWaitRoof : styles.zoneWaitWall, { opacity: zonePulse }]}>
+                  <View style={styles.zoneHintBg}>
+                    <Text style={styles.zoneHint}>{t('dropHere')}</Text>
+                  </View>
                 </Animated.View>
               )}
             </View>
@@ -635,7 +639,6 @@ export default function InsulationGameScreen() {
                     ))}
                   </View>
                 </View>
-                <Text style={styles.dragLabel}>{t('roof')}</Text>
               </Animated.View>
             )}
 
@@ -657,7 +660,6 @@ export default function InsulationGameScreen() {
                     ))}
                   </View>
                 </View>
-                <Text style={styles.dragLabel}>{t('wall')}</Text>
               </Animated.View>
             )}
           </>
@@ -949,22 +951,76 @@ const styles = StyleSheet.create({
   bush: { position: 'absolute', bottom: 4, fontSize: 26, zIndex: 3 },
 
   // Zone overlays
-  zone: { position: 'absolute', zIndex: 15, borderRadius: Radius.sm, overflow: 'hidden' },
-  zoneActive: { flex: 1, borderWidth: 3, borderRadius: Radius.sm, alignItems: 'center', justifyContent: 'center', gap: 2 },
-  zoneWait: { borderColor: 'rgba(255,152,0,0.75)', backgroundColor: 'rgba(255,152,0,0.12)', borderStyle: 'dashed' },
-  zoneLbl: { fontFamily: Fonts.rounded, fontSize: FontSizes.sm, fontWeight: '800', color: '#E65100', textAlign: 'center' },
-  zoneHint: { fontFamily: Fonts.rounded, fontSize: 11, fontWeight: '700', color: GameColors.textSecondary, textAlign: 'center' },
+  zone: { position: 'absolute', zIndex: 15, borderRadius: Radius.md, overflow: 'visible' },
+  zoneActive: {
+    flex: 1, borderWidth: 3, borderRadius: Radius.md,
+    alignItems: 'center', justifyContent: 'center', gap: 6,
+  },
+  zoneWaitRoof: {
+    borderColor: '#FF6D00',
+    backgroundColor: 'rgba(255,111,0,0.22)',
+    borderStyle: 'dashed',
+  },
+  zoneWaitWall: {
+    borderColor: '#D32F2F',
+    backgroundColor: 'rgba(211,47,47,0.20)',
+    borderStyle: 'dashed',
+  },
+  zoneLblBg: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 10,
+  },
+  zoneLblBgRoof: {
+    backgroundColor: 'rgba(255,111,0,0.88)',
+  },
+  zoneLblBgWall: {
+    backgroundColor: 'rgba(211,47,47,0.88)',
+  },
+  zoneLbl: {
+    fontFamily: Fonts.rounded,
+    fontSize: FontSizes.md,
+    fontWeight: '900',
+    color: '#fff',
+    textAlign: 'center',
+    textShadowColor: 'rgba(0,0,0,0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  zoneHintBg: {
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  zoneHint: {
+    fontFamily: Fonts.rounded,
+    fontSize: FontSizes.sm,
+    fontWeight: '800',
+    color: '#fff',
+    textAlign: 'center',
+  },
   zoneDone: {
-    flex: 1, backgroundColor: 'rgba(255,183,77,0.35)',
-    borderWidth: 2, borderColor: '#F57C00', borderRadius: Radius.sm,
+    flex: 1, backgroundColor: 'rgba(76,175,80,0.30)',
+    borderWidth: 2.5, borderColor: '#388E3C', borderRadius: Radius.md,
     alignItems: 'center', justifyContent: 'center', gap: 4, overflow: 'hidden',
   },
   insulationLayer: {
     position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-    flexDirection: 'row', flexWrap: 'wrap', gap: 2, padding: 3, opacity: 0.5,
+    flexDirection: 'row', flexWrap: 'wrap', gap: 2, padding: 3, opacity: 0.45,
   },
-  insulationStrip: { width: '100%', height: 8, backgroundColor: '#FFB74D', borderRadius: 2 },
-  zoneDoneTxt: { fontFamily: Fonts.rounded, fontSize: 11, fontWeight: '800', color: '#E65100', textAlign: 'center', zIndex: 2 },
+  insulationStrip: { width: '100%', height: 8, backgroundColor: '#66BB6A', borderRadius: 2 },
+  zoneDoneBadge: {
+    backgroundColor: 'rgba(46,125,50,0.85)',
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 8,
+    zIndex: 2,
+  },
+  zoneDoneTxt: {
+    fontFamily: Fonts.rounded, fontSize: FontSizes.sm,
+    fontWeight: '900', color: '#fff', textAlign: 'center',
+  },
 
   // Thermometer
   thermoPos: {
