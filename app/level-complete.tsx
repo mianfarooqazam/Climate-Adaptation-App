@@ -142,7 +142,7 @@ export default function LevelCompleteScreen() {
 
         {/* Level name */}
         <Text style={styles.levelName}>
-          {level?.title ?? 'Level'}
+          {levelId === 'w1-l1' ? t('roofShield') : levelId === 'w1-l2' ? t('hotWalls') : levelId === 'w1-l3' ? t('fullProtection') : level?.title ?? 'Level'}
         </Text>
       </Animated.View>
 

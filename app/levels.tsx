@@ -52,7 +52,7 @@ const TYPE_EMOJI: Record<MiniGameType, string> = {
   'insulation-game': '\u{1F3E0}', // 🏠
 };
 
-const TYPE_LABEL: Record<MiniGameType, string> = {
+const TYPE_LABEL_EN: Record<MiniGameType, string> = {
   quiz: 'Quiz',
   'flood-defense': 'Flood Defense',
   'eco-builder': 'Eco Builder',
@@ -60,10 +60,23 @@ const TYPE_LABEL: Record<MiniGameType, string> = {
   'insulation-game': 'Insulation',
 };
 
+// Maps for insulation world translated titles & descriptions
+const LEVEL_TITLE_KEY: Record<string, 'roofShield' | 'hotWalls' | 'fullProtection'> = {
+  'w1-l1': 'roofShield',
+  'w1-l2': 'hotWalls',
+  'w1-l3': 'fullProtection',
+};
+const LEVEL_DESC_KEY: Record<string, 'roofShieldDesc' | 'hotWallsDesc' | 'fullProtectionDesc'> = {
+  'w1-l1': 'roofShieldDesc',
+  'w1-l2': 'hotWallsDesc',
+  'w1-l3': 'fullProtectionDesc',
+};
+
 export default function LevelsScreen() {
   const router = useRouter();
   const { worldId } = useLocalSearchParams<{ worldId: string }>();
   const { player, isLevelUnlocked } = useGame();
+  const { t, lang } = useLanguage();
 
   const world = getWorldById(worldId ?? 'w1');
   const levels = getLevelsForWorld(worldId ?? 'w1');
@@ -85,8 +98,8 @@ export default function LevelsScreen() {
         </Pressable>
         <View style={styles.headerCenter}>
           <Text style={styles.headerEmoji}>{world.emoji}</Text>
-          <Text style={styles.headerTitle}>{world.title}</Text>
-          <Text style={styles.headerSubtitle}>{world.subtitle}</Text>
+          <Text style={styles.headerTitle}>{worldId === 'w1' ? t('w1Title') : world.title}</Text>
+          <Text style={styles.headerSubtitle}>{worldId === 'w1' ? t('w1Subtitle') : world.subtitle}</Text>
         </View>
         <LanguageToggle />
       </View>
@@ -142,10 +155,10 @@ export default function LevelsScreen() {
                   ]}
                   numberOfLines={1}
                 >
-                  {level.title}
+                  {LEVEL_TITLE_KEY[level.id] ? t(LEVEL_TITLE_KEY[level.id]) : level.title}
                 </Text>
                 <Text style={styles.levelType}>
-                  {TYPE_LABEL[level.type]} {'  '}
+                  {level.type === 'insulation-game' ? t('typeInsulation') : TYPE_LABEL_EN[level.type]} {'  '}
                   {Array.from({ length: level.difficulty })
                     .map(() => '\u{1F525}')
                     .join('')}
@@ -160,8 +173,8 @@ export default function LevelsScreen() {
 
         {/* World description */}
         <View style={styles.descriptionBox}>
-          <Text style={styles.descriptionText}>
-            {world.description}
+          <Text style={[styles.descriptionText, lang === 'ur' && { writingDirection: 'rtl' }]}>
+            {worldId === 'w1' ? t('w1Description') : world.description}
           </Text>
         </View>
 
