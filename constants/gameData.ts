@@ -6,7 +6,7 @@
 // Types
 // ---------------------------------------------------------------------------
 
-export type MiniGameType = 'quiz' | 'flood-defense' | 'eco-builder' | 'sorting';
+export type MiniGameType = 'quiz' | 'flood-defense' | 'eco-builder' | 'sorting' | 'insulation-game';
 
 export interface QuizQuestion {
   id: string;
@@ -40,6 +40,30 @@ export interface SortingItem {
   name: string;
   emoji: string;
   correctBin: 'recycle' | 'compost' | 'landfill';
+}
+
+// ---------------------------------------------------------------------------
+// Insulation Game Types
+// ---------------------------------------------------------------------------
+
+export type InsulationZoneId = 'roof' | 'right-wall' | 'right-window';
+
+export interface InsulationMaterial {
+  id: string;
+  name: string;
+  emoji: string;
+  description: string;
+  tempEffect: number; // degrees of cooling when applied
+  points: number;
+  applicableTo: InsulationZoneId[];
+}
+
+export interface InsulationLevelConfig {
+  activeZones: InsulationZoneId[];
+  availableMaterials: string[]; // material IDs
+  startTemp: number;
+  targetTemp: number;
+  timeLimit?: number; // seconds (optional)
 }
 
 export interface Level {
@@ -82,13 +106,13 @@ export const WORLDS: World[] = [
   {
     id: 'w1',
     order: 1,
-    title: 'Rising Waters',
-    subtitle: 'Understanding Floods',
-    emoji: '\u{1F30A}', // 🌊
-    color: '#1E88E5',
-    gradientEnd: '#64B5F6',
+    title: 'Insulation',
+    subtitle: 'Keep the Heat Out',
+    emoji: '\u{1F3E0}', // 🏠
+    color: '#E65100',
+    gradientEnd: '#FF8A65',
     description:
-      'Learn why floods happen, how the water cycle works, and what early warning signs to look for.',
+      'The sun is scorching! Learn how insulation keeps buildings cool by blocking heat rays from entering through roofs, walls, and windows.',
     starsToUnlock: 0,
   },
   {
@@ -113,7 +137,7 @@ export const WORLDS: World[] = [
     gradientEnd: '#FFB74D',
     description:
       'Master recycling, composting, saving energy, and reducing your carbon footprint every day.',
-    starsToUnlock: 15,
+    starsToUnlock: 12,
   },
   {
     id: 'w4',
@@ -125,7 +149,7 @@ export const WORLDS: World[] = [
     gradientEnd: '#BA68C8',
     description:
       'Unite the community! Create emergency plans and apply all your green skills to protect EcoVille.',
-    starsToUnlock: 27,
+    starsToUnlock: 24,
   },
 ];
 
@@ -134,61 +158,39 @@ export const WORLDS: World[] = [
 // ---------------------------------------------------------------------------
 
 export const LEVELS: Level[] = [
-  // ---- World 1: Rising Waters ----
+  // ---- World 1: Insulation (3 levels) ----
   {
     id: 'w1-l1',
     worldId: 'w1',
     order: 1,
-    title: 'What Is a Flood?',
-    type: 'quiz',
-    description: 'Test your knowledge about what causes floods.',
+    title: 'Roof Shield',
+    type: 'insulation-game',
+    description: 'The sun is heating the roof! Add insulation to block the heat rays.',
     difficulty: 1,
     starsRequired: 0,
-    fact: 'Floods are the most common natural disaster worldwide, affecting millions of people every year.',
+    fact: 'Up to 25% of a home\u2019s heat is gained through an uninsulated roof. Roof insulation is the single most effective upgrade!',
   },
   {
     id: 'w1-l2',
     worldId: 'w1',
     order: 2,
-    title: 'First Barriers',
-    type: 'flood-defense',
-    description: 'Place sandbags to protect houses from a small flood.',
+    title: 'Hot Walls',
+    type: 'insulation-game',
+    description: 'Sun rays are blasting through the walls! Insulate the right side to keep cool.',
     difficulty: 1,
-    starsRequired: 0,
-    fact: 'A single sandbag wall can redirect water flow and protect doorways from shallow flooding.',
+    starsRequired: 1,
+    fact: 'Uninsulated walls can let in 35% of unwanted heat during summer, making rooms uncomfortable.',
   },
   {
     id: 'w1-l3',
     worldId: 'w1',
     order: 3,
-    title: 'Water Cycle Quiz',
-    type: 'quiz',
-    description: 'How does water move through our environment?',
-    difficulty: 1,
-    starsRequired: 2,
-    fact: 'The water cycle has no beginning or end — water continuously evaporates, condenses, and precipitates.',
-  },
-  {
-    id: 'w1-l4',
-    worldId: 'w1',
-    order: 4,
-    title: 'Storm Surge',
-    type: 'flood-defense',
-    description: 'A bigger storm is coming! Use barriers and drains.',
+    title: 'Full Protection',
+    type: 'insulation-game',
+    description: 'Insulate both the roof AND the wall to fully protect the house from heat.',
     difficulty: 2,
-    starsRequired: 4,
-    fact: 'Storm drains can handle thousands of litres of water per minute when properly maintained.',
-  },
-  {
-    id: 'w1-l5',
-    worldId: 'w1',
-    order: 5,
-    title: 'Flood Expert',
-    type: 'quiz',
-    description: 'Prove you understand floods, warning signs, and safety.',
-    difficulty: 2,
-    starsRequired: 6,
-    fact: 'Just 15 cm of fast-moving flood water can knock an adult off their feet. Always stay safe!',
+    starsRequired: 3,
+    fact: 'Combining roof and wall insulation can reduce energy bills by up to 40%, saving money and the planet!',
   },
 
   // ---- World 2: Green Builder ----
@@ -368,138 +370,6 @@ export const LEVELS: Level[] = [
 // ---------------------------------------------------------------------------
 
 export const QUIZ_QUESTIONS: Record<string, QuizQuestion[]> = {
-  'w1-l1': [
-    {
-      id: 'q1',
-      question: 'What is the most common natural disaster in the world?',
-      options: ['Earthquake', 'Flood', 'Tornado', 'Volcanic eruption'],
-      correctIndex: 1,
-      explanation: 'Floods affect more people worldwide than any other type of natural disaster.',
-    },
-    {
-      id: 'q2',
-      question: 'Which of these can cause a flood?',
-      options: [
-        'Heavy rainfall',
-        'A sunny day',
-        'A gentle breeze',
-        'A clear night sky',
-      ],
-      correctIndex: 0,
-      explanation: 'Heavy rainfall overwhelms rivers and drainage systems, causing floods.',
-    },
-    {
-      id: 'q3',
-      question: 'What happens when rivers receive too much water?',
-      options: [
-        'They dry up',
-        'They overflow their banks',
-        'They freeze instantly',
-        'Nothing happens',
-      ],
-      correctIndex: 1,
-      explanation:
-        'When rivers receive more water than they can hold, they overflow and flood surrounding areas.',
-    },
-    {
-      id: 'q4',
-      question: 'How does climate change affect flooding?',
-      options: [
-        'It has no effect',
-        'It makes floods less likely',
-        'Warmer air holds more moisture, causing heavier rainfall',
-        'It only affects volcanoes',
-      ],
-      correctIndex: 2,
-      explanation:
-        'Climate change causes warmer temperatures, which means the air holds more water vapour, leading to heavier rain.',
-    },
-  ],
-  'w1-l3': [
-    {
-      id: 'q1',
-      question: 'What powers the water cycle?',
-      options: ['Wind', 'The Moon', 'The Sun', 'Gravity alone'],
-      correctIndex: 2,
-      explanation: 'The Sun heats water, causing evaporation — the engine of the water cycle.',
-    },
-    {
-      id: 'q2',
-      question: 'What is evaporation?',
-      options: [
-        'Water turning to ice',
-        'Water turning to vapour',
-        'Rain falling',
-        'Water going underground',
-      ],
-      correctIndex: 1,
-      explanation: 'Evaporation is when liquid water turns into water vapour (gas) due to heat.',
-    },
-    {
-      id: 'q3',
-      question: 'What is precipitation?',
-      options: [
-        'Water evaporating from oceans',
-        'Water stored underground',
-        'Water falling as rain, snow, or hail',
-        'Water flowing in rivers',
-      ],
-      correctIndex: 2,
-      explanation: 'Precipitation is any water that falls from clouds — rain, snow, sleet, or hail.',
-    },
-    {
-      id: 'q4',
-      question: 'Where does most of Earth\'s freshwater come from?',
-      options: ['Oceans', 'Glaciers and ice caps', 'Rivers', 'Clouds'],
-      correctIndex: 1,
-      explanation: 'About 69% of Earth\'s freshwater is frozen in glaciers and polar ice caps.',
-    },
-  ],
-  'w1-l5': [
-    {
-      id: 'q1',
-      question: 'What should you do if you see flood water rising?',
-      options: [
-        'Walk through it',
-        'Move to higher ground immediately',
-        'Stay and watch',
-        'Try to swim',
-      ],
-      correctIndex: 1,
-      explanation: 'Always move to higher ground. Flood water is dangerous and unpredictable.',
-    },
-    {
-      id: 'q2',
-      question: 'How deep does flood water need to be to knock you down?',
-      options: ['1 metre', '15 centimetres', '50 centimetres', '2 metres'],
-      correctIndex: 1,
-      explanation: 'Just 15 cm of fast-moving water can sweep you off your feet!',
-    },
-    {
-      id: 'q3',
-      question: 'What is a "flash flood"?',
-      options: [
-        'A flood caused by lightning',
-        'A flood that happens very quickly with little warning',
-        'A flood that lasts only a second',
-        'A flood that only happens at night',
-      ],
-      correctIndex: 1,
-      explanation: 'Flash floods occur within minutes or hours of heavy rain, with little or no warning.',
-    },
-    {
-      id: 'q4',
-      question: 'Which of these is a good flood warning sign?',
-      options: [
-        'Birds singing',
-        'Rising water levels in streams',
-        'Clear blue sky',
-        'Falling temperatures',
-      ],
-      correctIndex: 1,
-      explanation: 'Rapidly rising water levels in rivers and streams warn that a flood may be coming.',
-    },
-  ],
   'w2-l1': [
     {
       id: 'q1',
@@ -926,10 +796,10 @@ export const BADGES: Badge[] = [
     condition: 'Complete any level',
   },
   {
-    id: 'flood-novice',
-    name: 'Flood Novice',
-    emoji: '\u{1F30A}', // 🌊
-    description: 'Completed World 1: Rising Waters.',
+    id: 'insulation-pro',
+    name: 'Insulation Pro',
+    emoji: '\u{1F3E0}', // 🏠
+    description: 'Completed World 1: Insulation.',
     condition: 'Complete all World 1 levels',
   },
   {
@@ -982,6 +852,47 @@ export const BADGES: Badge[] = [
     condition: 'Accumulate 100 Green Score points',
   },
 ];
+
+// ---------------------------------------------------------------------------
+// Insulation Game — Materials & Level Configs
+// ---------------------------------------------------------------------------
+
+export const INSULATION_MATERIALS: InsulationMaterial[] = [
+  {
+    id: 'insulation',
+    name: 'Insulation',
+    emoji: '\u{1F9F1}', // 🧱
+    description: 'A thick insulation layer that blocks heat from passing through, keeping the house cool inside.',
+    tempEffect: 6,
+    points: 15,
+    applicableTo: ['roof', 'right-wall'],
+  },
+];
+
+export const INSULATION_LEVEL_CONFIGS: Record<string, InsulationLevelConfig> = {
+  'w1-l1': {
+    activeZones: ['roof'],
+    availableMaterials: ['insulation'],
+    startTemp: 38,
+    targetTemp: 30,
+  },
+  'w1-l2': {
+    activeZones: ['right-wall'],
+    availableMaterials: ['insulation'],
+    startTemp: 38,
+    targetTemp: 30,
+  },
+  'w1-l3': {
+    activeZones: ['roof', 'right-wall'],
+    availableMaterials: ['insulation'],
+    startTemp: 38,
+    targetTemp: 24,
+  },
+};
+
+export function getInsulationMaterial(id: string): InsulationMaterial | undefined {
+  return INSULATION_MATERIALS.find((m) => m.id === id);
+}
 
 // ---------------------------------------------------------------------------
 // Helper to get levels for a world

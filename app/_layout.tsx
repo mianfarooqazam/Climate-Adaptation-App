@@ -28,6 +28,7 @@ export default function RootLayout() {
         <Stack.Screen name="flood-defense" />
         <Stack.Screen name="eco-builder" />
         <Stack.Screen name="sorting" />
+        <Stack.Screen name="insulation-game" />
         <Stack.Screen
           name="level-complete"
           options={{ animation: 'fade' }}

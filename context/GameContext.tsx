@@ -130,7 +130,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
         // World completion badges
         const worldBadgeMap: Record<string, string> = {
-          w1: 'flood-novice',
+          w1: 'insulation-pro',
           w2: 'green-builder',
           w3: 'eco-warrior',
           w4: 'community-hero',

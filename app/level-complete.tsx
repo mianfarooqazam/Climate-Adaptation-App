@@ -187,6 +187,7 @@ export default function LevelCompleteScreen() {
                 'flood-defense': '/flood-defense',
                 'eco-builder': '/eco-builder',
                 sorting: '/sorting',
+                'insulation-game': '/insulation-game',
               };
               router.replace({
                 pathname: typeRoute[nextLevel.type] as any,
@@ -207,6 +208,7 @@ export default function LevelCompleteScreen() {
               'flood-defense': '/flood-defense',
               'eco-builder': '/eco-builder',
               sorting: '/sorting',
+              'insulation-game': '/insulation-game',
             };
             router.replace({
               pathname: typeRoute[level?.type ?? 'quiz'] as any,

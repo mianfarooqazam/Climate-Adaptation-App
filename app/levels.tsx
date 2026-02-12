@@ -39,13 +39,15 @@ const TYPE_ROUTE: Record<MiniGameType, string> = {
   'flood-defense': '/flood-defense',
   'eco-builder': '/eco-builder',
   sorting: '/sorting',
+  'insulation-game': '/insulation-game',
 };
 
 const TYPE_EMOJI: Record<MiniGameType, string> = {
-  quiz: '\u{1F9E0}',           // 🧠
-  'flood-defense': '\u{1F30A}', // 🌊
-  'eco-builder': '\u{1F3D7}',   // 🏗
-  sorting: '\u{267B}',          // ♻
+  quiz: '\u{1F9E0}',              // 🧠
+  'flood-defense': '\u{1F30A}',    // 🌊
+  'eco-builder': '\u{1F3D7}',     // 🏗
+  sorting: '\u{267B}',            // ♻
+  'insulation-game': '\u{1F3E0}', // 🏠
 };
 
 const TYPE_LABEL: Record<MiniGameType, string> = {
@@ -53,6 +55,7 @@ const TYPE_LABEL: Record<MiniGameType, string> = {
   'flood-defense': 'Flood Defense',
   'eco-builder': 'Eco Builder',
   sorting: 'Sort & Recycle',
+  'insulation-game': 'Insulation',
 };
 
 export default function LevelsScreen() {
