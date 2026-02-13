@@ -58,13 +58,15 @@ function WorldCard({
 }) {
   const { t } = useLanguage();
   const scale = useRef(new Animated.Value(1)).current;
-  const worldTitleKeyMap: Record<string, 'w1Title' | 'w5Title'> = {
+  const worldTitleKeyMap: Record<string, 'w1Title' | 'w5Title' | 'w7Title'> = {
     w1: 'w1Title',
     w5: 'w5Title',
+    w7: 'w7Title',
   };
-  const worldSubtitleKeyMap: Record<string, 'w1Subtitle' | 'w5Subtitle'> = {
+  const worldSubtitleKeyMap: Record<string, 'w1Subtitle' | 'w5Subtitle' | 'w7Subtitle'> = {
     w1: 'w1Subtitle',
     w5: 'w5Subtitle',
+    w7: 'w7Subtitle',
   };
 
   const pressIn = () =>

@@ -43,6 +43,7 @@ const TYPE_ROUTE: Record<MiniGameType, string> = {
   sorting: '/sorting',
   'insulation-game': '/insulation-game',
   'windows-game': '/windows-game',
+  'build-home': '/build-home',
 };
 
 const TYPE_EMOJI: Record<MiniGameType, string> = {
@@ -52,6 +53,7 @@ const TYPE_EMOJI: Record<MiniGameType, string> = {
   sorting: '\u{267B}',            // ♻
   'insulation-game': '\u{1F3E0}', // 🏠
   'windows-game': '\u{1FA9F}',    // 🪟
+  'build-home': '\u{1F3D7}',      // 🏗
 };
 
 const TYPE_LABEL_EN: Record<MiniGameType, string> = {
@@ -61,27 +63,32 @@ const TYPE_LABEL_EN: Record<MiniGameType, string> = {
   sorting: 'Sort & Recycle',
   'insulation-game': 'Insulation',
   'windows-game': 'Windows',
+  'build-home': 'Build Home',
 };
 
 // Maps for insulation world translated titles & descriptions
-const LEVEL_TITLE_KEY: Record<string, 'roofShield' | 'hotWalls' | 'fullProtection' | 'learnLayersTitle' | 'addRightWindowTitle'> = {
+const LEVEL_TITLE_KEY: Record<string, 'roofShield' | 'hotWalls' | 'fullProtection' | 'learnLayersTitle' | 'addRightWindowTitle' | 'buildHomeExplore'> = {
   'w1-l1': 'roofShield',
   'w1-l2': 'hotWalls',
   'w1-l3': 'fullProtection',
   'w5-l1': 'learnLayersTitle',
   'w5-l2': 'addRightWindowTitle',
+  'w7-l1': 'buildHomeExplore',
 };
-const WORLD_TITLE_KEY: Record<string, 'w1Title' | 'w5Title'> = {
+const WORLD_TITLE_KEY: Record<string, 'w1Title' | 'w5Title' | 'w7Title'> = {
   w1: 'w1Title',
   w5: 'w5Title',
+  w7: 'w7Title',
 };
-const WORLD_SUBTITLE_KEY: Record<string, 'w1Subtitle' | 'w5Subtitle'> = {
+const WORLD_SUBTITLE_KEY: Record<string, 'w1Subtitle' | 'w5Subtitle' | 'w7Subtitle'> = {
   w1: 'w1Subtitle',
   w5: 'w5Subtitle',
+  w7: 'w7Subtitle',
 };
-const WORLD_DESC_KEY: Record<string, 'w1Description' | 'w5Description'> = {
+const WORLD_DESC_KEY: Record<string, 'w1Description' | 'w5Description' | 'w7Description'> = {
   w1: 'w1Description',
   w5: 'w5Description',
+  w7: 'w7Description',
 };
 
 export default function LevelsScreen() {

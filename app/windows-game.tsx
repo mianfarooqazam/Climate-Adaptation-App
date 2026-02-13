@@ -35,6 +35,7 @@ import {
   Radius,
   Spacing,
 } from '@/constants/theme';
+import type { TranslationKey } from '@/constants/i18n';
 import { useGame } from '@/context/GameContext';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -139,7 +140,7 @@ interface Mood {
   eyeStyle: 'squint' | 'normal' | 'happy';
 }
 
-function moodFromLayer(layer: WindowLayer, tFn: (k: string) => string): Mood {
+function moodFromLayer(layer: WindowLayer, tFn: (k: TranslationKey) => string): Mood {
   if (layer === 1) {
     return {
       label: tFn('tooHot'),
