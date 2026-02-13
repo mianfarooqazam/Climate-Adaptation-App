@@ -59,6 +59,7 @@ const THERMO_W = 80;
 
 // 3D depth
 const SIDE_D = 50;
+const SIDE_WALL_W = 70; // right side wall (same brick as left, a little bigger)
 
 // House front-face dimensions
 const H_W = Math.min((SCENE_W - THERMO_W - 60 - SIDE_D) * 0.46, 360);
@@ -489,48 +490,21 @@ export default function InsulationGameScreen() {
           {/* ---- GROUND SHADOW ---- */}
           <View style={styles.groundShadow} />
 
-          {/* ---- 3D: RIGHT SIDE WALL (behind front, zIndex 1) ---- */}
+          {/* ---- 3D: RIGHT SIDE WALL (same as left wall, like windows world — no brown block) ---- */}
           <View style={styles.sideWall}>
-            {Array.from({ length: Math.floor(WALL_H / 16) }).map((_, i) => (
-              <View key={i} style={[styles.sideBrickRow, i % 2 === 1 && { paddingLeft: 8 }]}>
+            {Array.from({ length: Math.floor(WALL_H / 18) }).map((_, i) => (
+              <View key={i} style={[styles.brickRow, i % 2 === 1 && { paddingLeft: 12 }]}>
                 {Array.from({ length: 3 }).map((__, j) => (
-                  <View key={j} style={styles.sideBrick} />
+                  <View key={j} style={styles.brick} />
                 ))}
               </View>
             ))}
           </View>
 
-          {/* ---- 3D: RIGHT ROOF FACE (behind front roof, zIndex 1) ---- */}
-          {/* A darker parallelogram representing the side slope of the roof */}
-          <View style={styles.sideRoof}>
-            <LinearGradient
-              colors={['#6D4C41', '#5D4037']}
-              style={StyleSheet.absoluteFill}
-            />
-            {/* Roof tile lines */}
-            {Array.from({ length: 4 }).map((_, i) => (
-              <View
-                key={i}
-                style={{
-                  position: 'absolute',
-                  left: 0, right: 0,
-                  top: 8 + i * 16,
-                  height: 2,
-                  backgroundColor: 'rgba(0,0,0,0.12)',
-                }}
-              />
-            ))}
-          </View>
-
-          {/* ---- 3D: FOUNDATION SIDE EDGE ---- */}
-          <View style={styles.foundationSide} />
-
-          {/* ---- CHIMNEY (front face) ---- */}
+          {/* ---- CHIMNEY (front face only, like windows world) ---- */}
           <View style={styles.chimney}>
             <View style={styles.chimneyTop} />
             <View style={styles.chimneyFront} />
-            {/* Chimney 3D side */}
-            <View style={styles.chimneySide} />
           </View>
 
           {/* ---- FRONT ROOF (triangle, zIndex 2) ---- */}
@@ -820,14 +794,14 @@ const styles = StyleSheet.create({
     zIndex: 0,
   },
 
-  // ---- 3D: Side wall ----
+  // ---- 3D: Right side wall (same as left wall brick, like windows world — no brown block) ----
   sideWall: {
     position: 'absolute',
     left: H_W,
     top: ROOF_H,
-    width: SIDE_D,
+    width: SIDE_WALL_W,
     height: WALL_H,
-    backgroundColor: '#BCAAA4',
+    backgroundColor: '#D7CCC8',
     transform: [{ skewY: '-6deg' }],
     overflow: 'hidden',
     zIndex: 1,
@@ -835,46 +809,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: '#8D6E63',
   },
-  sideBrickRow: { flexDirection: 'row', gap: 2, marginBottom: 2 },
-  sideBrick: {
-    width: 16, height: 12,
-    backgroundColor: '#A1887F',
-    borderRadius: 1,
-    borderWidth: 1,
-    borderColor: '#8D6E63',
-  },
 
-  // ---- 3D: Side roof face ----
-  sideRoof: {
-    position: 'absolute',
-    left: H_W + ROOF_OVERHANG / 2 - 2,
-    top: 2,
-    width: SIDE_D + 4,
-    height: ROOF_H - 2,
-    backgroundColor: '#6D4C41',
-    transform: [{ skewY: '-12deg' }],
-    overflow: 'hidden',
-    zIndex: 1,
-    borderRightWidth: 2,
-    borderColor: '#4E342E',
-    borderTopRightRadius: 2,
-  },
-
-  // ---- 3D: Foundation side ----
-  foundationSide: {
-    position: 'absolute',
-    left: H_W,
-    top: H_H - 14,
-    width: SIDE_D,
-    height: 10,
-    backgroundColor: '#607D8B',
-    transform: [{ skewY: '-6deg' }],
-    zIndex: 1,
-    borderRightWidth: 2,
-    borderColor: '#455A64',
-  },
-
-  // ---- Chimney ----
+  // ---- Chimney (front face only) ----
   chimney: {
     position: 'absolute',
     left: H_W * 0.17,
@@ -889,16 +825,6 @@ const styles = StyleSheet.create({
     width: 24, height: 34, backgroundColor: '#795548',
     borderBottomLeftRadius: 2, borderBottomRightRadius: 2,
     marginLeft: 4,
-  },
-  chimneySide: {
-    position: 'absolute',
-    left: 28,
-    top: 8,
-    width: 10,
-    height: 34,
-    backgroundColor: '#5D4037',
-    transform: [{ skewY: '-6deg' }],
-    borderBottomRightRadius: 2,
   },
 
   // ---- Front roof ----
