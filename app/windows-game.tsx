@@ -10,12 +10,13 @@
 
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Animated,
   Dimensions,
   Easing,
   Modal,
+  PanResponder,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -31,6 +32,7 @@ import {
   FontSizes,
   Fonts,
   GameColors,
+  Radius,
   Spacing,
 } from '@/constants/theme';
 import { useGame } from '@/context/GameContext';
@@ -61,6 +63,12 @@ const H_TOP = SCENE_H * 0.26;
 const ROOF_H = 70;
 const ROOF_OVERHANG = 24;
 const WALL_H = H_H - ROOF_H - 14;
+
+// Drop target for level 2 (big window) — screen coordinates
+const WINDOW_DROP_LEFT = H_LEFT + H_W;
+const WINDOW_DROP_TOP = HEADER_H + H_TOP + ROOF_H;
+const WINDOW_DROP_WIDTH = SIDE_D;
+const WINDOW_DROP_HEIGHT = WALL_H;
 
 // Sun
 const SUN_CX = (SCR_W - THERMO_W) * 0.86;
@@ -312,17 +320,20 @@ export default function WindowsGameScreen() {
   const { t, lang } = useLanguage();
 
   const level = getLevelById(levelId ?? 'w5-l1');
-  const [layer, setLayer] = useState<WindowLayer>(1);
+  const isPracticeLevel = levelId === 'w5-l2';
+  const [layer, setLayer] = useState<WindowLayer | null>(isPracticeLevel ? null : 1);
   const [showTryAgainModal, setShowTryAgainModal] = useState(false);
 
   const isLearnLevel = levelId === 'w5-l1';
-  const isPracticeLevel = levelId === 'w5-l2';
 
-  const visibleRays = layer === 1 ? 8 : layer === 2 ? 4 : 1;
-  const moodVal = moodFromLayer(layer, t);
-  const currentTemp = tempFromLayer(layer);
+  // When no selection (level 2), show 1-layer scene; otherwise use selected layer
+  const displayLayer = layer ?? 1;
+  const visibleRays = displayLayer === 1 ? 8 : displayLayer === 2 ? 4 : 1;
+  const moodVal = moodFromLayer(displayLayer, t);
+  const currentTemp = tempFromLayer(displayLayer);
 
   const score = useMemo(() => {
+    if (!layer) return 0;
     if (layer === 1) return 10;
     if (layer === 2) return 20;
     return 30;
@@ -345,6 +356,16 @@ export default function WindowsGameScreen() {
       Animated.sequence([
         Animated.timing(cloudX, { toValue: 18, duration: 6000, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
         Animated.timing(cloudX, { toValue: 0, duration: 6000, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+      ]),
+    ).start();
+  }, []);
+
+  const windowZonePulse = useRef(new Animated.Value(0.4)).current;
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(windowZonePulse, { toValue: 1, duration: 900, useNativeDriver: true }),
+        Animated.timing(windowZonePulse, { toValue: 0.4, duration: 900, useNativeDriver: true }),
       ]),
     ).start();
   }, []);
@@ -390,13 +411,84 @@ export default function WindowsGameScreen() {
         tryAgainTimeoutRef.current = setTimeout(() => {
           tryAgainTimeoutRef.current = null;
           setShowTryAgainModal(true);
-        }, 3000);
+        }, 2000);
       }
     }
   };
 
+  const applyLayerRef = useRef(handleLayerPress);
+  useEffect(() => {
+    applyLayerRef.current = handleLayerPress;
+  }, [handleLayerPress]);
+
+  // ---- Level 2: drag and drop onto the big window ----
+  const [isDraggingL1, setIsDraggingL1] = useState(false);
+  const [isDraggingL2, setIsDraggingL2] = useState(false);
+  const [isDraggingL3, setIsDraggingL3] = useState(false);
+  const dragL1 = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
+  const dragL2 = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
+  const dragL3 = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
+  const scaleL1 = useRef(new Animated.Value(1)).current;
+  const scaleL2 = useRef(new Animated.Value(1)).current;
+  const scaleL3 = useRef(new Animated.Value(1)).current;
+
+  const tryDropWindow = useCallback((layerChoice: WindowLayer, moveX: number, moveY: number) => {
+    if (
+      moveX >= WINDOW_DROP_LEFT &&
+      moveX <= WINDOW_DROP_LEFT + WINDOW_DROP_WIDTH &&
+      moveY >= WINDOW_DROP_TOP &&
+      moveY <= WINDOW_DROP_TOP + WINDOW_DROP_HEIGHT
+    ) {
+      applyLayerRef.current(layerChoice);
+    }
+  }, []);
+  const tryDropWindowRef = useRef(tryDropWindow);
+  useEffect(() => {
+    tryDropWindowRef.current = tryDropWindow;
+  }, [tryDropWindow]);
+
+  const makeWindowPanResponder = useCallback(
+    (
+      layerChoice: WindowLayer,
+      dragXY: Animated.ValueXY,
+      scaleVal: Animated.Value,
+      setDragging: (v: boolean) => void,
+    ) =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onMoveShouldSetPanResponder: () => true,
+        onPanResponderGrant: () => {
+          setDragging(true);
+          (dragXY as any).setOffset({ x: (dragXY.x as any)._value ?? 0, y: (dragXY.y as any)._value ?? 0 });
+          dragXY.setValue({ x: 0, y: 0 });
+          Animated.spring(scaleVal, { toValue: 1.2, useNativeDriver: true }).start();
+        },
+        onPanResponderMove: (_, g) => {
+          dragXY.setValue({ x: g.dx, y: g.dy });
+        },
+        onPanResponderRelease: (_, g) => {
+          setDragging(false);
+          (dragXY as any).flattenOffset();
+          Animated.spring(scaleVal, { toValue: 1, useNativeDriver: true }).start();
+          tryDropWindowRef.current(layerChoice, g.moveX, g.moveY);
+          Animated.spring(dragXY, { toValue: { x: 0, y: 0 }, useNativeDriver: true }).start();
+        },
+      }),
+    [],
+  );
+
+  const panL1 = useRef(
+    makeWindowPanResponder(1, dragL1, scaleL1, setIsDraggingL1),
+  ).current;
+  const panL2 = useRef(
+    makeWindowPanResponder(2, dragL2, scaleL2, setIsDraggingL2),
+  ).current;
+  const panL3 = useRef(
+    makeWindowPanResponder(3, dragL3, scaleL3, setIsDraggingL3),
+  ).current;
+
   // Window glass color for the big side window — changes with layer count
-  const windowGlass = layer === 1 ? '#B3E5FC' : layer === 2 ? '#81D4FA' : '#4DD0E1';
+  const windowGlass = displayLayer === 1 ? '#B3E5FC' : displayLayer === 2 ? '#81D4FA' : '#4DD0E1';
 
   // Moods for the three learn sections (1, 2, 3 layers)
   const mood1 = moodFromLayer(1, t);
@@ -631,13 +723,13 @@ export default function WindowsGameScreen() {
             {/* Window frame border */}
             <View style={styles.sideWindowBorder}>
               {/* Layer 2 inner pane */}
-              {layer >= 2 && <View style={styles.sideWindowLayer2} />}
+              {displayLayer >= 2 && <View style={styles.sideWindowLayer2} />}
               {/* Layer 3 inner pane */}
-              {layer >= 3 && <View style={styles.sideWindowLayer3} />}
+              {displayLayer >= 3 && <View style={styles.sideWindowLayer3} />}
               {/* Cross bars removed */}
               {/* Layer label */}
               <View style={styles.sideWindowLabelWrap}>
-                <Text style={styles.sideWindowLabel}>{layer}x</Text>
+                <Text style={styles.sideWindowLabel}>{displayLayer}x</Text>
               </View>
             </View>
           </View>
@@ -760,35 +852,83 @@ export default function WindowsGameScreen() {
         <View style={styles.thermoPos}>
           <Thermometer temperature={currentTemp} />
         </View>
+
+        {/* Drop target overlay (level 2: highlighted like insulation) */}
+        {isPracticeLevel && layer === null && (
+          <View
+            pointerEvents="none"
+            style={[styles.windowDropZone, { left: H_LEFT + H_W, top: H_TOP + ROOF_H, width: SIDE_D, height: WALL_H }]}
+          >
+            <Animated.View style={[styles.windowZoneActive, { opacity: windowZonePulse }]}>
+              <View style={styles.windowZoneHintBg}>
+                <Text style={[styles.windowZoneHint, lang === 'ur' && styles.rtl]}>{t('dropWindowHere')}</Text>
+              </View>
+            </Animated.View>
+          </View>
+        )}
       </View>
 
-      {/* ===== BOTTOM CONTROLS ===== */}
+      {/* ===== BOTTOM: same 3 layer buttons; on level 2 they are draggable too ===== */}
       <View style={styles.controls}>
-        <Text style={[styles.helper, lang === 'ur' && styles.rtl]}>
-          {isPracticeLevel ? t('chooseBestWindow') : t('chooseWindow')}
-        </Text>
+        {!isPracticeLevel && (
+          <Text style={[styles.helper, lang === 'ur' && styles.rtl]}>{t('chooseWindow')}</Text>
+        )}
         <View style={styles.layerButtons}>
-          <Pressable
-            style={[styles.layerBtn, layer === 1 && styles.layerBtnActive]}
-            onPress={() => handleLayerPress(1)}
-          >
-            <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F'}</Text>
-            <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('singleLayer')}</Text>
-          </Pressable>
-          <Pressable
-            style={[styles.layerBtn, layer === 2 && styles.layerBtnActive2]}
-            onPress={() => handleLayerPress(2)}
-          >
-            <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F\uD83E\uDE9F'}</Text>
-            <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('doubleLayer')}</Text>
-          </Pressable>
-          <Pressable
-            style={[styles.layerBtn, layer === 3 && styles.layerBtnActive3]}
-            onPress={() => handleLayerPress(3)}
-          >
-            <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F\uD83E\uDE9F\uD83E\uDE9F'}</Text>
-            <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('tripleLayer')}</Text>
-          </Pressable>
+          {isPracticeLevel ? (
+            <>
+              <Animated.View
+                {...panL1.panHandlers}
+                style={[
+                  styles.layerButtonWrap,
+                  { transform: [...dragL1.getTranslateTransform(), { scale: scaleL1 }], zIndex: isDraggingL1 ? 100 : 1 },
+                ]}
+              >
+                <Pressable style={[styles.layerBtn, layer === 1 && styles.layerBtnActive]} onPress={() => handleLayerPress(1)}>
+                  <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F'}</Text>
+                  <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('singleLayer')}</Text>
+                </Pressable>
+              </Animated.View>
+              <Animated.View
+                {...panL2.panHandlers}
+                style={[
+                  styles.layerButtonWrap,
+                  { transform: [...dragL2.getTranslateTransform(), { scale: scaleL2 }], zIndex: isDraggingL2 ? 100 : 1 },
+                ]}
+              >
+                <Pressable style={[styles.layerBtn, layer === 2 && styles.layerBtnActive2]} onPress={() => handleLayerPress(2)}>
+                  <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F\uD83E\uDE9F'}</Text>
+                  <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('doubleLayer')}</Text>
+                </Pressable>
+              </Animated.View>
+              <Animated.View
+                {...panL3.panHandlers}
+                style={[
+                  styles.layerButtonWrap,
+                  { transform: [...dragL3.getTranslateTransform(), { scale: scaleL3 }], zIndex: isDraggingL3 ? 100 : 1 },
+                ]}
+              >
+                <Pressable style={[styles.layerBtn, layer === 3 && styles.layerBtnActive3]} onPress={() => handleLayerPress(3)}>
+                  <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F\uD83E\uDE9F\uD83E\uDE9F'}</Text>
+                  <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('tripleLayer')}</Text>
+                </Pressable>
+              </Animated.View>
+            </>
+          ) : (
+            <>
+              <Pressable style={[styles.layerBtn, layer === 1 && styles.layerBtnActive]} onPress={() => handleLayerPress(1)}>
+                <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F'}</Text>
+                <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('singleLayer')}</Text>
+              </Pressable>
+              <Pressable style={[styles.layerBtn, layer === 2 && styles.layerBtnActive2]} onPress={() => handleLayerPress(2)}>
+                <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F\uD83E\uDE9F'}</Text>
+                <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('doubleLayer')}</Text>
+              </Pressable>
+              <Pressable style={[styles.layerBtn, layer === 3 && styles.layerBtnActive3]} onPress={() => handleLayerPress(3)}>
+                <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F\uD83E\uDE9F\uD83E\uDE9F'}</Text>
+                <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('tripleLayer')}</Text>
+              </Pressable>
+            </>
+          )}
         </View>
       </View>
 
@@ -1395,12 +1535,46 @@ const styles = StyleSheet.create({
 
   // Bottom controls
   controls: {
-    height: CTRL_H,
+    minHeight: CTRL_H,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: Spacing.xl,
     gap: Spacing.lg,
     backgroundColor: 'rgba(0,77,64,0.90)',
+  },
+  windowDropZone: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 8,
+  },
+  windowZoneActive: {
+    flex: 1,
+    width: '100%',
+    borderWidth: 3,
+    borderRadius: Radius.md,
+    borderColor: '#0288D1',
+    backgroundColor: 'rgba(2,136,209,0.22)',
+    borderStyle: 'dashed',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  windowZoneHintBg: {
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  windowZoneHint: {
+    fontFamily: Fonts.rounded,
+    fontSize: FontSizes.sm,
+    fontWeight: '800',
+    color: '#fff',
+    textAlign: 'center',
+  },
+  layerButtonWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   helper: {
     fontFamily: Fonts.rounded,
