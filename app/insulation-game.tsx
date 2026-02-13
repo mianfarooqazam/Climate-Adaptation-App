@@ -334,7 +334,7 @@ export default function InsulationGameScreen() {
         const maxSc = Math.round(maxPts * 1.3);
         const st = completeLevel(levelId ?? '', sc, maxSc);
         router.replace({ pathname: '/level-complete', params: { levelId: levelId ?? '', stars: String(st), score: String(sc), maxScore: String(maxSc) } });
-      }, 3000);
+      }, 2000);
     }
   }, [selectedMaterial, finished, config, startTemp, availableMaterials, levelId]);
 
@@ -342,18 +342,29 @@ export default function InsulationGameScreen() {
   const applyRef = useRef(applyInsulation);
   useEffect(() => { applyRef.current = applyInsulation; }, [applyInsulation]);
 
-  // Helper: try to drop on a specific target zone (reads from refs, never stale)
-  const tryDrop = useCallback((targetZoneId: InsulationZoneId, dropX: number, dropY: number) => {
+  const sceneRef = useRef<View>(null);
+
+  // Helper: try to drop on a specific target zone (uses measured scene position for accurate hit test)
+  const tryDrop = useCallback((targetZoneId: InsulationZoneId, dropX: number, dropY: number, sceneX?: number, sceneY?: number) => {
     const zone = ZONES.find((z) => z.id === targetZoneId);
     if (!zone || !activeSet.has(zone.id) || insulatedZonesRef.current[zone.id]) return;
-    const sy = dropY - HEADER_H; // scene-relative Y
-    if (dropX >= zone.left && dropX <= zone.left + zone.width && sy >= zone.top && sy <= zone.top + zone.height) {
+    const left = (sceneX ?? 0) + zone.left;
+    const top = (sceneY ?? HEADER_H) + zone.top;
+    if (dropX >= left && dropX <= left + zone.width && dropY >= top && dropY <= top + zone.height) {
       applyRef.current(zone.id);
     }
   }, [activeSet]);
 
   const tryDropRef = useRef(tryDrop);
   useEffect(() => { tryDropRef.current = tryDrop; }, [tryDrop]);
+
+  const runDropWithMeasure = useCallback((zoneId: InsulationZoneId, moveX: number, moveY: number) => {
+    (sceneRef.current as any)?.measureInWindow?.((sx: number, sy: number) => {
+      tryDropRef.current(zoneId, moveX, moveY, sx, sy);
+    });
+  }, []);
+  const runDropWithMeasureRef = useRef(runDropWithMeasure);
+  useEffect(() => { runDropWithMeasureRef.current = runDropWithMeasure; }, [runDropWithMeasure]);
 
   // PanResponder for the ROOF brick — calls through refs to avoid stale closures
   const roofPanResponder = useRef(
@@ -371,7 +382,7 @@ export default function InsulationGameScreen() {
         setIsDraggingRoof(false);
         dragRoof.flattenOffset();
         Animated.spring(dragRoofScale, { toValue: 1, useNativeDriver: true }).start();
-        tryDropRef.current('roof', g.moveX, g.moveY);
+        runDropWithMeasureRef.current('roof', g.moveX, g.moveY);
         Animated.spring(dragRoof, { toValue: { x: 0, y: 0 }, useNativeDriver: true }).start();
       },
     }),
@@ -393,7 +404,7 @@ export default function InsulationGameScreen() {
         setIsDraggingWall(false);
         dragWall.flattenOffset();
         Animated.spring(dragWallScale, { toValue: 1, useNativeDriver: true }).start();
-        tryDropRef.current('right-wall', g.moveX, g.moveY);
+        runDropWithMeasureRef.current('right-wall', g.moveX, g.moveY);
         Animated.spring(dragWall, { toValue: { x: 0, y: 0 }, useNativeDriver: true }).start();
       },
     }),
@@ -431,7 +442,7 @@ export default function InsulationGameScreen() {
       </View>
 
       {/* ===== SCENE ===== */}
-      <View style={styles.scene}>
+      <View ref={sceneRef} style={styles.scene} collapsable={false}>
         <LinearGradient colors={['#81D4FA', '#B3E5FC', '#E8F5E9']} locations={[0, 0.55, 1]} style={StyleSheet.absoluteFill} />
 
         {/* Clouds */}

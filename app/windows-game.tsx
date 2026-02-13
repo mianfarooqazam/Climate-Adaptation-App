@@ -374,15 +374,17 @@ export default function WindowsGameScreen() {
     const sc = finalScore ?? score;
     const max = finalMax ?? 30;
     const stars = completeLevel(level?.id ?? 'w5-l1', sc, max);
-    router.replace({
-      pathname: '/level-complete',
-      params: {
-        levelId: level?.id ?? 'w5-l1',
-        stars: String(stars),
-        score: String(sc),
-        maxScore: String(max),
-      },
-    });
+    setTimeout(() => {
+      router.replace({
+        pathname: '/level-complete',
+        params: {
+          levelId: level?.id ?? 'w5-l1',
+          stars: String(stars),
+          score: String(sc),
+          maxScore: String(max),
+        },
+      });
+    }, 2000);
   };
 
   const finishLearnLevel = () => {
@@ -432,12 +434,16 @@ export default function WindowsGameScreen() {
   const scaleL2 = useRef(new Animated.Value(1)).current;
   const scaleL3 = useRef(new Animated.Value(1)).current;
 
-  const tryDropWindow = useCallback((layerChoice: WindowLayer, moveX: number, moveY: number) => {
+  const sceneRef = useRef<View>(null);
+
+  const tryDropWindow = useCallback((layerChoice: WindowLayer, moveX: number, moveY: number, sceneX?: number, sceneY?: number) => {
+    const left = sceneX !== undefined && sceneY !== undefined ? sceneX + H_LEFT + H_W : WINDOW_DROP_LEFT;
+    const top = sceneX !== undefined && sceneY !== undefined ? sceneY + H_TOP + ROOF_H : WINDOW_DROP_TOP;
     if (
-      moveX >= WINDOW_DROP_LEFT &&
-      moveX <= WINDOW_DROP_LEFT + WINDOW_DROP_WIDTH &&
-      moveY >= WINDOW_DROP_TOP &&
-      moveY <= WINDOW_DROP_TOP + WINDOW_DROP_HEIGHT
+      moveX >= left &&
+      moveX <= left + WINDOW_DROP_WIDTH &&
+      moveY >= top &&
+      moveY <= top + WINDOW_DROP_HEIGHT
     ) {
       applyLayerRef.current(layerChoice);
     }
@@ -446,6 +452,16 @@ export default function WindowsGameScreen() {
   useEffect(() => {
     tryDropWindowRef.current = tryDropWindow;
   }, [tryDropWindow]);
+
+  const runDropWithMeasure = useCallback((layerChoice: WindowLayer, moveX: number, moveY: number) => {
+    (sceneRef.current as any)?.measureInWindow?.((sx: number, sy: number) => {
+      tryDropWindowRef.current(layerChoice, moveX, moveY, sx, sy);
+    });
+  }, []);
+  const runDropWithMeasureRef = useRef(runDropWithMeasure);
+  useEffect(() => {
+    runDropWithMeasureRef.current = runDropWithMeasure;
+  }, [runDropWithMeasure]);
 
   const makeWindowPanResponder = useCallback(
     (
@@ -470,7 +486,7 @@ export default function WindowsGameScreen() {
           setDragging(false);
           dragXY.flattenOffset();
           Animated.spring(scaleVal, { toValue: 1, useNativeDriver: true }).start();
-          tryDropWindowRef.current(layerChoice, g.moveX, g.moveY);
+          runDropWithMeasureRef.current(layerChoice, g.moveX, g.moveY);
           Animated.spring(dragXY, { toValue: { x: 0, y: 0 }, useNativeDriver: true }).start();
         },
       }),
@@ -669,7 +685,7 @@ export default function WindowsGameScreen() {
       </View>
 
       {/* ===== SCENE ===== */}
-      <View style={styles.scene}>
+      <View ref={sceneRef} style={styles.scene} collapsable={false}>
         <LinearGradient colors={['#81D4FA', '#B3E5FC', '#E8F5E9']} locations={[0, 0.55, 1]} style={StyleSheet.absoluteFill} />
 
         {/* Clouds */}
