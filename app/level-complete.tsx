@@ -149,7 +149,9 @@ export default function LevelCompleteScreen() {
             : levelId === 'w1-l3'
             ? t('fullProtection')
             : levelId === 'w5-l1'
-            ? t('windowLayers')
+            ? t('learnLayersTitle')
+            : levelId === 'w5-l2'
+            ? t('addRightWindowTitle')
             : level?.title ?? 'Level'}
         </Text>
       </Animated.View>

@@ -8,31 +8,33 @@
  * gradient rays, thermometer, ground, trees/bushes as the insulation game.
  */
 
-import React, { useMemo, useState, useRef, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Animated,
-  Easing,
-  Dimensions,
-  Pressable,
-} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Animated,
+  Dimensions,
+  Easing,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
 import GameButton from '@/components/game/GameButton';
-import Thermometer from '@/components/game/Thermometer';
 import LanguageToggle from '@/components/game/LanguageToggle';
-import { useGame } from '@/context/GameContext';
-import { useLanguage } from '@/context/LanguageContext';
+import Thermometer from '@/components/game/Thermometer';
 import { getLevelById } from '@/constants/gameData';
 import {
-  GameColors,
-  Spacing,
   FontSizes,
   Fonts,
+  GameColors,
+  Spacing,
 } from '@/constants/theme';
+import { useGame } from '@/context/GameContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 type WindowLayer = 1 | 2 | 3;
 
@@ -98,6 +100,22 @@ const RAYS: RayDef[] = [
   { id: 'r7', startX: SUN_CX + 8, startY: SUN_CY + 44, endX: PEOPLE_X + 5,  endY: PEOPLE_Y_BOT - 10 },
   { id: 'r8', startX: SUN_CX + 10, startY: SUN_CY + 48, endX: PEOPLE_X + 35, endY: PEOPLE_Y_BOT },
 ];
+
+// Learn level: ray definitions per section (sun at 100,0 → end at endX, LEARN_RAY_END_Y)
+const LEARN_RAY_END_X = [
+  [50, 70, 90, 110, 130, 150],           // 6 rays (1 layer)
+  [75, 100, 125],                         // 3 rays (2 layers)
+  [100],                                  // 1 ray (3 layers)
+];
+const LEARN_RAY_START_X = 100;
+const LEARN_RAY_START_Y = 0;
+const LEARN_RAY_END_Y = 148; // rays pass through window area
+function learnRayAngle(endX: number) {
+  return Math.atan2(LEARN_RAY_END_Y - LEARN_RAY_START_Y, endX - LEARN_RAY_START_X) * (180 / Math.PI);
+}
+function learnRayLength(endX: number) {
+  return Math.sqrt((LEARN_RAY_END_Y - LEARN_RAY_START_Y) ** 2 + (endX - LEARN_RAY_START_X) ** 2);
+}
 
 // ---------------------------------------------------------------------------
 // Mood data (matching insulation game)
@@ -295,6 +313,10 @@ export default function WindowsGameScreen() {
 
   const level = getLevelById(levelId ?? 'w5-l1');
   const [layer, setLayer] = useState<WindowLayer>(1);
+  const [showTryAgainModal, setShowTryAgainModal] = useState(false);
+
+  const isLearnLevel = levelId === 'w5-l1';
+  const isPracticeLevel = levelId === 'w5-l2';
 
   const visibleRays = layer === 1 ? 8 : layer === 2 ? 4 : 1;
   const moodVal = moodFromLayer(layer, t);
@@ -327,22 +349,213 @@ export default function WindowsGameScreen() {
     ).start();
   }, []);
 
-  const finishLevel = () => {
-    const maxScore = 30;
-    const stars = completeLevel(level?.id ?? 'w5-l1', score, maxScore);
+  const finishLevel = (finalScore?: number, finalMax?: number) => {
+    const sc = finalScore ?? score;
+    const max = finalMax ?? 30;
+    const stars = completeLevel(level?.id ?? 'w5-l1', sc, max);
     router.replace({
       pathname: '/level-complete',
       params: {
         levelId: level?.id ?? 'w5-l1',
         stars: String(stars),
-        score: String(score),
-        maxScore: String(maxScore),
+        score: String(sc),
+        maxScore: String(max),
       },
     });
   };
 
+  const finishLearnLevel = () => {
+    completeLevel('w5-l1', 30, 30);
+    router.replace({
+      pathname: '/level-complete',
+      params: { levelId: 'w5-l1', stars: '3', score: '30', maxScore: '30' },
+    });
+  };
+
+  const tryAgainTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => {
+    if (tryAgainTimeoutRef.current) clearTimeout(tryAgainTimeoutRef.current);
+  }, []);
+
+  const handleLayerPress = (l: WindowLayer) => {
+    setLayer(l);
+    if (isPracticeLevel) {
+      if (tryAgainTimeoutRef.current) {
+        clearTimeout(tryAgainTimeoutRef.current);
+        tryAgainTimeoutRef.current = null;
+      }
+      if (l === 3) {
+        finishLevel(30, 30);
+      } else {
+        tryAgainTimeoutRef.current = setTimeout(() => {
+          tryAgainTimeoutRef.current = null;
+          setShowTryAgainModal(true);
+        }, 3000);
+      }
+    }
+  };
+
   // Window glass color for the big side window — changes with layer count
   const windowGlass = layer === 1 ? '#B3E5FC' : layer === 2 ? '#81D4FA' : '#4DD0E1';
+
+  // Moods for the three learn sections (1, 2, 3 layers)
+  const mood1 = moodFromLayer(1, t);
+  const mood2 = moodFromLayer(2, t);
+  const mood3 = moodFromLayer(3, t);
+
+  // ===== LEARN LEVEL: Three sections — order: text → sun → layer (with rays) → humans =====
+  if (isLearnLevel) {
+    return (
+      <View style={styles.root}>
+        <LinearGradient colors={['#81D4FA', '#B3E5FC', '#E1F5FE']} style={StyleSheet.absoluteFill} />
+        <View style={styles.header}>
+          <Pressable onPress={() => router.back()} style={styles.backBtn}>
+            <Text style={styles.backTxt}>{'\u2190'}</Text>
+          </Pressable>
+          <Text style={[styles.headerTitle, lang === 'ur' && styles.rtl]}>{t('learnLayersTitle')}</Text>
+          <View style={{ flex: 1 }} />
+          <LanguageToggle />
+        </View>
+        <ScrollView
+          style={styles.learnScroll}
+          contentContainerStyle={styles.learnSectionsWrap}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Section 1: 1 layer — sun (same as Add the Right Window) → rays → window → humans */}
+          <View style={styles.learnSection}>
+            <Text style={[styles.learnSectionText, lang === 'ur' && styles.rtl]}>{t('learnSection1')}</Text>
+            <View style={styles.learnSunRayWrap}>
+              <Animated.View style={[styles.learnSunWrap, { transform: [{ scale: sunScale }] }]}>
+                <View style={styles.learnSunGlow3} />
+                <View style={styles.learnSunGlow2} />
+                <View style={styles.learnSunGlow1} />
+                <Text style={styles.learnSunEmoji}>{'\u2600\uFE0F'}</Text>
+              </Animated.View>
+              <View style={styles.learnRayContainer}>
+                {LEARN_RAY_END_X[0].map((endX, i) => (
+                  <View
+                    key={i}
+                    style={[styles.learnRayBar, {
+                      left: LEARN_RAY_START_X,
+                      width: learnRayLength(endX),
+                      transform: [{ rotate: `${learnRayAngle(endX)}deg` }],
+                    }]}
+                  >
+                    <LinearGradient
+                      colors={['rgba(255,210,0,0.75)', 'rgba(255,165,0,0.3)', 'rgba(255,120,0,0.06)']}
+                      start={{ x: 0, y: 0.5 }}
+                      end={{ x: 1, y: 0.5 }}
+                      style={StyleSheet.absoluteFill}
+                    />
+                  </View>
+                ))}
+                <View style={[styles.learnWindowOverlay, { backgroundColor: 'rgba(179,229,252,0.92)' }]}>
+                  <Text style={styles.learnWindowLabel}>1x</Text>
+                </View>
+              </View>
+            </View>
+            <View style={styles.learnPeopleRow}>
+              <CartoonPerson m={mood1} shirt="#42A5F5" pants="#1565C0" hair="#5D4037" />
+              <CartoonPerson m={mood1} shirt="#EC407A" pants="#880E4F" hair="#3E2723" isFemale />
+              <CartoonPerson m={mood1} shirt="#66BB6A" pants="#33691E" hair="#4E342E" isChild />
+              <CartoonPerson m={mood1} shirt="#FFB74D" pants="#E91E63" hair="#5D4037" isChild isFemale hairBow="#FF4081" />
+            </View>
+          </View>
+
+          {/* Section 2: 2 layers — sun → rays → window → humans */}
+          <View style={styles.learnSection}>
+            <Text style={[styles.learnSectionText, lang === 'ur' && styles.rtl]}>{t('learnSection2')}</Text>
+            <View style={styles.learnSunRayWrap}>
+              <Animated.View style={[styles.learnSunWrap, { transform: [{ scale: sunScale }] }]}>
+                <View style={styles.learnSunGlow3} />
+                <View style={styles.learnSunGlow2} />
+                <View style={styles.learnSunGlow1} />
+                <Text style={styles.learnSunEmoji}>{'\u2600\uFE0F'}</Text>
+              </Animated.View>
+              <View style={styles.learnRayContainer}>
+                {LEARN_RAY_END_X[1].map((endX, i) => (
+                  <View
+                    key={i}
+                    style={[styles.learnRayBar, {
+                      left: LEARN_RAY_START_X,
+                      width: learnRayLength(endX),
+                      transform: [{ rotate: `${learnRayAngle(endX)}deg` }],
+                    }]}
+                  >
+                    <LinearGradient
+                      colors={['rgba(255,210,0,0.75)', 'rgba(255,165,0,0.3)', 'rgba(255,120,0,0.06)']}
+                      start={{ x: 0, y: 0.5 }}
+                      end={{ x: 1, y: 0.5 }}
+                      style={StyleSheet.absoluteFill}
+                    />
+                  </View>
+                ))}
+                <View style={[styles.learnWindowOverlay, { backgroundColor: 'rgba(129,212,250,0.92)' }]}>
+                  <View style={styles.learnWindowInner} />
+                  <Text style={styles.learnWindowLabel}>2x</Text>
+                </View>
+              </View>
+            </View>
+            <View style={styles.learnPeopleRow}>
+              <CartoonPerson m={mood2} shirt="#42A5F5" pants="#1565C0" hair="#5D4037" />
+              <CartoonPerson m={mood2} shirt="#EC407A" pants="#880E4F" hair="#3E2723" isFemale />
+              <CartoonPerson m={mood2} shirt="#66BB6A" pants="#33691E" hair="#4E342E" isChild />
+              <CartoonPerson m={mood2} shirt="#FFB74D" pants="#E91E63" hair="#5D4037" isChild isFemale hairBow="#FF4081" />
+            </View>
+          </View>
+
+          {/* Section 3: 3 layers — sun → rays → window → humans */}
+          <View style={styles.learnSection}>
+            <Text style={[styles.learnSectionText, lang === 'ur' && styles.rtl]}>{t('learnSection3')}</Text>
+            <View style={styles.learnSunRayWrap}>
+              <Animated.View style={[styles.learnSunWrap, { transform: [{ scale: sunScale }] }]}>
+                <View style={styles.learnSunGlow3} />
+                <View style={styles.learnSunGlow2} />
+                <View style={styles.learnSunGlow1} />
+                <Text style={styles.learnSunEmoji}>{'\u2600\uFE0F'}</Text>
+              </Animated.View>
+              <View style={styles.learnRayContainer}>
+                {LEARN_RAY_END_X[2].map((endX, i) => (
+                  <View
+                    key={i}
+                    style={[styles.learnRayBar, {
+                      left: LEARN_RAY_START_X,
+                      width: learnRayLength(endX),
+                      transform: [{ rotate: `${learnRayAngle(endX)}deg` }],
+                    }]}
+                  >
+                    <LinearGradient
+                      colors={['rgba(255,210,0,0.75)', 'rgba(255,165,0,0.3)', 'rgba(255,120,0,0.06)']}
+                      start={{ x: 0, y: 0.5 }}
+                      end={{ x: 1, y: 0.5 }}
+                      style={StyleSheet.absoluteFill}
+                    />
+                  </View>
+                ))}
+                <View style={[styles.learnWindowOverlay, { backgroundColor: 'rgba(77,208,225,0.92)' }]}>
+                  <View style={styles.learnWindowInner} />
+                  <View style={[styles.learnWindowInner, styles.learnWindowInner2]} />
+                  <Text style={styles.learnWindowLabel}>3x</Text>
+                </View>
+              </View>
+            </View>
+            <View style={styles.learnPeopleRow}>
+              <CartoonPerson m={mood3} shirt="#42A5F5" pants="#1565C0" hair="#5D4037" />
+              <CartoonPerson m={mood3} shirt="#EC407A" pants="#880E4F" hair="#3E2723" isFemale />
+              <CartoonPerson m={mood3} shirt="#66BB6A" pants="#33691E" hair="#4E342E" isChild />
+              <CartoonPerson m={mood3} shirt="#FFB74D" pants="#E91E63" hair="#5D4037" isChild isFemale hairBow="#FF4081" />
+            </View>
+          </View>
+        </ScrollView>
+
+        {/* Continue: right bottom, light green bg, text then white arrow */}
+        <Pressable style={styles.learnContinueWrap} onPress={finishLearnLevel}>
+          <Text style={[styles.learnContinueText, lang === 'ur' && styles.rtl]}>{t('continueBtn')}</Text>
+          <Text style={styles.learnContinueArrow}>{'\u27A1'}</Text>
+        </Pressable>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.root}>
@@ -353,7 +566,9 @@ export default function WindowsGameScreen() {
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <Text style={styles.backTxt}>{'\u2190'}</Text>
         </Pressable>
-        <Text style={[styles.headerTitle, lang === 'ur' && styles.rtl]}>{t('windowLayers')}</Text>
+        <Text style={[styles.headerTitle, lang === 'ur' && styles.rtl]}>
+          {isPracticeLevel ? t('addRightWindowTitle') : t('windowLayers')}
+        </Text>
         <View style={{ flex: 1 }} />
         <Text style={[styles.headerSub, lang === 'ur' && styles.rtl]}>
           {t('raysPassing')}: {visibleRays}/8
@@ -549,38 +764,56 @@ export default function WindowsGameScreen() {
 
       {/* ===== BOTTOM CONTROLS ===== */}
       <View style={styles.controls}>
-        <Text style={[styles.helper, lang === 'ur' && styles.rtl]}>{t('chooseWindow')}</Text>
+        <Text style={[styles.helper, lang === 'ur' && styles.rtl]}>
+          {isPracticeLevel ? t('chooseBestWindow') : t('chooseWindow')}
+        </Text>
         <View style={styles.layerButtons}>
           <Pressable
             style={[styles.layerBtn, layer === 1 && styles.layerBtnActive]}
-            onPress={() => setLayer(1)}
+            onPress={() => handleLayerPress(1)}
           >
             <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F'}</Text>
             <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('singleLayer')}</Text>
           </Pressable>
           <Pressable
             style={[styles.layerBtn, layer === 2 && styles.layerBtnActive2]}
-            onPress={() => setLayer(2)}
+            onPress={() => handleLayerPress(2)}
           >
             <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F\uD83E\uDE9F'}</Text>
             <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('doubleLayer')}</Text>
           </Pressable>
           <Pressable
             style={[styles.layerBtn, layer === 3 && styles.layerBtnActive3]}
-            onPress={() => setLayer(3)}
+            onPress={() => handleLayerPress(3)}
           >
             <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F\uD83E\uDE9F\uD83E\uDE9F'}</Text>
             <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('tripleLayer')}</Text>
           </Pressable>
         </View>
-        <GameButton
-          title={t('completeWindowsLevel')}
-          emoji={'\u2705'}
-          onPress={finishLevel}
-          color={GameColors.primary}
-          size="md"
-        />
       </View>
+
+      {/* Try Again modal (practice level: wrong layer chosen) */}
+      <Modal
+        visible={showTryAgainModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowTryAgainModal(false)}
+      >
+        <Pressable style={styles.modalOverlay} onPress={() => setShowTryAgainModal(false)}>
+          <Pressable style={styles.modalCard} onPress={(e) => e.stopPropagation()}>
+            <Text style={[styles.modalTitle, lang === 'ur' && styles.rtl]}>{t('tryAgainDialogTitle')}</Text>
+            <Text style={[styles.modalMessage, lang === 'ur' && styles.rtl]}>{t('tryAgainDialogMessage')}</Text>
+            <GameButton
+              title={t('retry')}
+              emoji={'\u{1F504}'}
+              onPress={() => setShowTryAgainModal(false)}
+              color={GameColors.sun}
+              textColor={GameColors.primaryDark}
+              size="md"
+            />
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -592,6 +825,193 @@ export default function WindowsGameScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   rtl: { writingDirection: 'rtl' },
+
+  // Learn level (w5-l1)
+  learnContent: {
+    padding: Spacing.xl,
+    paddingTop: Spacing.lg,
+    alignItems: 'center',
+    maxWidth: 520,
+    alignSelf: 'center',
+  },
+  learnBody: {
+    fontFamily: Fonts.rounded,
+    fontSize: FontSizes.md,
+    lineHeight: 26,
+    color: GameColors.textSecondary,
+    marginBottom: Spacing.xl,
+    textAlign: 'center',
+  },
+  // Learn level: three sections — order: text → sun → layer (rays through) → humans
+  learnScroll: { flex: 1 },
+  learnSectionsWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around',
+    alignItems: 'flex-start',
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.md,
+    paddingBottom: 72,
+    gap: Spacing.lg,
+  },
+  learnSection: {
+    width: 200,
+    alignItems: 'center',
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.sm,
+  },
+  learnSectionText: {
+    fontFamily: Fonts.rounded,
+    fontSize: FontSizes.sm,
+    fontWeight: '800',
+    color: GameColors.textSecondary,
+    textAlign: 'center',
+    marginBottom: 14,
+    minHeight: 36,
+  },
+  learnSunRayWrap: {
+    alignItems: 'center',
+    width: '100%',
+  },
+  learnSunWrap: {
+    width: 50,
+    height: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  learnSunGlow3: { position: 'absolute', width: 72, height: 72, borderRadius: 36, backgroundColor: 'rgba(255,235,59,0.12)' },
+  learnSunGlow2: { position: 'absolute', width: 60, height: 60, borderRadius: 30, backgroundColor: 'rgba(255,235,59,0.2)' },
+  learnSunGlow1: { position: 'absolute', width: 49, height: 49, borderRadius: 24.5, backgroundColor: 'rgba(255,235,59,0.35)' },
+  learnSunEmoji: { fontSize: 32 },
+  learnRayContainer: {
+    position: 'relative',
+    width: 200,
+    height: 148,
+    marginBottom: 0,
+  },
+  learnRayBar: {
+    position: 'absolute',
+    height: 9,
+    borderRadius: 5,
+    overflow: 'hidden',
+    transformOrigin: 'left center',
+    top: -4.5,
+  },
+  learnWindowOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 40,
+    width: 120,
+    height: 88,
+    borderRadius: 8,
+    borderWidth: 3,
+    borderColor: '#5D4037',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  learnPeopleRow: {
+    flexDirection: 'row',
+    gap: 6,
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 4,
+    width: '100%',
+  },
+  learnWindowBox: {
+    width: 120,
+    height: 88,
+    borderRadius: 8,
+    borderWidth: 3,
+    borderColor: '#5D4037',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  learnWindowInner: {
+    position: 'absolute',
+    top: 4,
+    left: 4,
+    right: 4,
+    bottom: 4,
+    borderWidth: 2,
+    borderColor: 'rgba(2,136,209,0.5)',
+    borderRadius: 4,
+    backgroundColor: 'rgba(3,169,244,0.25)',
+  },
+  learnWindowInner2: {
+    top: 8,
+    left: 8,
+    right: 8,
+    bottom: 8,
+  },
+  learnWindowLabel: {
+    fontFamily: Fonts.rounded,
+    fontSize: FontSizes.md,
+    fontWeight: '900',
+    color: '#004D40',
+    zIndex: 2,
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  learnContinueWrap: {
+    position: 'absolute',
+    right: Spacing.lg,
+    bottom: Spacing.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    backgroundColor: '#A5D6A7',
+    borderRadius: 12,
+    gap: 8,
+  },
+  learnContinueText: {
+    fontFamily: Fonts.rounded,
+    fontSize: FontSizes.md,
+    fontWeight: '800',
+    color: '#ffff',
+  },
+  learnContinueArrow: { fontSize: 20, color: '#fff', fontWeight: '700' },
+
+  // Try Again modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: Spacing.xl,
+  },
+  modalCard: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: Spacing.xl,
+    alignItems: 'center',
+    minWidth: 280,
+    maxWidth: 400,
+  },
+  modalTitle: {
+    fontFamily: Fonts.rounded,
+    fontSize: FontSizes.xl,
+    fontWeight: '900',
+    color: '#C62828',
+    marginBottom: Spacing.md,
+    textAlign: 'center',
+  },
+  modalMessage: {
+    fontFamily: Fonts.rounded,
+    fontSize: FontSizes.md,
+    color: GameColors.textSecondary,
+    textAlign: 'center',
+    marginBottom: Spacing.lg,
+    lineHeight: 22,
+  },
 
   // Header
   header: {

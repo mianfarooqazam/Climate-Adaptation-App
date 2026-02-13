@@ -64,11 +64,12 @@ const TYPE_LABEL_EN: Record<MiniGameType, string> = {
 };
 
 // Maps for insulation world translated titles & descriptions
-const LEVEL_TITLE_KEY: Record<string, 'roofShield' | 'hotWalls' | 'fullProtection' | 'windowLayers'> = {
+const LEVEL_TITLE_KEY: Record<string, 'roofShield' | 'hotWalls' | 'fullProtection' | 'windowLayers' | 'learnLayersTitle' | 'addRightWindowTitle'> = {
   'w1-l1': 'roofShield',
   'w1-l2': 'hotWalls',
   'w1-l3': 'fullProtection',
-  'w5-l1': 'windowLayers',
+  'w5-l1': 'learnLayersTitle',
+  'w5-l2': 'addRightWindowTitle',
 };
 const WORLD_TITLE_KEY: Record<string, 'w1Title' | 'w2Title' | 'w3Title' | 'w4Title' | 'w5Title'> = {
   w1: 'w1Title',

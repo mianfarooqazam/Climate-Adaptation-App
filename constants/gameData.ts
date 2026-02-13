@@ -205,17 +205,28 @@ export const LEVELS: Level[] = [
     fact: 'Combining roof and wall insulation can reduce energy bills by up to 40%, saving money and the planet!',
   },
 
-  // ---- World 5: Windows (1 level) ----
+  // ---- World 5: Windows (2 levels: learn then practice) ----
   {
     id: 'w5-l1',
     worldId: 'w5',
     order: 1,
-    title: 'Window Layers',
+    title: 'What Are Window Layers?',
     type: 'windows-game',
-    description: 'Compare single, double, and triple-layer windows and see how much heat gets inside.',
+    description: 'Learn what window layers mean and how they block heat.',
     difficulty: 1,
     starsRequired: 0,
     fact: 'Double and triple glazing reduce heat transfer significantly, keeping indoor temperatures more comfortable.',
+  },
+  {
+    id: 'w5-l2',
+    worldId: 'w5',
+    order: 2,
+    title: 'Add the Right Window',
+    type: 'windows-game',
+    description: 'Choose the best window to keep everyone cool.',
+    difficulty: 1,
+    starsRequired: 0,
+    fact: 'Triple-layer windows block the most heat and keep families comfortable on hot days.',
   },
 
   // ---- World 2: Green Builder ----
