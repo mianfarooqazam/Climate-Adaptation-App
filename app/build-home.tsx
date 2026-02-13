@@ -117,7 +117,7 @@ function FallbackScene({
     <View style={styles.fallbackScene}>
       <View style={styles.fallbackGround} />
       <Image
-        source={require('@/assets/images/Yazdan.jpg')}
+        source={require('@/assets/images/icon.png')}
         style={[
           styles.fallbackImage,
           {
