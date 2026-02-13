@@ -1,11 +1,10 @@
 /**
  * EcoHero: Flood Fighters — Strategic Landscaping Game
  *
- * Level 1: Two roads — one with trees (shade, people comfortable),
- *          one without (bright sun, people sweating).
- * Level 2: Two homes — one without trees (hot), one where user drags
- *          a tree near the home to block sun rays. No thermometer.
- * Trees are drawn bigger.
+ * Level 1: Two roads — same house as insulation/windows; one side with big trees
+ *          (shade, people comfortable), one without (bright sun, people sweating).
+ * Level 2: Two same houses — one without trees (hot), one where user drags
+ *          a tree near the home to block sun. No thermometer.
  */
 
 import { LinearGradient } from 'expo-linear-gradient';
@@ -23,20 +22,38 @@ import {
 
 import GameButton from '@/components/game/GameButton';
 import LanguageToggle from '@/components/game/LanguageToggle';
+import {
+  LandscapingHouse,
+  Tree,
+  moodCool,
+  moodHot,
+} from '@/components/game/LandscapingHouse';
 import { useGame } from '@/context/GameContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { getLevelById } from '@/constants/gameData';
-import { Fonts, FontSizes, GameColors, Radius, Spacing } from '@/constants/theme';
+import { Fonts, FontSizes, GameColors, Spacing } from '@/constants/theme';
 
 const { width: SCR_W, height: SCR_H } = Dimensions.get('window');
 const HEADER_H = 48;
-const TRAY_H = 72;
+const TRAY_H = 80;
 const SCENE_H = SCR_H - HEADER_H - TRAY_H;
 
-// Big tree size (user asked for bigger trees)
-const TREE_SIZE = 72;
-const TREE_EMOJI = '\u{1F333}'; // 🌳
-const SUN_EMOJI = '\u2600\uFE0F'; // ☀️
+// House scale so two fit on screen
+const HOUSE_SCALE = 0.48;
+const H_W = 180;
+const H_H = 124;
+const HOUSE_OFFSET_Y = SCENE_H * 0.18;
+const HOUSE1_LEFT = SCR_W * 0.06;
+const HOUSE2_LEFT = SCR_W * 0.52;
+
+// Level 2 drop zone near right house
+const DROP_MARGIN = 50;
+const DROP_LEFT = HOUSE2_LEFT - DROP_MARGIN;
+const DROP_TOP = HEADER_H + HOUSE_OFFSET_Y - 15;
+const DROP_W = H_W * HOUSE_SCALE + DROP_MARGIN * 2;
+const DROP_H = H_H * HOUSE_SCALE + 70;
+
+const SUN_EMOJI = '\u2600\uFE0F';
 
 export default function LandscapingGameScreen() {
   const router = useRouter();
@@ -53,25 +70,8 @@ export default function LandscapingGameScreen() {
   const scaleTree = useRef(new Animated.Value(1)).current;
   const [isDraggingTree, setIsDraggingTree] = useState(false);
 
-  // Level 2: drop zone near right home (center-right of screen)
-  const HOME2_LEFT = SCR_W * 0.52;
-  const HOME2_TOP = SCENE_H * 0.35;
-  const HOME2_W = 100;
-  const HOME2_H = 80;
-  const DROP_MARGIN = 60;
-  const DROP_LEFT = HOME2_LEFT - DROP_MARGIN;
-  const DROP_TOP = HOME2_TOP - 20;
-  const DROP_W = HOME2_W + DROP_MARGIN * 2;
-  const DROP_H = HOME2_H + 80;
-  const TRAY_TREE_START_Y = SCR_H - TRAY_H + 16;
-
   const tryDropTree = useCallback((moveX: number, moveY: number) => {
-    if (
-      moveX >= DROP_LEFT &&
-      moveX <= DROP_LEFT + DROP_W &&
-      moveY >= DROP_TOP &&
-      moveY <= DROP_TOP + DROP_H
-    ) {
+    if (moveX >= DROP_LEFT && moveX <= DROP_LEFT + DROP_W && moveY >= DROP_TOP && moveY <= DROP_TOP + DROP_H) {
       setTreePlaced(true);
     }
   }, []);
@@ -105,21 +105,20 @@ export default function LandscapingGameScreen() {
     });
   };
 
-  // Level 1: Continue button
   const onContinueL1 = () => finishLevel(3, 30, 30);
 
-  // Level 2: Success when tree placed
   useEffect(() => {
     if (isLevel2 && treePlaced) {
-      const t = setTimeout(() => finishLevel(3, 30, 30), 1500);
-      return () => clearTimeout(t);
+      const id = setTimeout(() => finishLevel(3, 30, 30), 1500);
+      return () => clearTimeout(id);
     }
   }, [isLevel2, treePlaced]);
 
   if (!level) return null;
 
-  // ========== LEVEL 1: Two roads ==========
+  // ========== LEVEL 1: Two roads, same house each side; left with trees ==========
   if (isLevel1) {
+    const colW = SCR_W / 2;
     return (
       <View style={styles.root}>
         <LinearGradient colors={['#81D4FA', '#B3E5FC', '#E1F5FE']} style={StyleSheet.absoluteFill} />
@@ -135,37 +134,42 @@ export default function LandscapingGameScreen() {
         </View>
 
         <View style={styles.scene}>
-          {/* Left road: with trees, shade, people comfortable */}
-          <View style={[styles.roadColumn, { borderRightWidth: 2, borderColor: 'rgba(0,0,0,0.1)' }]}>
-            <Text style={styles.sunIcon}>{SUN_EMOJI}</Text>
-            <View style={[styles.roadStrip, { backgroundColor: '#78909C' }]} />
-            <View style={styles.treeRow}>
-              <Text style={styles.bigTree}>{TREE_EMOJI}</Text>
-              <Text style={styles.bigTree}>{TREE_EMOJI}</Text>
-              <Text style={styles.bigTree}>{TREE_EMOJI}</Text>
-            </View>
-            <View style={[styles.shadeOverlay, { opacity: 0.4 }]} />
-            <Text style={styles.roadLabel}>{t('roadWithTrees')}</Text>
-            <View style={styles.peopleRow}>
-              <Text style={styles.personEmoji}>{'\u{1F603}'}</Text>
-              <Text style={styles.personEmoji}>{'\u{1F603}'}</Text>
-              <Text style={styles.personEmoji}>{'\u{1F603}'}</Text>
-            </View>
-            <Text style={styles.moodTextCool}>{t('comfortable')}</Text>
+          <View style={StyleSheet.absoluteFill}>
+            <LinearGradient colors={['#81D4FA', '#B3E5FC', '#E8F5E9']} locations={[0, 0.55, 1]} style={StyleSheet.absoluteFill} />
+          </View>
+          {/* Ground */}
+          <View style={[styles.ground, { height: SCENE_H * 0.2 }]}>
+            <LinearGradient colors={['#66BB6A', '#43A047']} style={StyleSheet.absoluteFill} />
           </View>
 
-          {/* Right road: no trees, bright sun, people sweating */}
-          <View style={styles.roadColumn}>
-            <Text style={styles.sunIcon}>{SUN_EMOJI}</Text>
-            <View style={[styles.roadStrip, { backgroundColor: '#90A4AE' }]} />
-            <View style={styles.roadLabelPlaceholder} />
-            <Text style={styles.roadLabel}>{t('roadNoTrees')}</Text>
-            <View style={styles.peopleRow}>
-              <Text style={styles.personEmoji}>{'\u{1F975}'}</Text>
-              <Text style={styles.personEmoji}>{'\u{1F975}'}</Text>
-              <Text style={styles.personEmoji}>{'\u{1F975}'}</Text>
+          {/* Left column: house + trees, comfortable */}
+          <View style={[styles.column, { width: colW }]}>
+            <Text style={[styles.sunIcon, { left: colW * 0.35 }]}>{SUN_EMOJI}</Text>
+            <LandscapingHouse
+              left={colW * 0.08}
+              top={HOUSE_OFFSET_Y}
+              scale={HOUSE_SCALE}
+              mood={moodCool}
+              moodLabel={t('comfortable')}
+            />
+            <View style={[styles.treeGroupLeft, { left: colW * 0.02, top: HOUSE_OFFSET_Y + 20 }]}>
+              <Tree size={1.1} />
+              <Tree size={1} style={{ position: 'absolute', left: 75, top: 10 }} />
+              <Tree size={0.95} style={{ position: 'absolute', left: 145, top: 5 }} />
             </View>
-            <Text style={styles.moodTextHot}>{t('sweating')}</Text>
+            <View style={[styles.shadeOverlay, { width: colW, left: 0, top: 0, bottom: 0, opacity: 0.25 }]} />
+          </View>
+
+          {/* Right column: house, no trees, hot */}
+          <View style={[styles.column, { width: colW, left: colW }]}>
+            <Text style={[styles.sunIcon, { left: colW * 0.35 }]}>{SUN_EMOJI}</Text>
+            <LandscapingHouse
+              left={colW * 0.08}
+              top={HOUSE_OFFSET_Y}
+              scale={HOUSE_SCALE}
+              mood={moodHot}
+              moodLabel={t('sweating')}
+            />
           </View>
         </View>
 
@@ -177,7 +181,7 @@ export default function LandscapingGameScreen() {
     );
   }
 
-  // ========== LEVEL 2: Two homes, drag tree to shade right home ==========
+  // ========== LEVEL 2: Two houses, drag tree to shade right ==========
   return (
     <View style={styles.root}>
       <LinearGradient colors={['#81D4FA', '#B3E5FC', '#E1F5FE']} style={StyleSheet.absoluteFill} />
@@ -193,40 +197,40 @@ export default function LandscapingGameScreen() {
       </View>
 
       <View style={[styles.scene, { height: SCENE_H }]}>
-        {/* Home 1: no trees, hot */}
-        <View style={[styles.homeBox, { left: SCR_W * 0.12, top: SCENE_H * 0.35 }]}>
-          <Text style={styles.sunSmall}>{SUN_EMOJI}</Text>
-          <View style={[styles.homeShape, { backgroundColor: '#8D6E63' }]}>
-            <View style={styles.roofShape} />
-            <View style={styles.doorShape} />
-          </View>
-          <Text style={styles.hotLabel}>{t('hot')}</Text>
+        <LinearGradient colors={['#81D4FA', '#B3E5FC', '#E8F5E9']} locations={[0, 0.55, 1]} style={StyleSheet.absoluteFill} />
+        <View style={[styles.ground, { height: SCENE_H * 0.22 }]}>
+          <LinearGradient colors={['#66BB6A', '#43A047']} style={StyleSheet.absoluteFill} />
         </View>
 
-        {/* Home 2: drop zone for tree; when placed, show tree + shade */}
-        <View style={[styles.homeBox, { left: HOME2_LEFT, top: HOME2_TOP }]}>
-          <Text style={styles.sunSmall}>{SUN_EMOJI}</Text>
-          {treePlaced && (
-            <View style={styles.placedTreeWrap}>
-              <Text style={styles.placedTree}>{TREE_EMOJI}</Text>
-            </View>
-          )}
-          <View style={[styles.homeShape, { backgroundColor: '#8D6E63' }]}>
-            <View style={styles.roofShape} />
-            <View style={styles.doorShape} />
+        {/* Left house: no trees, hot */}
+        <Text style={[styles.sunSmall, { left: HOUSE1_LEFT + 40 }]}>{SUN_EMOJI}</Text>
+        <LandscapingHouse
+          left={HOUSE1_LEFT}
+          top={HOUSE_OFFSET_Y}
+          scale={HOUSE_SCALE}
+          mood={moodHot}
+          moodLabel={t('hot')}
+        />
+
+        {/* Right house: tree when placed, else hot */}
+        <Text style={[styles.sunSmall, { left: HOUSE2_LEFT + 40 }]}>{SUN_EMOJI}</Text>
+        {treePlaced && (
+          <View style={[styles.placedTreeWrap, { left: HOUSE2_LEFT - 30, top: HOUSE_OFFSET_Y + 25 }]}>
+            <Tree size={1.2} />
           </View>
-          {treePlaced ? (
-            <Text style={styles.coolLabel}>{t('comfortable')}</Text>
-          ) : (
-            <Text style={styles.dragHint}>{t('dragTreeToShade')}</Text>
-          )}
-        </View>
+        )}
+        <LandscapingHouse
+          left={HOUSE2_LEFT}
+          top={HOUSE_OFFSET_Y}
+          scale={HOUSE_SCALE}
+          mood={treePlaced ? moodCool : moodHot}
+          moodLabel={treePlaced ? t('comfortable') : t('hot')}
+        />
       </View>
 
-      {/* Tray: draggable tree (only when not yet placed) */}
       {!treePlaced && (
         <View style={styles.tray}>
-          <Text style={styles.trayLabel}>{t('dragTreeToShade')}</Text>
+          <Text style={[styles.trayLabel, lang === 'ur' && styles.rtl]}>{t('dragTreeToShade')}</Text>
           <Animated.View
             {...treePanResponder.panHandlers}
             style={[
@@ -237,7 +241,7 @@ export default function LandscapingGameScreen() {
               },
             ]}
           >
-            <Text style={styles.dragTreeEmoji}>{TREE_EMOJI}</Text>
+            <Tree size={1} />
           </Animated.View>
         </View>
       )}
@@ -264,65 +268,14 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: 'center',
   },
-
-  scene: {
-    flex: 1,
-    flexDirection: 'row',
-    position: 'relative',
-  },
-
-  // Level 1: roads
-  roadColumn: {
-    flex: 1,
-    alignItems: 'center',
-    paddingTop: 20,
-    paddingHorizontal: 8,
-    position: 'relative',
-  },
-  sunIcon: { fontSize: 44, marginBottom: 8 },
-  roadStrip: {
-    width: '90%',
-    height: 12,
-    borderRadius: 4,
-    marginBottom: 12,
-  },
-  treeRow: { flexDirection: 'row', gap: 16, marginBottom: 8 },
-  bigTree: { fontSize: TREE_SIZE },
-  shadeOverlay: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 80,
-    bottom: 100,
-    backgroundColor: '#2E7D32',
-    pointerEvents: 'none',
-  },
-  roadLabelPlaceholder: { height: 24 },
-  roadLabel: {
-    fontFamily: Fonts.rounded,
-    fontSize: FontSizes.sm,
-    fontWeight: '800',
-    color: GameColors.textSecondary,
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  peopleRow: { flexDirection: 'row', gap: 12 },
-  personEmoji: { fontSize: 36 },
-  moodTextCool: {
-    fontFamily: Fonts.rounded,
-    fontSize: FontSizes.sm,
-    fontWeight: '700',
-    color: '#2E7D32',
-    marginTop: 4,
-  },
-  moodTextHot: {
-    fontFamily: Fonts.rounded,
-    fontSize: FontSizes.sm,
-    fontWeight: '700',
-    color: '#C62828',
-    marginTop: 4,
-  },
-
+  scene: { flex: 1, position: 'relative', overflow: 'hidden' },
+  column: { position: 'absolute', left: 0, top: 0, bottom: 0 },
+  ground: { position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 2 },
+  sunIcon: { position: 'absolute', top: 8, fontSize: 40 },
+  sunSmall: { position: 'absolute', top: 4, fontSize: 36 },
+  treeGroupLeft: { position: 'absolute', width: 220, height: 140, zIndex: 5 },
+  shadeOverlay: { position: 'absolute', backgroundColor: '#2E7D32', zIndex: 4, pointerEvents: 'none' },
+  placedTreeWrap: { position: 'absolute', zIndex: 6 },
   continueWrap: {
     position: 'absolute',
     right: Spacing.lg,
@@ -335,73 +288,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     gap: 8,
   },
-  continueText: {
-    fontFamily: Fonts.rounded,
-    fontSize: FontSizes.md,
-    fontWeight: '800',
-    color: '#fff',
-  },
+  continueText: { fontFamily: Fonts.rounded, fontSize: FontSizes.md, fontWeight: '800', color: '#fff' },
   continueArrow: { fontSize: 20, color: '#fff', fontWeight: '700' },
-
-  // Level 2: homes
-  homeBox: {
-    position: 'absolute',
-    width: 120,
-    alignItems: 'center',
-  },
-  sunSmall: { fontSize: 32, marginBottom: 4 },
-  homeShape: {
-    width: 100,
-    height: 70,
-    borderTopLeftRadius: Radius.md,
-    borderTopRightRadius: Radius.md,
-    alignItems: 'center',
-    paddingTop: 8,
-  },
-  roofShape: {
-    width: 0,
-    height: 0,
-    borderLeftWidth: 50,
-    borderRightWidth: 50,
-    borderBottomWidth: 28,
-    borderLeftColor: 'transparent',
-    borderRightColor: 'transparent',
-    borderBottomColor: '#5D4037',
-    borderStyle: 'solid',
-    marginTop: -20,
-  },
-  doorShape: {
-    width: 24,
-    height: 36,
-    backgroundColor: '#5D4037',
-    borderRadius: 4,
-    marginTop: 8,
-  },
-  hotLabel: {
-    fontFamily: Fonts.rounded,
-    fontSize: FontSizes.md,
-    fontWeight: '800',
-    color: '#C62828',
-    marginTop: 4,
-  },
-  coolLabel: {
-    fontFamily: Fonts.rounded,
-    fontSize: FontSizes.md,
-    fontWeight: '800',
-    color: '#2E7D32',
-    marginTop: 4,
-  },
-  dragHint: {
-    fontFamily: Fonts.rounded,
-    fontSize: FontSizes.xs,
-    fontWeight: '700',
-    color: GameColors.textSecondary,
-    marginTop: 4,
-    textAlign: 'center',
-  },
-  placedTreeWrap: { position: 'absolute', top: 28, zIndex: 5 },
-  placedTree: { fontSize: 64 },
-
   tray: {
     position: 'absolute',
     bottom: 0,
@@ -414,12 +302,6 @@ const styles = StyleSheet.create({
     gap: Spacing.lg,
     backgroundColor: 'rgba(46,125,50,0.9)',
   },
-  trayLabel: {
-    fontFamily: Fonts.rounded,
-    fontSize: FontSizes.sm,
-    fontWeight: '700',
-    color: '#fff',
-  },
+  trayLabel: { fontFamily: Fonts.rounded, fontSize: FontSizes.sm, fontWeight: '700', color: '#fff' },
   dragTreeWrap: { alignItems: 'center', justifyContent: 'center' },
-  dragTreeEmoji: { fontSize: 58 },
 });
