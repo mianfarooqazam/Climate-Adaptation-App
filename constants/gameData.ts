@@ -6,7 +6,7 @@
 // Types
 // ---------------------------------------------------------------------------
 
-export type MiniGameType = 'quiz' | 'flood-defense' | 'eco-builder' | 'sorting' | 'insulation-game' | 'windows-game';
+export type MiniGameType = 'quiz' | 'flood-defense' | 'eco-builder' | 'sorting' | 'insulation-game' | 'windows-game' | 'landscaping-game';
 
 export interface QuizQuestion {
   id: string;
@@ -128,8 +128,20 @@ export const WORLDS: World[] = [
     starsToUnlock: 6,
   },
   {
-    id: 'w2',
+    id: 'w6',
     order: 3,
+    title: 'Strategic Landscaping',
+    subtitle: 'Shade with Trees',
+    emoji: '\u{1F333}', // 🌳
+    color: '#2E7D32',
+    gradientEnd: '#66BB6A',
+    description:
+      'See how trees block the sun and keep roads and homes cool. Drag trees to shade your home!',
+    starsToUnlock: 6,
+  },
+  {
+    id: 'w2',
+    order: 4,
     title: 'Green Builder',
     subtitle: 'Climate-Smart Structures',
     emoji: '\u{1F3D7}', // 🏗
@@ -141,7 +153,7 @@ export const WORLDS: World[] = [
   },
   {
     id: 'w3',
-    order: 4,
+    order: 5,
     title: 'Eco Warrior',
     subtitle: 'Green Daily Habits',
     emoji: '\u{267B}', // ♻
@@ -153,7 +165,7 @@ export const WORLDS: World[] = [
   },
   {
     id: 'w4',
-    order: 5,
+    order: 6,
     title: 'Community Shield',
     subtitle: 'Stronger Together',
     emoji: '\u{1F6E1}', // 🛡
@@ -227,6 +239,30 @@ export const LEVELS: Level[] = [
     difficulty: 1,
     starsRequired: 0,
     fact: 'Triple-layer windows block the most heat and keep families comfortable on hot days.',
+  },
+
+  // ---- World 6: Strategic Landscaping (2 levels) ----
+  {
+    id: 'w6-l1',
+    worldId: 'w6',
+    order: 1,
+    title: 'Roads in the Sun',
+    type: 'landscaping-game',
+    description: 'Compare a road with trees to a road without. See how shade keeps people cool.',
+    difficulty: 1,
+    starsRequired: 0,
+    fact: 'Street trees can reduce pavement temperature by up to 20°C and keep pedestrians cooler.',
+  },
+  {
+    id: 'w6-l2',
+    worldId: 'w6',
+    order: 2,
+    title: 'Shade Your Home',
+    type: 'landscaping-game',
+    description: 'Drag a tree near the home to block sun rays and keep it cool.',
+    difficulty: 1,
+    starsRequired: 0,
+    fact: 'Trees near buildings reduce cooling costs by providing shade and blocking heat.',
   },
 
   // ---- World 2: Green Builder ----

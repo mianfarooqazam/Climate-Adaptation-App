@@ -32,6 +32,7 @@ export default function RootLayout() {
           <Stack.Screen name="sorting" />
           <Stack.Screen name="insulation-game" />
           <Stack.Screen name="windows-game" />
+          <Stack.Screen name="landscaping-game" />
           <Stack.Screen
             name="level-complete"
             options={{ animation: 'fade' }}

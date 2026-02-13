@@ -152,6 +152,10 @@ export default function LevelCompleteScreen() {
             ? t('learnLayersTitle')
             : levelId === 'w5-l2'
             ? t('addRightWindowTitle')
+            : levelId === 'w6-l1'
+            ? t('landscapingLevel1')
+            : levelId === 'w6-l2'
+            ? t('landscapingLevel2')
             : level?.title ?? 'Level'}
         </Text>
       </Animated.View>
@@ -170,6 +174,7 @@ export default function LevelCompleteScreen() {
                 sorting: '/sorting',
                 'insulation-game': '/insulation-game',
                 'windows-game': '/windows-game',
+                'landscaping-game': '/landscaping-game',
               };
               router.replace({
                 pathname: typeRoute[nextLevel.type] as any,
@@ -192,6 +197,7 @@ export default function LevelCompleteScreen() {
               sorting: '/sorting',
               'insulation-game': '/insulation-game',
               'windows-game': '/windows-game',
+              'landscaping-game': '/landscaping-game',
             };
             router.replace({
               pathname: typeRoute[level?.type ?? 'quiz'] as any,
