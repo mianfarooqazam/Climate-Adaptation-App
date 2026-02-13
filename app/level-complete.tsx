@@ -142,7 +142,15 @@ export default function LevelCompleteScreen() {
 
         {/* Level name */}
         <Text style={styles.levelName}>
-          {levelId === 'w1-l1' ? t('roofShield') : levelId === 'w1-l2' ? t('hotWalls') : levelId === 'w1-l3' ? t('fullProtection') : level?.title ?? 'Level'}
+          {levelId === 'w1-l1'
+            ? t('roofShield')
+            : levelId === 'w1-l2'
+            ? t('hotWalls')
+            : levelId === 'w1-l3'
+            ? t('fullProtection')
+            : levelId === 'w5-l1'
+            ? t('windowLayers')
+            : level?.title ?? 'Level'}
         </Text>
       </Animated.View>
 
@@ -159,6 +167,7 @@ export default function LevelCompleteScreen() {
                 'eco-builder': '/eco-builder',
                 sorting: '/sorting',
                 'insulation-game': '/insulation-game',
+                'windows-game': '/windows-game',
               };
               router.replace({
                 pathname: typeRoute[nextLevel.type] as any,
@@ -180,6 +189,7 @@ export default function LevelCompleteScreen() {
               'eco-builder': '/eco-builder',
               sorting: '/sorting',
               'insulation-game': '/insulation-game',
+              'windows-game': '/windows-game',
             };
             router.replace({
               pathname: typeRoute[level?.type ?? 'quiz'] as any,

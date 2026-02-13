@@ -6,7 +6,7 @@
 // Types
 // ---------------------------------------------------------------------------
 
-export type MiniGameType = 'quiz' | 'flood-defense' | 'eco-builder' | 'sorting' | 'insulation-game';
+export type MiniGameType = 'quiz' | 'flood-defense' | 'eco-builder' | 'sorting' | 'insulation-game' | 'windows-game';
 
 export interface QuizQuestion {
   id: string;
@@ -116,8 +116,20 @@ export const WORLDS: World[] = [
     starsToUnlock: 0,
   },
   {
-    id: 'w2',
+    id: 'w5',
     order: 2,
+    title: 'Windows',
+    subtitle: 'Layered Glass Cooling',
+    emoji: '\u{1FA9F}', // 🪟
+    color: '#00838F',
+    gradientEnd: '#4DD0E1',
+    description:
+      'Compare single, double, and triple-layer windows. See how each layer blocks more heat rays and keeps families cooler.',
+    starsToUnlock: 6,
+  },
+  {
+    id: 'w2',
+    order: 3,
     title: 'Green Builder',
     subtitle: 'Climate-Smart Structures',
     emoji: '\u{1F3D7}', // 🏗
@@ -129,7 +141,7 @@ export const WORLDS: World[] = [
   },
   {
     id: 'w3',
-    order: 3,
+    order: 4,
     title: 'Eco Warrior',
     subtitle: 'Green Daily Habits',
     emoji: '\u{267B}', // ♻
@@ -141,7 +153,7 @@ export const WORLDS: World[] = [
   },
   {
     id: 'w4',
-    order: 4,
+    order: 5,
     title: 'Community Shield',
     subtitle: 'Stronger Together',
     emoji: '\u{1F6E1}', // 🛡
@@ -191,6 +203,19 @@ export const LEVELS: Level[] = [
     difficulty: 2,
     starsRequired: 3,
     fact: 'Combining roof and wall insulation can reduce energy bills by up to 40%, saving money and the planet!',
+  },
+
+  // ---- World 5: Windows (1 level) ----
+  {
+    id: 'w5-l1',
+    worldId: 'w5',
+    order: 1,
+    title: 'Window Layers',
+    type: 'windows-game',
+    description: 'Compare single, double, and triple-layer windows and see how much heat gets inside.',
+    difficulty: 1,
+    starsRequired: 0,
+    fact: 'Double and triple glazing reduce heat transfer significantly, keeping indoor temperatures more comfortable.',
   },
 
   // ---- World 2: Green Builder ----
