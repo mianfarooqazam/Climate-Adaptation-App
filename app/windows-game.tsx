@@ -455,11 +455,11 @@ export default function WindowsGameScreen() {
       setDragging: (v: boolean) => void,
     ) =>
       PanResponder.create({
-        onStartShouldSetPanResponder: () => true,
-        onMoveShouldSetPanResponder: () => true,
+        onStartShouldSetPanResponder: () => false,
+        onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dx) > 10 || Math.abs(g.dy) > 10,
         onPanResponderGrant: () => {
           setDragging(true);
-          (dragXY as any).setOffset({ x: (dragXY.x as any)._value ?? 0, y: (dragXY.y as any)._value ?? 0 });
+          dragXY.setOffset({ x: (dragXY.x as any)._value ?? 0, y: (dragXY.y as any)._value ?? 0 });
           dragXY.setValue({ x: 0, y: 0 });
           Animated.spring(scaleVal, { toValue: 1.2, useNativeDriver: true }).start();
         },
@@ -468,7 +468,7 @@ export default function WindowsGameScreen() {
         },
         onPanResponderRelease: (_, g) => {
           setDragging(false);
-          (dragXY as any).flattenOffset();
+          dragXY.flattenOffset();
           Animated.spring(scaleVal, { toValue: 1, useNativeDriver: true }).start();
           tryDropWindowRef.current(layerChoice, g.moveX, g.moveY);
           Animated.spring(dragXY, { toValue: { x: 0, y: 0 }, useNativeDriver: true }).start();
@@ -853,17 +853,13 @@ export default function WindowsGameScreen() {
           <Thermometer temperature={currentTemp} />
         </View>
 
-        {/* Drop target overlay (level 2: highlighted like insulation) */}
+        {/* Drop target overlay (level 2: highlighted box only) */}
         {isPracticeLevel && layer === null && (
           <View
             pointerEvents="none"
             style={[styles.windowDropZone, { left: H_LEFT + H_W, top: H_TOP + ROOF_H, width: SIDE_D, height: WALL_H }]}
           >
-            <Animated.View style={[styles.windowZoneActive, { opacity: windowZonePulse }]}>
-              <View style={styles.windowZoneHintBg}>
-                <Text style={[styles.windowZoneHint, lang === 'ur' && styles.rtl]}>{t('dropWindowHere')}</Text>
-              </View>
-            </Animated.View>
+            <Animated.View style={[styles.windowZoneActive, { opacity: windowZonePulse }]} />
           </View>
         )}
       </View>
@@ -1549,28 +1545,16 @@ const styles = StyleSheet.create({
     zIndex: 8,
   },
   windowZoneActive: {
-    flex: 1,
-    width: '100%',
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    right: 0,
+    bottom: 0,
     borderWidth: 3,
     borderRadius: Radius.md,
     borderColor: '#0288D1',
     backgroundColor: 'rgba(2,136,209,0.22)',
     borderStyle: 'dashed',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  windowZoneHintBg: {
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    borderRadius: 8,
-  },
-  windowZoneHint: {
-    fontFamily: Fonts.rounded,
-    fontSize: FontSizes.sm,
-    fontWeight: '800',
-    color: '#fff',
-    textAlign: 'center',
   },
   layerButtonWrap: {
     alignItems: 'center',
