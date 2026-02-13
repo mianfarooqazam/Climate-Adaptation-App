@@ -419,9 +419,7 @@ export default function WindowsGameScreen() {
               {layer >= 2 && <View style={styles.sideWindowLayer2} />}
               {/* Layer 3 inner pane */}
               {layer >= 3 && <View style={styles.sideWindowLayer3} />}
-              {/* Cross bars */}
-              <View style={styles.sideWindowCrossV} />
-              <View style={styles.sideWindowCrossH} />
+              {/* Cross bars removed */}
               {/* Layer label */}
               <View style={styles.sideWindowLabelWrap}>
                 <Text style={styles.sideWindowLabel}>{layer}x</Text>
@@ -732,24 +730,6 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: 'rgba(0,131,143,0.5)',
     borderRadius: 1,
-  },
-  sideWindowCrossV: {
-    position: 'absolute',
-    left: '46%',
-    top: 0,
-    bottom: 0,
-    width: 3,
-    backgroundColor: '#8D6E63',
-    zIndex: 2,
-  },
-  sideWindowCrossH: {
-    position: 'absolute',
-    top: '48%',
-    left: 0,
-    right: 0,
-    height: 3,
-    backgroundColor: '#8D6E63',
-    zIndex: 2,
   },
   sideWindowLabelWrap: {
     backgroundColor: 'rgba(255,255,255,0.75)',
