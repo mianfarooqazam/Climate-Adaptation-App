@@ -186,14 +186,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
   );
 
   // ------ isWorldUnlocked ------
-  const isWorldUnlocked = useCallback(
-    (worldId: string): boolean => {
-      const world = WORLDS.find((w) => w.id === worldId);
-      if (!world) return false;
-      return totalStars >= world.starsToUnlock;
-    },
-    [totalStars],
-  );
+  const isWorldUnlocked = useCallback((worldId: string): boolean => {
+    const world = WORLDS.find((w) => w.id === worldId);
+    if (!world) return false;
+    return true; // all worlds unlocked by default
+  }, []);
 
   // ------ resetProgress ------
   const resetProgress = useCallback(async () => {
