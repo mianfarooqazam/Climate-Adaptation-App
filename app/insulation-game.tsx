@@ -61,10 +61,10 @@ const THERMO_W = 80;
 const SIDE_D = 50;
 const SIDE_WALL_W = 70; // right side wall (same brick as left, a little bigger)
 
-// House front-face dimensions
+// House front-face dimensions (centered: house + side + thermo block)
 const H_W = Math.min((SCENE_W - THERMO_W - 60 - SIDE_D) * 0.46, 360);
 const H_H = Math.min(SCENE_H * 0.6, 320);
-const H_LEFT = (SCENE_W - THERMO_W - H_W - SIDE_D) / 2;
+const H_LEFT = Math.round((SCENE_W - THERMO_W - H_W - SIDE_D) / 2);
 const H_TOP = SCENE_H * 0.26;
 
 const ROOF_H = 70;

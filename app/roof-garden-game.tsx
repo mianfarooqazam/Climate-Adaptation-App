@@ -42,9 +42,9 @@ const CTRL_H = 100;
 const SCENE_H = SCR_H - HEADER_H - CTRL_H;
 const SIDE_D = 50;
 
-const H_W = Math.min((SCR_W - 80 - SIDE_D) * 0.46, 360);
+const H_W = Math.min((SCR_W - 60 - SIDE_D) * 0.46, 360);
 const H_H = Math.min(SCENE_H * 0.6, 320);
-const H_LEFT = (SCR_W - H_W - SIDE_D - 80) / 2;
+const H_LEFT = (SCR_W - H_W - SIDE_D) / 2;
 const H_TOP = SCENE_H * 0.26;
 
 const ROOF_H = 70;
