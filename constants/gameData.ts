@@ -6,7 +6,7 @@
 // Types
 // ---------------------------------------------------------------------------
 
-export type MiniGameType = 'quiz' | 'flood-defense' | 'eco-builder' | 'sorting' | 'insulation-game' | 'windows-game' | 'roof-garden-game' | 'build-home';
+export type MiniGameType = 'quiz' | 'flood-defense' | 'eco-builder' | 'sorting' | 'insulation-game' | 'windows-game' | 'build-home';
 
 export interface QuizQuestion {
   id: string;
@@ -128,20 +128,8 @@ export const WORLDS: World[] = [
     starsToUnlock: 6,
   },
   {
-    id: 'w3',
-    order: 3,
-    title: 'Roof Garden',
-    subtitle: 'Plants Cool the Roof',
-    emoji: '\u{1F331}', // 🌱
-    color: '#2E7D32',
-    gradientEnd: '#66BB6A',
-    description:
-      'Growing plants on the roof shades the building and reduces heat. Learn how a roof garden keeps everyone cooler.',
-    starsToUnlock: 6,
-  },
-  {
     id: 'w7',
-    order: 4,
+    order: 3,
     title: 'Build your home',
     subtitle: 'Explore in 3D',
     emoji: '\u{1F3D7}', // 🏗
@@ -215,30 +203,6 @@ export const LEVELS: Level[] = [
     difficulty: 1,
     starsRequired: 0,
     fact: 'Triple-layer windows block the most heat and keep families comfortable on hot days.',
-  },
-
-  // ---- World 3: Roof Garden (2 levels: learn then drag plants) ----
-  {
-    id: 'w3-l1',
-    worldId: 'w3',
-    order: 1,
-    title: 'What Is a Roof Garden?',
-    type: 'roof-garden-game',
-    description: 'Learn how plants on the roof reduce heat and keep the house cool.',
-    difficulty: 1,
-    starsRequired: 0,
-    fact: 'Roof gardens can lower roof surface temperature by up to 30°C and reduce indoor heat significantly.',
-  },
-  {
-    id: 'w3-l2',
-    worldId: 'w3',
-    order: 2,
-    title: 'Add Plants to the Roof',
-    type: 'roof-garden-game',
-    description: 'Drag plants onto the roof to shade it and keep everyone cool.',
-    difficulty: 1,
-    starsRequired: 0,
-    fact: 'Even small potted plants on a roof help block sun and cool the building below.',
   },
 
   // ---- World 7: Build your home ----
@@ -705,13 +669,6 @@ export const BADGES: Badge[] = [
     emoji: '\u{267B}', // ♻
     description: 'Completed World 3: Eco Warrior.',
     condition: 'Complete all World 3 levels',
-  },
-  {
-    id: 'roof-garden-pro',
-    name: 'Roof Garden Pro',
-    emoji: '\u{1F331}', // 🌱
-    description: 'Completed World 3: Roof Garden.',
-    condition: 'Complete all Roof Garden levels',
   },
   {
     id: 'community-hero',

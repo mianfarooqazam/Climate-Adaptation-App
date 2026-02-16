@@ -32,7 +32,6 @@ export default function RootLayout() {
           <Stack.Screen name="sorting" />
           <Stack.Screen name="insulation-game" />
           <Stack.Screen name="windows-game" />
-          <Stack.Screen name="roof-garden-game" />
           <Stack.Screen name="build-home" />
           <Stack.Screen
             name="level-complete"

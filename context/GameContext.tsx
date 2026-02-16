@@ -132,7 +132,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
         const worldBadgeMap: Record<string, string> = {
           w1: 'insulation-pro',
           w2: 'green-builder',
-          w3: 'roof-garden-pro',
           w4: 'community-hero',
         };
         for (const world of WORLDS) {

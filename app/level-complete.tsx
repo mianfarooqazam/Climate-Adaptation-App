@@ -170,7 +170,6 @@ export default function LevelCompleteScreen() {
                 sorting: '/sorting',
                 'insulation-game': '/insulation-game',
                 'windows-game': '/windows-game',
-                'roof-garden-game': '/roof-garden-game',
                 'build-home': '/build-home',
               };
               router.replace({
@@ -194,7 +193,6 @@ export default function LevelCompleteScreen() {
               sorting: '/sorting',
               'insulation-game': '/insulation-game',
               'windows-game': '/windows-game',
-              'roof-garden-game': '/roof-garden-game',
               'build-home': '/build-home',
             };
             router.replace({
