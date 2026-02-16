@@ -165,25 +165,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
   );
 
   // ------ isLevelUnlocked ------
-  const isLevelUnlocked = useCallback(
-    (levelId: string): boolean => {
-      const level = LEVELS.find((l) => l.id === levelId);
-      if (!level) return false;
-
-      // The world must be unlocked first
-      const world = WORLDS.find((w) => w.id === level.worldId);
-      if (world && totalStars < world.starsToUnlock) return false;
-
-      // Check per-level star requirement (within the world)
-      const worldLevels = getLevelsForWorld(level.worldId);
-      const worldStars = worldLevels.reduce(
-        (sum, l) => sum + (player.levelProgress[l.id]?.stars ?? 0),
-        0,
-      );
-      return worldStars >= level.starsRequired;
-    },
-    [player.levelProgress, totalStars],
-  );
+  const isLevelUnlocked = useCallback((levelId: string): boolean => {
+    const level = LEVELS.find((l) => l.id === levelId);
+    if (!level) return false;
+    return true; // all levels unlocked by default
+  }, []);
 
   // ------ isWorldUnlocked ------
   const isWorldUnlocked = useCallback((worldId: string): boolean => {
