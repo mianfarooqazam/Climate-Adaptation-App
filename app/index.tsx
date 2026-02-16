@@ -5,7 +5,7 @@
  * profile shortcut. Cartoon-style with floating cloud/leaf animations.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,9 @@ import {
   Animated,
   Easing,
   Dimensions,
+  Image,
+  Modal,
+  Pressable,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -98,6 +101,7 @@ export default function TitleScreen() {
   const router = useRouter();
   const { totalStars, player } = useGame();
   const { t } = useLanguage();
+  const [showCreditsModal, setShowCreditsModal] = useState(false);
 
   // Logo bounce animation
   const bounce = useRef(new Animated.Value(0)).current;
@@ -188,8 +192,37 @@ export default function TitleScreen() {
             color="rgba(255,255,255,0.25)"
             textColor="#fff"
           />
+
+          {/* Credits (press to show GIZ logo) */}
+          <Pressable
+            onPress={() => setShowCreditsModal(true)}
+            style={({ pressed }) => [styles.creditsPressable, pressed && styles.creditsPressablePressed]}
+          >
+            <Text style={styles.creditsLabel}>{t('credits')}</Text>
+          </Pressable>
         </View>
       </View>
+
+      {/* Credits modal: GIZ logo when Credits is pressed */}
+      <Modal
+        visible={showCreditsModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowCreditsModal(false)}
+      >
+        <Pressable
+          style={styles.creditsModalOverlay}
+          onPress={() => setShowCreditsModal(false)}
+        >
+          <Pressable style={styles.creditsModalContent} onPress={(e) => e.stopPropagation()}>
+            <Image
+              source={require('@/assets/images/GIZ.png')}
+              style={styles.creditsModalLogo}
+              resizeMode="contain"
+            />
+          </Pressable>
+        </Pressable>
+      </Modal>
 
       <Text style={styles.footer}>
         {t('footer')}
@@ -283,6 +316,42 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.sm,
     color: '#fff',
     fontWeight: '600',
+  },
+  creditsPressable: {
+    marginTop: Spacing.lg,
+    paddingVertical: Spacing.xs,
+    paddingHorizontal: Spacing.sm,
+  },
+  creditsPressablePressed: {
+    opacity: 0.7,
+  },
+  creditsLabel: {
+    fontFamily: Fonts.rounded,
+    fontSize: FontSizes.sm,
+    color: 'rgba(255,255,255,0.85)',
+    fontWeight: '700',
+  },
+  creditsModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: Spacing.xl,
+  },
+  creditsModalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: Spacing.xl,
+    alignItems: 'center',
+    minWidth: 260,
+    maxWidth: 320,
+    ...Shadow.md,
+  },
+  creditsModalLogo: {
+    width: 200,
+    height: 80,
+    marginTop: Spacing.lg,
+    marginBottom: Spacing.lg,
   },
   langToggle: {
     position: 'absolute',

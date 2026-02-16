@@ -14,6 +14,7 @@ const translations = {
   stars: { en: 'stars', ur: '\u0633\u062A\u0627\u0631\u06D2' },
   greenScore: { en: 'Green Score', ur: '\u0633\u0628\u0632 \u0633\u06A9\u0648\u0631' },
   footer: { en: 'Mainstreaming Green Skills for Climate Adaptation', ur: '\u0645\u0648\u0633\u0645\u06CC\u0627\u062A\u06CC \u0645\u0648\u0627\u0641\u0642\u062A \u06A9\u06D2 \u0644\u06CC\u06D2 \u0633\u0628\u0632 \u0645\u06C1\u0627\u0631\u062A\u06CC\u06BA' },
+  credits: { en: 'Credits', ur: '\u06A9\u0631\u06CC\u0688\u0679\u0633' },
 
   // ---- World map ----
   worldMap: { en: 'World Map', ur: '\u0639\u0627\u0644\u0645\u06CC \u0646\u0642\u0634\u06C1' },
