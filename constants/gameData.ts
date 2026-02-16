@@ -6,7 +6,7 @@
 // Types
 // ---------------------------------------------------------------------------
 
-export type MiniGameType = 'quiz' | 'flood-defense' | 'eco-builder' | 'sorting' | 'insulation-game' | 'windows-game' | 'build-home';
+export type MiniGameType = 'quiz' | 'flood-defense' | 'eco-builder' | 'sorting' | 'insulation-game' | 'windows-game' | 'roof-garden-game' | 'build-home';
 
 export interface QuizQuestion {
   id: string;
@@ -139,6 +139,18 @@ export const WORLDS: World[] = [
       'Walk around in a 3D world. Use the joystick to move your character and explore your home.',
     starsToUnlock: 12,
   },
+  {
+    id: 'w8',
+    order: 4,
+    title: 'Roof Garden',
+    subtitle: 'Plants on the Roof',
+    emoji: '\u{1F33B}', // 🌻
+    color: '#2E7D32',
+    gradientEnd: '#66BB6A',
+    description:
+      'Green roofs keep buildings cooler and help nature. Drag plants onto the roof to create your roof garden.',
+    starsToUnlock: 18,
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -216,6 +228,19 @@ export const LEVELS: Level[] = [
     difficulty: 1,
     starsRequired: 0,
     fact: 'Exploring your space helps you understand how to make it more climate-friendly.',
+  },
+
+  // ---- World 8: Roof Garden (1 level) ----
+  {
+    id: 'w8-l1',
+    worldId: 'w8',
+    order: 1,
+    title: 'Plants on the Roof',
+    type: 'roof-garden-game',
+    description: 'Drag plants to the roof to create a green roof and keep the house cool.',
+    difficulty: 1,
+    starsRequired: 0,
+    fact: 'Green roofs absorb heat, reduce stormwater runoff, and provide habitat for wildlife.',
   },
 ];
 

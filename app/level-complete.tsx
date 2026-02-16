@@ -152,6 +152,8 @@ export default function LevelCompleteScreen() {
             ? t('learnLayersTitle')
             : levelId === 'w5-l2'
             ? t('addRightWindowTitle')
+            : levelId === 'w8-l1'
+            ? t('roofGardenLevelTitle')
             : level?.title ?? 'Level'}
         </Text>
       </Animated.View>
@@ -170,6 +172,7 @@ export default function LevelCompleteScreen() {
                 sorting: '/sorting',
                 'insulation-game': '/insulation-game',
                 'windows-game': '/windows-game',
+                'roof-garden-game': '/roof-garden-game',
                 'build-home': '/build-home',
               };
               router.replace({

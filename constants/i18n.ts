@@ -71,6 +71,18 @@ const translations = {
   buildHomeExplore: { en: 'Explore Your Home', ur: '\u0627\u067E\u0646\u06D2 \u06AF\u06BE\u0631 \u06A9\u0648 \u0627\u0686\u06BE\u06CC\u06BA' },
   completeBuildHome: { en: 'Complete', ur: '\u0645\u06A9\u0645\u0644 \u06A9\u0631\u06CC\u06BA' },
 
+  w8Title: { en: 'Roof Garden', ur: '\u0686\u06BE\u062A \u0628\u0627\u063A\u06CC\u0686\u06C1' },
+  w8Subtitle: { en: 'Plants on the Roof', ur: '\u0686\u06BE\u062A \u067E\u0631 \u067E\u0648\u062F\u06D2' },
+  w8Description: {
+    en: 'Green roofs keep buildings cooler and help nature. Drag plants onto the roof to create your roof garden.',
+    ur: '\u0633\u0628\u0632 \u0686\u06BE\u062A\u06CC\u06BA \u0639\u0645\u0627\u0631\u062A\u0648\u06BA \u06A9\u0648 \u0679\u06BE\u0646\u0688\u0627 \u0631\u06A9\u06BE\u062A\u06CC \u06C1\u06CC\u06BA \u0627\u0648\u0631 \u0641\u0637\u0631\u062A \u06A9\u0648 \u0645\u062F\u062F \u062F\u06CC\u062A\u06CC \u06C1\u06CC\u06BA\u06D4 \u0686\u06BE\u062A \u067E\u0631 \u067E\u0648\u062F\u06D2 \u06A9\u06BE\u06CC\u0646\u0686\u06CC\u06BA \u0627\u0648\u0631 \u0627\u067E\u0646\u0627 \u0686\u06BE\u062A \u0628\u0627\u063A\u06CC\u0686\u06C1 \u0628\u0646\u0627\u0626\u06CC\u06BA\u06D4',
+  },
+  roofGardenLevelTitle: { en: 'Plants on the Roof', ur: '\u0686\u06BE\u062A \u067E\u0631 \u067E\u0648\u062F\u06D2' },
+  dragPlantsToRoof: { en: 'Drag plants to the roof!', ur: '\u067E\u0648\u062F\u06D2 \u0686\u06BE\u062A \u067E\u0631 \u06A9\u06BE\u06CC\u0646\u0686\u06CC\u06BA!' },
+  plantSeedling: { en: 'Seedling', ur: '\u067E\u0648\u062F\u0627' },
+  plantHerb: { en: 'Herb', ur: '\u062C\u0691\u06CC \u0628\u0648\u0679\u06CC' },
+  plantSunflower: { en: 'Sunflower', ur: '\u0633\u0648\u0631\u062C \u0645\u06A9\u06BE\u0626\u06CC' },
+
   // ---- Landscaping level titles ----
   landscapingLevel1: { en: 'Roads in the Sun', ur: '\u062F\u0648\u067E\u06C1\u0631 \u0633\u0691\u06A9\u06CC\u06BA' },
   landscapingLevel2: { en: 'Shade Your Home', ur: '\u06AF\u06BE\u0631 \u06A9\u0648 \u0633\u0627\u0626\u06D2 \u062F\u06CC\u06BA' },
@@ -136,6 +148,7 @@ const translations = {
   // ---- Type labels ----
   typeInsulation: { en: 'Insulation', ur: '\u0627\u0646\u0633\u0648\u0644\u06CC\u0634\u0646' },
   typeWindows: { en: 'Windows', ur: '\u06A9\u06BE\u0691\u06A9\u06CC\u0627\u06BA' },
+  typeRoofGarden: { en: 'Roof Garden', ur: '\u0686\u06BE\u062A \u0628\u0627\u063A\u06CC\u0686\u06C1' },
   typeLandscaping: { en: 'Landscaping', ur: '\u0644\u06CC\u0646\u0688 \u0633\u067E\u06CC\u0679\u0646\u06AF' },
 
   // ---- Insulation game ----

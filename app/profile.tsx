@@ -46,10 +46,11 @@ export default function ProfileScreen() {
   ).length;
   const totalLevels = LEVELS.length;
   const maxStars = totalLevels * 3;
-  const worldTitleKeyMap: Record<string, 'w1Title' | 'w5Title' | 'w7Title'> = {
+  const worldTitleKeyMap: Record<string, 'w1Title' | 'w5Title' | 'w7Title' | 'w8Title'> = {
     w1: 'w1Title',
     w5: 'w5Title',
     w7: 'w7Title',
+    w8: 'w8Title',
   };
 
   const handleReset = () => {
