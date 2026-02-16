@@ -1,5 +1,8 @@
 {
   "expo": {
+    "cli": {
+      "appVersionSource": "local"
+    },
     "name": "EcoHero: Flood Fighters",
     "slug": "ecohero-flood-fighters",
     "version": "1.0.0",
@@ -19,7 +22,8 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.anonymous.ecoherofloodfighters"
     },
     "web": {
       "output": "static",
@@ -40,6 +44,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "305d3def-0344-416a-b195-ece4f2d5f0f3"
+      }
+    },
+    "owner": "farooqazam"
   }
 }
