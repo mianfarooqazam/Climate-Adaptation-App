@@ -47,8 +47,7 @@ type WindowLayer = 1 | 2 | 3;
 
 const { width: SCR_W, height: SCR_H } = Dimensions.get('window');
 const HEADER_H = 48;
-const CTRL_H = 100;
-const SCENE_H = SCR_H - HEADER_H - CTRL_H;
+const SCENE_H = SCR_H - HEADER_H;
 
 const THERMO_W = 80;
 
@@ -326,6 +325,7 @@ export default function WindowsGameScreen() {
   const isPracticeLevel = levelId === 'w5-l2';
   const [layer, setLayer] = useState<WindowLayer | null>(isPracticeLevel ? null : 1);
   const [showTryAgainModal, setShowTryAgainModal] = useState(false);
+  const [showDragHintModal, setShowDragHintModal] = useState(false);
 
   const isLearnLevel = levelId === 'w5-l1';
 
@@ -685,10 +685,76 @@ export default function WindowsGameScreen() {
           {t('raysPassing')}: {visibleRays}/8
         </Text>
         <LanguageToggle />
+        <Pressable onPress={() => setShowDragHintModal(true)} style={styles.infoBtn} hitSlop={8}>
+          <Text style={styles.infoIcon}>{'\u2139'}</Text>
+        </Pressable>
       </View>
 
-      {/* ===== SCENE ===== */}
-      <View ref={sceneRef} style={styles.scene} collapsable={false}>
+      {/* ===== LEFT: drag items | CENTER/RIGHT: scene + thermometer ===== */}
+      <View style={styles.mainRow}>
+        <View style={styles.leftDragColumn}>
+          {!isPracticeLevel && (
+            <Text style={[styles.helper, lang === 'ur' && styles.rtl]}>{t('chooseWindow')}</Text>
+          )}
+          <View style={styles.layerButtonsColumn}>
+            {isPracticeLevel ? (
+              <>
+                <Animated.View
+                  {...panL1.panHandlers}
+                  style={[
+                    styles.layerButtonWrap,
+                    { transform: [...dragL1.getTranslateTransform(), { scale: scaleL1 }], zIndex: isDraggingL1 ? 100 : 1 },
+                  ]}
+                >
+                  <Pressable style={[styles.layerBtn, layer === 1 && styles.layerBtnActive]} onPress={() => handleLayerPress(1)}>
+                    <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F'}</Text>
+                    <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('singleLayer')}</Text>
+                  </Pressable>
+                </Animated.View>
+                <Animated.View
+                  {...panL2.panHandlers}
+                  style={[
+                    styles.layerButtonWrap,
+                    { transform: [...dragL2.getTranslateTransform(), { scale: scaleL2 }], zIndex: isDraggingL2 ? 100 : 1 },
+                  ]}
+                >
+                  <Pressable style={[styles.layerBtn, layer === 2 && styles.layerBtnActive2]} onPress={() => handleLayerPress(2)}>
+                    <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F\uD83E\uDE9F'}</Text>
+                    <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('doubleLayer')}</Text>
+                  </Pressable>
+                </Animated.View>
+                <Animated.View
+                  {...panL3.panHandlers}
+                  style={[
+                    styles.layerButtonWrap,
+                    { transform: [...dragL3.getTranslateTransform(), { scale: scaleL3 }], zIndex: isDraggingL3 ? 100 : 1 },
+                  ]}
+                >
+                  <Pressable style={[styles.layerBtn, layer === 3 && styles.layerBtnActive3]} onPress={() => handleLayerPress(3)}>
+                    <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F\uD83E\uDE9F\uD83E\uDE9F'}</Text>
+                    <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('tripleLayer')}</Text>
+                  </Pressable>
+                </Animated.View>
+              </>
+            ) : (
+              <>
+                <Pressable style={[styles.layerBtn, layer === 1 && styles.layerBtnActive]} onPress={() => handleLayerPress(1)}>
+                  <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F'}</Text>
+                  <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('singleLayer')}</Text>
+                </Pressable>
+                <Pressable style={[styles.layerBtn, layer === 2 && styles.layerBtnActive2]} onPress={() => handleLayerPress(2)}>
+                  <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F\uD83E\uDE9F'}</Text>
+                  <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('doubleLayer')}</Text>
+                </Pressable>
+                <Pressable style={[styles.layerBtn, layer === 3 && styles.layerBtnActive3]} onPress={() => handleLayerPress(3)}>
+                  <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F\uD83E\uDE9F\uD83E\uDE9F'}</Text>
+                  <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('tripleLayer')}</Text>
+                </Pressable>
+              </>
+            )}
+          </View>
+        </View>
+        <View ref={sceneRef} style={styles.scene} collapsable={false}>
         <LinearGradient colors={['#81D4FA', '#B3E5FC', '#E8F5E9']} locations={[0, 0.55, 1]} style={StyleSheet.absoluteFill} />
 
         {/* Clouds */}
@@ -882,69 +948,6 @@ export default function WindowsGameScreen() {
           </View>
         )}
       </View>
-
-      {/* ===== BOTTOM: same 3 layer buttons; on level 2 they are draggable too ===== */}
-      <View style={styles.controls}>
-        {!isPracticeLevel && (
-          <Text style={[styles.helper, lang === 'ur' && styles.rtl]}>{t('chooseWindow')}</Text>
-        )}
-        <View style={styles.layerButtons}>
-          {isPracticeLevel ? (
-            <>
-              <Animated.View
-                {...panL1.panHandlers}
-                style={[
-                  styles.layerButtonWrap,
-                  { transform: [...dragL1.getTranslateTransform(), { scale: scaleL1 }], zIndex: isDraggingL1 ? 100 : 1 },
-                ]}
-              >
-                <Pressable style={[styles.layerBtn, layer === 1 && styles.layerBtnActive]} onPress={() => handleLayerPress(1)}>
-                  <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F'}</Text>
-                  <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('singleLayer')}</Text>
-                </Pressable>
-              </Animated.View>
-              <Animated.View
-                {...panL2.panHandlers}
-                style={[
-                  styles.layerButtonWrap,
-                  { transform: [...dragL2.getTranslateTransform(), { scale: scaleL2 }], zIndex: isDraggingL2 ? 100 : 1 },
-                ]}
-              >
-                <Pressable style={[styles.layerBtn, layer === 2 && styles.layerBtnActive2]} onPress={() => handleLayerPress(2)}>
-                  <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F\uD83E\uDE9F'}</Text>
-                  <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('doubleLayer')}</Text>
-                </Pressable>
-              </Animated.View>
-              <Animated.View
-                {...panL3.panHandlers}
-                style={[
-                  styles.layerButtonWrap,
-                  { transform: [...dragL3.getTranslateTransform(), { scale: scaleL3 }], zIndex: isDraggingL3 ? 100 : 1 },
-                ]}
-              >
-                <Pressable style={[styles.layerBtn, layer === 3 && styles.layerBtnActive3]} onPress={() => handleLayerPress(3)}>
-                  <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F\uD83E\uDE9F\uD83E\uDE9F'}</Text>
-                  <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('tripleLayer')}</Text>
-                </Pressable>
-              </Animated.View>
-            </>
-          ) : (
-            <>
-              <Pressable style={[styles.layerBtn, layer === 1 && styles.layerBtnActive]} onPress={() => handleLayerPress(1)}>
-                <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F'}</Text>
-                <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('singleLayer')}</Text>
-              </Pressable>
-              <Pressable style={[styles.layerBtn, layer === 2 && styles.layerBtnActive2]} onPress={() => handleLayerPress(2)}>
-                <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F\uD83E\uDE9F'}</Text>
-                <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('doubleLayer')}</Text>
-              </Pressable>
-              <Pressable style={[styles.layerBtn, layer === 3 && styles.layerBtnActive3]} onPress={() => handleLayerPress(3)}>
-                <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F\uD83E\uDE9F\uD83E\uDE9F'}</Text>
-                <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('tripleLayer')}</Text>
-              </Pressable>
-            </>
-          )}
-        </View>
       </View>
 
       {/* Try Again modal (practice level: wrong layer chosen) */}
@@ -964,6 +967,27 @@ export default function WindowsGameScreen() {
               onPress={() => setShowTryAgainModal(false)}
               color={GameColors.sun}
               textColor={GameColors.primaryDark}
+              size="md"
+            />
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      {/* Drag & drop hint (info icon) */}
+      <Modal
+        visible={showDragHintModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowDragHintModal(false)}
+      >
+        <Pressable style={styles.modalOverlay} onPress={() => setShowDragHintModal(false)}>
+          <Pressable style={styles.modalCard} onPress={(e) => e.stopPropagation()}>
+            <Text style={[styles.modalMessage, lang === 'ur' && styles.rtl]}>{t('dragDropHint')}</Text>
+            <GameButton
+              title={t('back')}
+              onPress={() => setShowDragHintModal(false)}
+              color={GameColors.primary}
+              textColor="#fff"
               size="md"
             />
           </Pressable>
@@ -1188,6 +1212,15 @@ const styles = StyleSheet.create({
   backTxt: { fontSize: 20, color: '#fff', fontWeight: '700' },
   headerTitle: { fontFamily: Fonts.rounded, fontSize: FontSizes.lg, fontWeight: '900', color: '#fff' },
   headerSub: { fontFamily: Fonts.rounded, fontSize: FontSizes.sm, color: 'rgba(255,255,255,0.8)', fontWeight: '600' },
+  infoBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  infoIcon: { fontSize: 20, color: '#fff', fontWeight: '700' },
 
   // Scene
   scene: { flex: 1, position: 'relative', overflow: 'hidden' },
@@ -1548,15 +1581,17 @@ const styles = StyleSheet.create({
     zIndex: 20,
   },
 
-  // Bottom controls
-  controls: {
-    minHeight: CTRL_H,
-    flexDirection: 'row',
+  // Left column for drag items (thermometer stays right in scene)
+  mainRow: { flex: 1, flexDirection: 'row' },
+  leftDragColumn: {
+    width: 100,
+    justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: Spacing.xl,
-    gap: Spacing.lg,
-    backgroundColor: 'rgba(0,77,64,0.90)',
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.sm,
+    gap: Spacing.sm,
   },
+  layerButtonsColumn: { flexDirection: 'column', gap: 8, alignItems: 'center' },
   windowDropZone: {
     position: 'absolute',
     alignItems: 'center',

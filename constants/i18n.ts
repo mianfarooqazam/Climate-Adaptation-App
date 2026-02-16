@@ -184,6 +184,12 @@ const translations = {
   badges: { en: 'Badges', ur: '\u0628\u06CC\u062C\u0632' },
   resetProgress: { en: 'Reset Progress', ur: '\u062A\u0631\u0642\u06CC \u0631\u06CC\u0633\u06CC\u0679 \u06A9\u0631\u06CC\u06BA' },
 
+  // ---- Drag & drop hint (info icon) ----
+  dragDropHint: {
+    en: 'Drag the suitable item from the left to the correct spot.',
+    ur: '\u0628\u0627\u0626\u06CC\u06BA \u0633\u06D2 \u0645\u0646\u0627\u0633\u0628 \u0622\u0626\u06CC\u0679\u0645 \u06A9\u0648 \u0635\u062D\u06CC\u062D \u062C\u06AF\u06C1 \u067E\u0631 \u06A9\u06BE\u06CC\u0646\u0686\u06CC\u06BA\u06D4',
+  },
+
   // ---- Common ----
   back: { en: 'Back', ur: '\u0648\u0627\u067E\u0633' },
   goBack: { en: 'Go Back', ur: '\u0648\u0627\u067E\u0633 \u062C\u0627\u0626\u06CC\u06BA' },

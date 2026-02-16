@@ -13,6 +13,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Dimensions,
+  Modal,
   PanResponder,
   Pressable,
   StyleSheet,
@@ -66,6 +67,7 @@ export default function LandscapingGameScreen() {
   const isLevel2 = levelId === 'w6-l2';
 
   const [treePlaced, setTreePlaced] = useState(false);
+  const [showDragHintModal, setShowDragHintModal] = useState(false);
   const dragTree = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
   const scaleTree = useRef(new Animated.Value(1)).current;
   const [isDraggingTree, setIsDraggingTree] = useState(false);
@@ -194,6 +196,9 @@ export default function LandscapingGameScreen() {
         </Text>
         <View style={{ flex: 1 }} />
         <LanguageToggle />
+        <Pressable onPress={() => setShowDragHintModal(true)} style={styles.infoBtn} hitSlop={8}>
+          <Text style={styles.infoIcon}>{'\u2139'}</Text>
+        </Pressable>
       </View>
 
       <View style={[styles.scene, { height: SCENE_H }]}>
@@ -245,6 +250,15 @@ export default function LandscapingGameScreen() {
           </Animated.View>
         </View>
       )}
+
+      <Modal visible={showDragHintModal} transparent animationType="fade" onRequestClose={() => setShowDragHintModal(false)}>
+        <Pressable style={styles.dragHintOverlay} onPress={() => setShowDragHintModal(false)}>
+          <Pressable style={styles.dragHintCard} onPress={(e) => e.stopPropagation()}>
+            <Text style={[styles.dragHintText, lang === 'ur' && styles.rtl]}>{t('dragDropHint')}</Text>
+            <GameButton title={t('back')} onPress={() => setShowDragHintModal(false)} color={GameColors.primary} textColor="#fff" size="md" />
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -268,6 +282,11 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: 'center',
   },
+  infoBtn: { width: 32, height: 32, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.25)', alignItems: 'center', justifyContent: 'center' },
+  infoIcon: { fontSize: 20, color: '#fff', fontWeight: '700' },
+  dragHintOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 24 },
+  dragHintCard: { backgroundColor: '#fff', borderRadius: 16, padding: 24, maxWidth: 340, alignItems: 'center', gap: 16 },
+  dragHintText: { fontFamily: Fonts.rounded, fontSize: FontSizes.md, color: GameColors.textPrimary, textAlign: 'center', lineHeight: 22 },
   scene: { flex: 1, position: 'relative', overflow: 'hidden' },
   column: { position: 'absolute', left: 0, top: 0, bottom: 0 },
   ground: { position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 2 },

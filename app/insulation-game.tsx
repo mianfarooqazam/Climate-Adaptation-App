@@ -17,8 +17,10 @@ import {
   Animated,
   Easing,
   Dimensions,
+  Image,
   PanResponder,
   Pressable,
+  Modal,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -51,9 +53,9 @@ import {
 
 const { width: SCR_W, height: SCR_H } = Dimensions.get('window');
 const HEADER_H = 48;
-const TRAY_H = 90;
+const TRAY_H = 90; // kept for unused tray style reference
 const SCENE_W = SCR_W;
-const SCENE_H = SCR_H - HEADER_H - TRAY_H;
+const SCENE_H = SCR_H - HEADER_H;
 
 const THERMO_W = 80;
 
@@ -252,6 +254,7 @@ export default function InsulationGameScreen() {
   );
   const [insulatedZones, setInsulatedZones] = useState<Record<string, InsulationMaterial>>({});
   const [finished, setFinished] = useState(false);
+  const [showDragHintModal, setShowDragHintModal] = useState(false);
 
   const startTemp = config?.startTemp ?? 38;
   const currentTemp = useMemo(() => {
@@ -442,10 +445,67 @@ export default function InsulationGameScreen() {
           {Object.keys(insulatedZones).length}/{config.activeZones.length} {t('insulated')}
         </Text>
         <LanguageToggle />
+        <Pressable onPress={() => setShowDragHintModal(true)} style={styles.infoBtn} hitSlop={8}>
+          <Text style={styles.infoIcon}>{'\u2139'}</Text>
+        </Pressable>
       </View>
 
-      {/* ===== SCENE ===== */}
-      <View ref={sceneRef} style={styles.scene} collapsable={false}>
+      {/* ===== LEFT: drag items | CENTER/RIGHT: scene + thermometer ===== */}
+      <View style={styles.mainRow}>
+        <View style={styles.leftDragColumn}>
+          {remaining > 0 && selectedMaterial ? (
+            <>
+              <Text style={styles.trayLabel}>
+                {t('dragInsulation')} {'\u2191'}
+              </Text>
+              {activeSet.has('roof') && !insulatedZones['roof'] && (
+                <Animated.View
+                  {...roofPanResponder.panHandlers}
+                  style={[
+                    styles.dragItem,
+                    {
+                      transform: [...dragRoof.getTranslateTransform(), { scale: dragRoofScale }],
+                      zIndex: isDraggingRoof ? 100 : 10,
+                    },
+                  ]}
+                >
+                  <View style={styles.dragImageWrap}>
+                    <Image
+                      source={require('@/assets/images/insulation.jpeg')}
+                      style={styles.dragInsulationImage}
+                      resizeMode="cover"
+                    />
+                  </View>
+                </Animated.View>
+              )}
+              {activeSet.has('right-wall') && !insulatedZones['right-wall'] && (
+                <Animated.View
+                  {...wallPanResponder.panHandlers}
+                  style={[
+                    styles.dragItem,
+                    {
+                      transform: [...dragWall.getTranslateTransform(), { scale: dragWallScale }],
+                      zIndex: isDraggingWall ? 100 : 10,
+                    },
+                  ]}
+                >
+                  <View style={styles.dragImageWrap}>
+                    <Image
+                      source={require('@/assets/images/insulation.jpeg')}
+                      style={styles.dragInsulationImage}
+                      resizeMode="cover"
+                    />
+                  </View>
+                </Animated.View>
+              )}
+            </>
+          ) : !allDone ? (
+            <Text style={styles.trayLabel}>Select a material to begin</Text>
+          ) : (
+            <Text style={styles.trayLabel}>{t('allInsulated')}</Text>
+          )}
+        </View>
+        <View ref={sceneRef} style={styles.scene} collapsable={false}>
         <LinearGradient colors={['#81D4FA', '#B3E5FC', '#E8F5E9']} locations={[0, 0.55, 1]} style={StyleSheet.absoluteFill} />
 
         {/* Clouds */}
@@ -655,64 +715,16 @@ export default function InsulationGameScreen() {
         {/* Flash */}
         <Animated.View style={[styles.flash, { opacity: shieldFlash }]} pointerEvents="none" />
       </View>
-
-      {/* ===== DRAG TRAY ===== */}
-      <View style={styles.tray}>
-        {remaining > 0 && selectedMaterial ? (
-          <>
-            <Text style={styles.trayLabel}>
-              {t('dragInsulation')} {'\u2191'}
-            </Text>
-
-            {/* One draggable brick per active zone that is not yet insulated */}
-            {activeSet.has('roof') && !insulatedZones['roof'] && (
-              <Animated.View
-                {...roofPanResponder.panHandlers}
-                style={[
-                  styles.dragItem,
-                  {
-                    transform: [...dragRoof.getTranslateTransform(), { scale: dragRoofScale }],
-                    zIndex: isDraggingRoof ? 100 : 10,
-                  },
-                ]}
-              >
-                <View style={[styles.dragBrick, styles.dragBrickRoof]}>
-                  <View style={styles.dragBrickInner}>
-                    {Array.from({ length: 3 }).map((_, i) => (
-                      <View key={i} style={styles.dragStrip} />
-                    ))}
-                  </View>
-                </View>
-              </Animated.View>
-            )}
-
-            {activeSet.has('right-wall') && !insulatedZones['right-wall'] && (
-              <Animated.View
-                {...wallPanResponder.panHandlers}
-                style={[
-                  styles.dragItem,
-                  {
-                    transform: [...dragWall.getTranslateTransform(), { scale: dragWallScale }],
-                    zIndex: isDraggingWall ? 100 : 10,
-                  },
-                ]}
-              >
-                <View style={[styles.dragBrick, styles.dragBrickWall]}>
-                  <View style={styles.dragBrickInner}>
-                    {Array.from({ length: 3 }).map((_, i) => (
-                      <View key={i} style={[styles.dragStrip, { backgroundColor: '#FF8A65' }]} />
-                    ))}
-                  </View>
-                </View>
-              </Animated.View>
-            )}
-          </>
-        ) : !allDone ? (
-          <Text style={styles.trayLabel}>Select a material to begin</Text>
-        ) : (
-          <Text style={styles.trayLabel}>{t('allInsulated')}</Text>
-        )}
       </View>
+
+      <Modal visible={showDragHintModal} transparent animationType="fade" onRequestClose={() => setShowDragHintModal(false)}>
+        <Pressable style={styles.dragHintOverlay} onPress={() => setShowDragHintModal(false)}>
+          <Pressable style={styles.dragHintCard} onPress={(e) => e.stopPropagation()}>
+            <Text style={styles.dragHintText}>{t('dragDropHint')}</Text>
+            <GameButton title={t('back')} onPress={() => setShowDragHintModal(false)} color="#E65100" textColor="#fff" size="md" />
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -723,6 +735,9 @@ export default function InsulationGameScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  dragHintOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 24 },
+  dragHintCard: { backgroundColor: '#fff', borderRadius: 16, padding: 24, maxWidth: 340, alignItems: 'center', gap: 16 },
+  dragHintText: { fontFamily: Fonts.rounded, fontSize: FontSizes.md, color: GameColors.textPrimary, textAlign: 'center', lineHeight: 22 },
 
   // Header
   header: {
@@ -738,7 +753,18 @@ const styles = StyleSheet.create({
   backTxt: { fontSize: 20, color: '#fff', fontWeight: '700' },
   headerTitle: { fontFamily: Fonts.rounded, fontSize: FontSizes.lg, fontWeight: '900', color: '#fff' },
   headerSub: { fontFamily: Fonts.rounded, fontSize: FontSizes.sm, color: 'rgba(255,255,255,0.8)', fontWeight: '600' },
+  infoBtn: { width: 32, height: 32, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.25)', alignItems: 'center', justifyContent: 'center' },
+  infoIcon: { fontSize: 20, color: '#fff', fontWeight: '700' },
 
+  mainRow: { flex: 1, flexDirection: 'row' },
+  leftDragColumn: {
+    width: 88,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.sm,
+    gap: Spacing.md,
+  },
   // Scene
   scene: { flex: 1, position: 'relative', overflow: 'hidden' },
 
@@ -1034,22 +1060,17 @@ const styles = StyleSheet.create({
   },
   trayLabel: { fontFamily: Fonts.rounded, fontSize: FontSizes.md, fontWeight: '700', color: '#FFE0B2' },
   dragItem: { alignItems: 'center', gap: 4 },
-  dragBrick: {
-    width: 64, height: 50, backgroundColor: '#FFB74D',
-    borderRadius: 8, borderWidth: 2, borderColor: '#F57C00',
-    overflow: 'hidden', ...Shadow.md,
+  dragImageWrap: {
+    width: 72,
+    height: 56,
+    borderRadius: 8,
+    overflow: 'hidden',
+    ...Shadow.md,
   },
-  dragBrickRoof: {
-    backgroundColor: '#FFB74D',
-    borderColor: '#F57C00',
+  dragInsulationImage: {
+    width: '100%',
+    height: '100%',
   },
-  dragBrickWall: {
-    backgroundColor: '#FFAB91',
-    borderColor: '#E64A19',
-  },
-  dragBrickInner: { flex: 1, justifyContent: 'center', gap: 3, padding: 6 },
-  dragStrip: { height: 6, backgroundColor: '#FFA726', borderRadius: 2 },
-  dragLabel: { fontFamily: Fonts.rounded, fontSize: 11, fontWeight: '800', color: '#FFE0B2' },
 
   // Error
   errorContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: Spacing.lg },

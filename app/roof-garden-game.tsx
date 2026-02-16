@@ -12,6 +12,7 @@ import {
   Animated,
   Dimensions,
   Easing,
+  Modal,
   PanResponder,
   Pressable,
   StyleSheet,
@@ -38,8 +39,7 @@ import { useLanguage } from '@/context/LanguageContext';
 
 const { width: SCR_W, height: SCR_H } = Dimensions.get('window');
 const HEADER_H = 48;
-const CTRL_H = 100;
-const SCENE_H = SCR_H - HEADER_H - CTRL_H;
+const SCENE_H = SCR_H - HEADER_H;
 const SIDE_D = 50;
 
 // Symmetric horizontal padding so house is centered
@@ -373,6 +373,7 @@ export default function RoofGardenGameScreen() {
   }, [runDropWithMeasure]);
 
   const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [showDragHintModal, setShowDragHintModal] = useState(false);
   const dragXY = useRef<Record<string, Animated.ValueXY>>({});
   const scaleVal = useRef<Record<string, Animated.Value>>({});
   PLANTS.forEach((p) => {
@@ -422,9 +423,39 @@ export default function RoofGardenGameScreen() {
         <Text style={[styles.headerTitle, lang === 'ur' && styles.rtl]}>{t('roofGardenLevelTitle')}</Text>
         <View style={{ flex: 1 }} />
         <LanguageToggle />
+        <Pressable onPress={() => setShowDragHintModal(true)} style={styles.infoBtn} hitSlop={8}>
+          <Text style={styles.infoIcon}>{'\u2139'}</Text>
+        </Pressable>
       </View>
 
-      <View ref={sceneRef} style={styles.scene} collapsable={false}>
+      <View style={styles.mainRow}>
+        <View style={styles.leftDragColumn}>
+          <Text style={[styles.helper, lang === 'ur' && styles.rtl]}>{t('dragPlantsToRoof')}</Text>
+          <View style={styles.plantButtonsColumn}>
+            {PLANTS.map((plant) => (
+              <Animated.View
+                key={plant.id}
+                {...panResponders[plant.id].panHandlers}
+                style={[
+                  styles.plantButtonWrap,
+                  {
+                    transform: [
+                      ...dragXY.current[plant.id].getTranslateTransform(),
+                      { scale: scaleVal.current[plant.id] },
+                    ],
+                    zIndex: draggingId === plant.id ? 100 : 1,
+                  },
+                ]}
+              >
+                <View style={styles.plantBtn}>
+                  <Text style={styles.plantBtnEmoji}>{plant.emoji}</Text>
+                  <Text style={[styles.plantBtnText, lang === 'ur' && styles.rtl]}>{t(plant.labelKey)}</Text>
+                </View>
+              </Animated.View>
+            ))}
+          </View>
+        </View>
+        <View ref={sceneRef} style={styles.scene} collapsable={false}>
         <LinearGradient colors={['#81D4FA', '#B3E5FC', '#E8F5E9']} locations={[0, 0.55, 1]} style={StyleSheet.absoluteFill} />
 
         <Animated.View style={{ transform: [{ translateX: cloudX }] }}>
@@ -590,33 +621,18 @@ export default function RoofGardenGameScreen() {
           </View>
         )}
       </View>
-
-      <View style={styles.controls}>
-        <Text style={[styles.helper, lang === 'ur' && styles.rtl]}>{t('dragPlantsToRoof')}</Text>
-        <View style={styles.plantButtons}>
-          {PLANTS.map((plant) => (
-            <Animated.View
-              key={plant.id}
-              {...panResponders[plant.id].panHandlers}
-              style={[
-                styles.plantButtonWrap,
-                {
-                  transform: [
-                    ...dragXY.current[plant.id].getTranslateTransform(),
-                    { scale: scaleVal.current[plant.id] },
-                  ],
-                  zIndex: draggingId === plant.id ? 100 : 1,
-                },
-              ]}
-            >
-              <View style={styles.plantBtn}>
-                <Text style={styles.plantBtnEmoji}>{plant.emoji}</Text>
-                <Text style={[styles.plantBtnText, lang === 'ur' && styles.rtl]}>{t(plant.labelKey)}</Text>
-              </View>
-            </Animated.View>
-          ))}
-        </View>
       </View>
+
+      <Modal visible={showDragHintModal} transparent animationType="fade" onRequestClose={() => setShowDragHintModal(false)}>
+        <Pressable style={styles.dragHintOverlay} onPress={() => setShowDragHintModal(false)}>
+          <Pressable style={styles.dragHintCard} onPress={(e) => e.stopPropagation()}>
+            <Text style={[styles.dragHintText, lang === 'ur' && styles.rtl]}>{t('dragDropHint')}</Text>
+            <Pressable style={styles.dragHintBtn} onPress={() => setShowDragHintModal(false)}>
+              <Text style={styles.dragHintBtnText}>{t('back')}</Text>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -628,6 +644,11 @@ export default function RoofGardenGameScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   rtl: { writingDirection: 'rtl' },
+  dragHintOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 24 },
+  dragHintCard: { backgroundColor: '#fff', borderRadius: 16, padding: 24, maxWidth: 340, alignItems: 'center', gap: 16 },
+  dragHintText: { fontFamily: Fonts.rounded, fontSize: FontSizes.md, color: GameColors.textPrimary, textAlign: 'center', lineHeight: 22 },
+  dragHintBtn: { backgroundColor: GameColors.primary, paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg, borderRadius: 12 },
+  dragHintBtnText: { fontFamily: Fonts.rounded, fontSize: FontSizes.md, fontWeight: '700', color: '#fff' },
 
   header: {
     flexDirection: 'row',
@@ -647,7 +668,19 @@ const styles = StyleSheet.create({
   },
   backTxt: { fontSize: 20, color: '#fff', fontWeight: '700' },
   headerTitle: { fontFamily: Fonts.rounded, fontSize: FontSizes.lg, fontWeight: '900', color: '#fff' },
+  infoBtn: { width: 32, height: 32, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.25)', alignItems: 'center', justifyContent: 'center' },
+  infoIcon: { fontSize: 20, color: '#fff', fontWeight: '700' },
 
+  mainRow: { flex: 1, flexDirection: 'row' },
+  leftDragColumn: {
+    width: 100,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.sm,
+    gap: Spacing.sm,
+  },
+  plantButtonsColumn: { flexDirection: 'column', gap: 12, alignItems: 'center' },
   scene: { flex: 1, position: 'relative', overflow: 'hidden' },
 
   sun: {
@@ -942,14 +975,6 @@ const styles = StyleSheet.create({
     borderStyle: 'dashed',
   },
 
-  controls: {
-    minHeight: CTRL_H,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.xl,
-    gap: Spacing.lg,
-    backgroundColor: 'rgba(46,125,50,0.90)',
-  },
   helper: {
     fontFamily: Fonts.rounded,
     fontWeight: '700',
