@@ -204,7 +204,18 @@ export default function RoofGardenGameScreen() {
 
   const level = getLevelById(levelId ?? 'w8-l1');
   const [plantOnRoof, setPlantOnRoof] = useState(false);
+  const [placedPlantEmoji, setPlacedPlantEmoji] = useState<string | null>(null);
+  const completeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const sceneRef = useRef<View>(null);
+
+  useEffect(() => () => {
+    if (completeTimeoutRef.current) clearTimeout(completeTimeoutRef.current);
+  }, []);
+
+  // When 1 plant is dropped, show that one + 3 more on roof (4 total)
+  const plantsOnRoofEmojis = placedPlantEmoji
+    ? [placedPlantEmoji, ...PLANTS.map((p) => p.emoji).slice(0, 3)]
+    : [];
 
   const moodVal = coolMood(t);
 
@@ -240,20 +251,18 @@ export default function RoofGardenGameScreen() {
 
   const finishLevel = useCallback(() => {
     completeLevel(level?.id ?? 'w8-l1', 30, 30);
-    setTimeout(() => {
-      router.replace({
-        pathname: '/level-complete',
-        params: {
-          levelId: level?.id ?? 'w8-l1',
-          stars: '3',
-          score: '30',
-          maxScore: '30',
-        },
-      });
-    }, 800);
+    router.replace({
+      pathname: '/level-complete',
+      params: {
+        levelId: level?.id ?? 'w8-l1',
+        stars: '3',
+        score: '30',
+        maxScore: '30',
+      },
+    });
   }, [completeLevel, level?.id, router]);
 
-  const tryDropOnRoof = useCallback((moveX: number, moveY: number, sceneX?: number, sceneY?: number) => {
+  const tryDropOnRoof = useCallback((moveX: number, moveY: number, plantId: string, sceneX?: number, sceneY?: number) => {
     const left = sceneX !== undefined && sceneY !== undefined ? sceneX + ROOF_DROP_LEFT : ROOF_DROP_LEFT;
     const top = sceneX !== undefined && sceneY !== undefined ? sceneY + ROOF_DROP_TOP : ROOF_DROP_TOP;
     if (
@@ -263,8 +272,16 @@ export default function RoofGardenGameScreen() {
       moveY <= top + ROOF_DROP_HEIGHT &&
       !plantOnRoof
     ) {
-      setPlantOnRoof(true);
-      finishLevel();
+      const plant = PLANTS.find((p) => p.id === plantId);
+      if (plant) {
+        setPlacedPlantEmoji(plant.emoji);
+        setPlantOnRoof(true);
+        if (completeTimeoutRef.current) clearTimeout(completeTimeoutRef.current);
+        completeTimeoutRef.current = setTimeout(() => {
+          completeTimeoutRef.current = null;
+          finishLevel();
+        }, 3000);
+      }
     }
   }, [plantOnRoof, finishLevel]);
 
@@ -273,9 +290,9 @@ export default function RoofGardenGameScreen() {
     tryDropRef.current = tryDropOnRoof;
   }, [tryDropOnRoof]);
 
-  const runDropWithMeasure = useCallback((moveX: number, moveY: number) => {
+  const runDropWithMeasure = useCallback((moveX: number, moveY: number, plantId: string) => {
     (sceneRef.current as any)?.measureInWindow?.((sx: number, sy: number) => {
-      tryDropRef.current(moveX, moveY, sx, sy);
+      tryDropRef.current(moveX, moveY, plantId, sx, sy);
     });
   }, []);
 
@@ -313,7 +330,7 @@ export default function RoofGardenGameScreen() {
         const s = scaleVal.current[plantId];
         d.flattenOffset();
         Animated.spring(s, { toValue: 1, useNativeDriver: true }).start();
-        runDropRef.current(g.moveX, g.moveY);
+        runDropRef.current(g.moveX, g.moveY, plantId);
         Animated.spring(d, { toValue: { x: 0, y: 0 }, useNativeDriver: true }).start();
       },
     }),
@@ -398,6 +415,14 @@ export default function RoofGardenGameScreen() {
               />
             ))}
             <View style={styles.roofShadow} />
+            {/* Plants on roof: dropped plant + 3 more (4 total) */}
+            {plantOnRoof && plantsOnRoofEmojis.length > 0 && (
+              <View style={styles.plantsOnRoofWrap} pointerEvents="none">
+                {plantsOnRoofEmojis.map((emoji, i) => (
+                  <Text key={i} style={styles.plantOnRoofEmoji}>{emoji}</Text>
+                ))}
+              </View>
+            )}
           </View>
 
           <View style={styles.frontWalls}>
@@ -650,6 +675,19 @@ const styles = StyleSheet.create({
     right: ROOF_OVERHANG / 2,
     height: 4,
     backgroundColor: 'rgba(0,0,0,0.08)',
+  },
+  plantsOnRoofWrap: {
+    position: 'absolute',
+    top: ROOF_H / 2 - 22,
+    left: 8,
+    right: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    zIndex: 4,
+  },
+  plantOnRoofEmoji: {
+    fontSize: 36,
   },
   frontWalls: {
     position: 'absolute',
