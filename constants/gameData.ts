@@ -128,8 +128,20 @@ export const WORLDS: World[] = [
     starsToUnlock: 6,
   },
   {
-    id: 'w7',
+    id: 'w8',
     order: 3,
+    title: 'Roof Garden',
+    subtitle: 'Plants on the Roof',
+    emoji: '\u{1F33B}', // 🌻
+    color: '#2E7D32',
+    gradientEnd: '#66BB6A',
+    description:
+      'Green roofs keep buildings cooler and help nature. Drag plants onto the roof to create your roof garden.',
+    starsToUnlock: 6,
+  },
+  {
+    id: 'w7',
+    order: 4,
     title: 'Build your home',
     subtitle: 'Explore in 3D',
     emoji: '\u{1F3D7}', // 🏗
@@ -138,18 +150,6 @@ export const WORLDS: World[] = [
     description:
       'Walk around in a 3D world. Use the joystick to move your character and explore your home.',
     starsToUnlock: 12,
-  },
-  {
-    id: 'w8',
-    order: 4,
-    title: 'Roof Garden',
-    subtitle: 'Plants on the Roof',
-    emoji: '\u{1F33B}', // 🌻
-    color: '#2E7D32',
-    gradientEnd: '#66BB6A',
-    description:
-      'Green roofs keep buildings cooler and help nature. Drag plants onto the roof to create your roof garden.',
-    starsToUnlock: 18,
   },
 ];
 

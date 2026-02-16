@@ -42,9 +42,12 @@ const CTRL_H = 100;
 const SCENE_H = SCR_H - HEADER_H - CTRL_H;
 const SIDE_D = 50;
 
-const H_W = Math.min((SCR_W - 60 - SIDE_D) * 0.46, 360);
+// Symmetric horizontal padding so house is centered
+const PAD_H = 24;
+const AVAIL_W = SCR_W - PAD_H * 2;
+const H_W = Math.min((AVAIL_W - SIDE_D) * 0.46, 360);
 const H_H = Math.min(SCENE_H * 0.6, 320);
-const H_LEFT = (SCR_W - H_W - SIDE_D) / 2;
+const H_LEFT = Math.round(PAD_H + (AVAIL_W - H_W - SIDE_D) / 2);
 const H_TOP = SCENE_H * 0.26;
 
 const ROOF_H = 70;
@@ -56,6 +59,44 @@ const ROOF_DROP_LEFT = H_LEFT;
 const ROOF_DROP_TOP = H_TOP;
 const ROOF_DROP_WIDTH = H_W + ROOF_OVERHANG;
 const ROOF_DROP_HEIGHT = ROOF_H;
+
+// Sun position (right side; sun view is right: 30, width 80 → center at SCR_W - 70)
+const SUN_CX = SCR_W - 70;
+const SUN_CY = 24;
+
+// ---------------------------------------------------------------------------
+// Ray geometry (sun rays to house — like windows/insulation worlds)
+// ---------------------------------------------------------------------------
+
+interface RayDef {
+  id: string;
+  startX: number;
+  startY: number;
+  endX: number;
+  endY: number;
+}
+
+function rayAngle(r: RayDef) {
+  return Math.atan2(r.endY - r.startY, r.endX - r.startX) * (180 / Math.PI);
+}
+function rayLength(r: RayDef) {
+  return Math.sqrt((r.endX - r.startX) ** 2 + (r.endY - r.startY) ** 2);
+}
+
+const PEOPLE_X = H_LEFT + H_W * 0.55;
+const PEOPLE_Y_TOP = H_TOP + ROOF_H + WALL_H * 0.25;
+const PEOPLE_Y_BOT = H_TOP + ROOF_H + WALL_H * 0.85;
+
+const RAYS: RayDef[] = [
+  { id: 'r1', startX: SUN_CX - 4, startY: SUN_CY + 20, endX: H_LEFT + H_W * 0.2, endY: H_TOP + 10 },
+  { id: 'r2', startX: SUN_CX, startY: SUN_CY + 24, endX: H_LEFT + H_W * 0.4, endY: H_TOP + 25 },
+  { id: 'r3', startX: SUN_CX + 3, startY: SUN_CY + 28, endX: H_LEFT + H_W * 0.6, endY: H_TOP + 35 },
+  { id: 'r4', startX: SUN_CX + 6, startY: SUN_CY + 32, endX: PEOPLE_X, endY: PEOPLE_Y_TOP + 60 },
+  { id: 'r5', startX: SUN_CX - 2, startY: SUN_CY + 36, endX: PEOPLE_X + 20, endY: PEOPLE_Y_TOP + 80 },
+  { id: 'r6', startX: SUN_CX + 4, startY: SUN_CY + 40, endX: PEOPLE_X + 50, endY: PEOPLE_Y_BOT - 30 },
+  { id: 'r7', startX: SUN_CX + 8, startY: SUN_CY + 44, endX: PEOPLE_X + 5, endY: PEOPLE_Y_BOT - 10 },
+  { id: 'r8', startX: SUN_CX + 10, startY: SUN_CY + 48, endX: PEOPLE_X + 35, endY: PEOPLE_Y_BOT },
+];
 
 // ---------------------------------------------------------------------------
 // Mood (nice & cool — same as windows 3-layer)
@@ -69,6 +110,18 @@ interface Mood {
   mouth: 'frown' | 'neutral' | 'smile' | 'grin';
   sweat: boolean;
   eyeStyle: 'squint' | 'normal' | 'happy';
+}
+
+function hotMood(tFn: (k: TranslationKey) => string): Mood {
+  return {
+    label: tFn('tooHot'),
+    bg: '#FFCDD2',
+    skin: '#FFAB91',
+    cheek: '#EF5350',
+    mouth: 'frown',
+    sweat: true,
+    eyeStyle: 'squint',
+  };
 }
 
 function coolMood(tFn: (k: TranslationKey) => string): Mood {
@@ -116,7 +169,12 @@ function CartoonPerson({ m, shirt, pants, hair, isChild, isFemale, hairBow }: Pe
       )}
       <View style={{ width: h(30), height: h(30), borderRadius: h(15), backgroundColor: m.skin, zIndex: 1, alignItems: 'center', justifyContent: 'center' }}>
         <View style={{ flexDirection: 'row', gap: h(8), marginTop: -h(2) }}>
-          {m.eyeStyle === 'happy' ? (
+          {m.eyeStyle === 'squint' ? (
+            <>
+              <View style={{ width: h(7), height: h(3), backgroundColor: '#5D4037', borderRadius: h(2) }} />
+              <View style={{ width: h(7), height: h(3), backgroundColor: '#5D4037', borderRadius: h(2) }} />
+            </>
+          ) : m.eyeStyle === 'happy' ? (
             <>
               <View style={{ width: h(7), height: h(4), borderTopWidth: h(2.5), borderColor: '#5D4037', borderTopLeftRadius: h(5), borderTopRightRadius: h(5), backgroundColor: 'transparent' }} />
               <View style={{ width: h(7), height: h(4), borderTopWidth: h(2.5), borderColor: '#5D4037', borderTopLeftRadius: h(5), borderTopRightRadius: h(5), backgroundColor: 'transparent' }} />
@@ -133,8 +191,19 @@ function CartoonPerson({ m, shirt, pants, hair, isChild, isFemale, hairBow }: Pe
           <View style={{ width: h(6), height: h(4), borderRadius: h(3), backgroundColor: m.cheek, opacity: 0.5 }} />
         </View>
         <View style={{ marginTop: h(1) }}>
-          <View style={{ width: h(12), height: h(7), backgroundColor: '#5D4037', borderBottomLeftRadius: h(6), borderBottomRightRadius: h(6) }} />
+          {m.mouth === 'frown' ? (
+            <View style={{ width: h(10), height: h(5), borderBottomWidth: h(2.5), borderColor: '#5D4037', borderBottomLeftRadius: h(6), borderBottomRightRadius: h(6), transform: [{ rotate: '180deg' }] }} />
+          ) : m.mouth === 'neutral' ? (
+            <View style={{ width: h(8), height: h(2.5), backgroundColor: '#5D4037', borderRadius: h(1) }} />
+          ) : m.mouth === 'smile' ? (
+            <View style={{ width: h(10), height: h(5), borderBottomWidth: h(2.5), borderColor: '#5D4037', borderBottomLeftRadius: h(6), borderBottomRightRadius: h(6) }} />
+          ) : (
+            <View style={{ width: h(12), height: h(7), backgroundColor: '#5D4037', borderBottomLeftRadius: h(6), borderBottomRightRadius: h(6) }} />
+          )}
         </View>
+        {m.sweat && (
+          <View style={{ position: 'absolute', right: -h(2), top: h(6), width: h(6), height: h(9), borderRadius: h(3), backgroundColor: '#64B5F6' }} />
+        )}
       </View>
       {isFemale ? (
         <>
@@ -213,11 +282,13 @@ export default function RoofGardenGameScreen() {
   }, []);
 
   // When 1 plant is dropped, show that one + 3 more on roof (4 total)
+  // Dropped plant + 5 more (6 total on roof)
   const plantsOnRoofEmojis = placedPlantEmoji
-    ? [placedPlantEmoji, ...PLANTS.map((p) => p.emoji).slice(0, 3)]
+    ? [placedPlantEmoji, ...PLANTS.map((p) => p.emoji), ...PLANTS.map((p) => p.emoji).slice(0, 2)]
     : [];
 
-  const moodVal = coolMood(t);
+  // Before plants on roof: "Too hot!" — after: "Nice and cool!"
+  const moodVal = plantOnRoof ? coolMood(t) : hotMood(t);
 
   const sunScale = useRef(new Animated.Value(1)).current;
   useEffect(() => {
@@ -280,7 +351,7 @@ export default function RoofGardenGameScreen() {
         completeTimeoutRef.current = setTimeout(() => {
           completeTimeoutRef.current = null;
           finishLevel();
-        }, 3000);
+        }, 2000);
       }
     }
   }, [plantOnRoof, finishLevel]);
@@ -373,6 +444,29 @@ export default function RoofGardenGameScreen() {
           <Text style={styles.sunLabelText}>{t('sunScorching')}</Text>
         </View>
 
+        {/* Sun rays to house (like other worlds) */}
+        {RAYS.map((r) => (
+          <View
+            key={r.id}
+            style={[
+              styles.ray,
+              {
+                left: r.startX,
+                top: r.startY - 4,
+                width: rayLength(r),
+                transform: [{ rotate: `${rayAngle(r)}deg` }],
+              },
+            ]}
+          >
+            <LinearGradient
+              colors={['rgba(255,210,0,0.75)', 'rgba(255,165,0,0.3)', 'rgba(255,120,0,0.06)']}
+              start={{ x: 0, y: 0.5 }}
+              end={{ x: 1, y: 0.5 }}
+              style={StyleSheet.absoluteFill}
+            />
+          </View>
+        ))}
+
         {/* ======= 3D HOUSE (same layout as windows world) ======= */}
         <View style={styles.houseWrap}>
           <View style={styles.groundShadow} />
@@ -453,7 +547,7 @@ export default function RoofGardenGameScreen() {
                 <CartoonPerson m={moodVal} shirt="#66BB6A" pants="#33691E" hair="#4E342E" isChild />
                 <CartoonPerson m={moodVal} shirt="#FFB74D" pants="#E91E63" hair="#5D4037" isChild isFemale hairBow="#FF4081" />
               </View>
-              <Text style={[styles.moodLabel, { color: '#1565C0' }]}>{moodVal.label}</Text>
+              <Text style={[styles.moodLabel, { color: plantOnRoof ? '#1565C0' : '#C62828' }]}>{moodVal.label}</Text>
             </View>
 
             <View style={styles.wallPanelR}>
@@ -582,11 +676,20 @@ const styles = StyleSheet.create({
   },
   sunLabelText: { fontSize: 16, fontWeight: '800', color: '#fff', textAlign: 'center' },
 
+  ray: {
+    position: 'absolute',
+    height: 9,
+    borderRadius: 5,
+    overflow: 'hidden',
+    transformOrigin: 'left center',
+    zIndex: 5,
+  },
+
   houseWrap: {
     position: 'absolute',
     left: H_LEFT,
     top: H_TOP,
-    width: H_W + SIDE_D + 10,
+    width: H_W + SIDE_D,
     height: H_H + 30,
     zIndex: 3,
   },

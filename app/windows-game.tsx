@@ -56,9 +56,11 @@ const THERMO_W = 80;
 const SIDE_D = 50;
 
 // House front-face dimensions (centered: house + side + thermo block)
-const H_W = Math.min((SCR_W - THERMO_W - 60 - SIDE_D) * 0.46, 360);
+const PAD_H = 24;
+const AVAIL_W = SCR_W - PAD_H * 2 - THERMO_W;
+const H_W = Math.min((AVAIL_W - SIDE_D) * 0.46, 360);
 const H_H = Math.min(SCENE_H * 0.6, 320);
-const H_LEFT = Math.round((SCR_W - THERMO_W - H_W - SIDE_D) / 2);
+const H_LEFT = Math.round(PAD_H + (AVAIL_W - H_W - SIDE_D) / 2);
 const H_TOP = SCENE_H * 0.26;
 
 const ROOF_H = 70;
