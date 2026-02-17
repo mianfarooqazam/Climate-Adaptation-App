@@ -509,7 +509,7 @@ export default function WindowsGameScreen() {
     makeWindowPanResponder(3, dragL3, scaleL3, setIsDraggingL3),
   ).current;
 
-  // Window glass color for the big side window — changes with layer count
+  // rglass color for the big side window — changes with layer count
   const windowGlass = displayLayer === 1 ? '#B3E5FC' : displayLayer === 2 ? '#81D4FA' : '#4DD0E1';
 
   // Moods for the three learn sections (1, 2, 3 layers)

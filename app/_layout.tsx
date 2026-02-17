@@ -24,6 +24,7 @@ export default function RootLayout() {
           }}
         >
           <Stack.Screen name="index" />
+          <Stack.Screen name="intro-conversation" />
           <Stack.Screen name="world-map" />
           <Stack.Screen name="levels" />
           <Stack.Screen name="quiz" />

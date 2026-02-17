@@ -178,7 +178,7 @@ export default function TitleScreen() {
           <GameButton
             title={t('play')}
             emoji={'\u{1F3AE}'}
-            onPress={() => router.push('/world-map')}
+            onPress={() => router.push('/intro-conversation')}
             size="lg"
             color={GameColors.sun}
             textColor={GameColors.primaryDark}
