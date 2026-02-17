@@ -17,6 +17,7 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import GameButton from '@/components/game/GameButton';
 import StarRating from '@/components/game/StarRating';
@@ -48,6 +49,7 @@ export default function LevelCompleteScreen() {
   }>();
   const { isLevelUnlocked } = useGame();
   const { t } = useLanguage();
+  const insets = useSafeAreaInsets();
 
   const level = getLevelById(levelId ?? '');
   const world = getWorldById(level?.worldId ?? '');
@@ -99,7 +101,7 @@ export default function LevelCompleteScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom, paddingLeft: insets.left, paddingRight: insets.right }]}>
       <LinearGradient
         colors={
           starCount >= 2
@@ -110,7 +112,7 @@ export default function LevelCompleteScreen() {
       />
 
       {/* Language toggle */}
-      <View style={styles.langToggle}>
+      <View style={[styles.langToggle, { top: insets.top + 16 }]}>
         <LanguageToggle />
       </View>
 

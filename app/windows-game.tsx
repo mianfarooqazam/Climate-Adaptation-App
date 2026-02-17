@@ -24,6 +24,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import GameButton from '@/components/game/GameButton';
 import LanguageToggle from '@/components/game/LanguageToggle';
@@ -323,6 +324,7 @@ export default function WindowsGameScreen() {
   const { levelId } = useLocalSearchParams<{ levelId: string }>();
   const { completeLevel } = useGame();
   const { t, lang } = useLanguage();
+  const insets = useSafeAreaInsets();
 
   const level = getLevelById(levelId ?? 'w5-l1');
   const isPracticeLevel = levelId === 'w5-l2';
@@ -522,7 +524,7 @@ export default function WindowsGameScreen() {
     return (
       <View style={[styles.root, { backgroundColor: '#fff' }]}>
         <View style={[StyleSheet.absoluteFill, { backgroundColor: '#fff' }]} />
-        <View style={styles.header}>
+        <View style={[styles.header, { paddingTop: insets.top, paddingLeft: insets.left + Spacing.md, paddingRight: insets.right + Spacing.md }]}>
           <Pressable onPress={() => router.back()} style={styles.backBtn}>
             <Text style={styles.backTxt}>{'\u2190'}</Text>
           </Pressable>
@@ -664,7 +666,7 @@ export default function WindowsGameScreen() {
       <LinearGradient colors={['#81D4FA', '#B3E5FC', '#E1F5FE']} style={StyleSheet.absoluteFill} />
 
       {/* ===== COMPACT HEADER ===== */}
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top, paddingLeft: insets.left + Spacing.md, paddingRight: insets.right + Spacing.md }]}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <Text style={styles.backTxt}>{'\u2190'}</Text>
         </Pressable>

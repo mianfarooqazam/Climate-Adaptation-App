@@ -16,10 +16,13 @@ import {
   Image,
   Modal,
   Pressable,
+  ScrollView,
+  useWindowDimensions,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import GameButton from '@/components/game/GameButton';
 import LanguageToggle from '@/components/game/LanguageToggle';
@@ -32,8 +35,6 @@ import {
   Fonts,
   Shadow,
 } from '@/constants/theme';
-
-const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 
 // Floating decorative elements
 function FloatingEmoji({
@@ -102,6 +103,8 @@ export default function TitleScreen() {
   const { totalStars, player } = useGame();
   const { t } = useLanguage();
   const [showCreditsModal, setShowCreditsModal] = useState(false);
+  const { width: SCREEN_W } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
 
   // Logo bounce animation
   const bounce = useRef(new Animated.Value(0)).current;
@@ -125,7 +128,7 @@ export default function TitleScreen() {
   }, []);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom, paddingLeft: insets.left + Spacing.lg, paddingRight: insets.right + Spacing.lg }]}>
       <LinearGradient
         colors={['#81C784', '#43A047', '#2E7D32']}
         style={StyleSheet.absoluteFill}
@@ -139,11 +142,16 @@ export default function TitleScreen() {
       <FloatingEmoji emoji={'\u{2601}'} delay={600} startX={SCREEN_W * 0.15} duration={5500} />
 
       {/* Language toggle (top-right) */}
-      <View style={styles.langToggle}>
+      <View style={[styles.langToggle, { top: insets.top + 14 }]}>
         <LanguageToggle />
       </View>
 
       {/* ---- Main row: Logo left | Buttons right ---- */}
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        bounces={false}
+      >
       <View style={styles.mainRow}>
         {/* Left side: branding */}
         <View style={styles.leftSide}>
@@ -202,6 +210,7 @@ export default function TitleScreen() {
           </Pressable>
         </View>
       </View>
+      </ScrollView>
 
       {/* Credits modal: GIZ logo when Credits is pressed */}
       <Modal
@@ -224,7 +233,7 @@ export default function TitleScreen() {
         </Pressable>
       </Modal>
 
-      <Text style={styles.footer}>
+      <Text style={[styles.footer, { bottom: insets.bottom + 14 }]}>
         {t('footer')}
       </Text>
 
@@ -238,7 +247,15 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: Spacing.lg,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: Spacing.lg,
+    maxWidth: 700,
+    width: '100%',
+    alignSelf: 'center',
   },
   floatingEmoji: {
     position: 'absolute',

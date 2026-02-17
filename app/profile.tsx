@@ -18,6 +18,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import BadgeView from '@/components/game/Badge';
 import GameButton from '@/components/game/GameButton';
@@ -40,6 +41,7 @@ export default function ProfileScreen() {
   const router = useRouter();
   const { player, totalStars, resetProgress } = useGame();
   const { t } = useLanguage();
+  const insets = useSafeAreaInsets();
 
   const completedLevels = Object.values(player.levelProgress).filter(
     (lp) => lp.completed,
@@ -79,7 +81,7 @@ export default function ProfileScreen() {
       />
 
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top, paddingLeft: insets.left + Spacing.md, paddingRight: insets.right + Spacing.md }]}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <Text style={styles.backText}>{'\u2190'}</Text>
         </Pressable>
@@ -88,7 +90,7 @@ export default function ProfileScreen() {
       </View>
 
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + Spacing.xl }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Avatar & Name */}

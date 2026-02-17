@@ -13,9 +13,9 @@ import {
   Pressable,
   StyleSheet,
   Animated,
-  Dimensions,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -37,7 +37,6 @@ import {
 } from '@/constants/theme';
 import { getWorldStars } from '@/utils/storage';
 
-const { width: SCREEN_W } = Dimensions.get('window');
 
 // ---------------------------------------------------------------------------
 // WorldCard
@@ -147,6 +146,7 @@ export default function WorldMapScreen() {
   const router = useRouter();
   const { isWorldUnlocked, player, totalStars } = useGame();
   const { t } = useLanguage();
+  const insets = useSafeAreaInsets();
 
   return (
     <View style={styles.container}>
@@ -156,7 +156,7 @@ export default function WorldMapScreen() {
       />
 
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + 14, paddingLeft: insets.left + Spacing.md, paddingRight: insets.right + Spacing.md }]}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <Text style={styles.backText}>{'\u2190'}</Text>
         </Pressable>
@@ -175,7 +175,7 @@ export default function WorldMapScreen() {
       </View>
 
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40, paddingHorizontal: Math.max(Spacing.lg, insets.left), paddingRight: Math.max(Spacing.lg, insets.right) }]}
         showsVerticalScrollIndicator={false}
       >
         {WORLDS.map((world) => {

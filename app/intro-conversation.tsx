@@ -11,17 +11,16 @@ import {
   Text,
   StyleSheet,
   Image,
-  Dimensions,
+  useWindowDimensions,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import GameButton from '@/components/game/GameButton';
 import { useLanguage } from '@/context/LanguageContext';
 import type { TranslationKey } from '@/constants/i18n';
 import { GameColors, Fonts, FontSizes, Spacing, Shadow } from '@/constants/theme';
-
-const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 
 type Speaker = 'ali' | 'ayesha';
 
@@ -37,9 +36,15 @@ export default function IntroConversationScreen() {
   const router = useRouter();
   const { t, lang } = useLanguage();
   const [index, setIndex] = useState(0);
+  const { width: SCREEN_W, height: SCREEN_H } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
 
   const step = CONVERSATION[index];
   const isLast = index === CONVERSATION.length - 1;
+
+  const avatarW = SCREEN_H * 0.375;
+  const avatarH = SCREEN_H * 0.5;
+  const bubbleMaxW = SCREEN_W * 0.55;
 
   const goNext = () => {
     if (isLast) {
@@ -47,6 +52,10 @@ export default function IntroConversationScreen() {
     } else {
       setIndex((i) => i + 1);
     }
+  };
+
+  const goSkip = () => {
+    router.replace('/world-map');
   };
 
   const isAyesha = step.speaker === 'ayesha';
@@ -57,44 +66,53 @@ export default function IntroConversationScreen() {
   }, [index]);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top + Spacing.xl, paddingBottom: insets.bottom + Spacing.xl, paddingLeft: insets.left + Spacing.lg, paddingRight: insets.right + Spacing.lg }]}>
       <View style={styles.bgWhite} />
 
       <View style={styles.content}>
         {/* Speaker area: avatar + name + speech */}
         <View style={[styles.speakerRow, isAyesha && styles.speakerRowReverse]}>
-          <View style={styles.avatarWrap}>
+          <View style={[styles.avatarWrap, { minWidth: avatarW }]}>
             {!avatarError ? (
               <Image
                 source={
                   isAyesha
-                    ? require('@/assets/images/farooqi.jpg')
-                    : require('@/assets/images/farooq.jpg')
+                    ? require('@/assets/images/Ayesha.jpg')
+                    : require('@/assets/images/Usman.jpg')
                 }
-                style={styles.avatar}
+                style={[styles.avatar, { width: avatarW, height: avatarH }]}
                 resizeMode="contain"
                 onError={() => setAvatarError(true)}
               />
             ) : (
-              <View style={[styles.avatarPlaceholder, isAyesha ? styles.avatarAyesha : styles.avatarAli]}>
+              <View style={[styles.avatarPlaceholder, isAyesha ? styles.avatarAyesha : styles.avatarAli, { width: avatarW, height: avatarH }]}>
                 <Text style={styles.avatarInitial}>{isAyesha ? 'Ay' : 'Al'}</Text>
               </View>
             )}
           </View>
-          <View style={styles.bubble}>
+          <View style={[styles.bubble, { maxWidth: bubbleMaxW }]}>
             <Text style={[styles.bubbleText, lang === 'ur' && styles.rtl]}>{t(step.key)}</Text>
           </View>
         </View>
       </View>
 
       <View style={styles.footer}>
-        <GameButton
-          title={isLast ? t('introStart') : t('introNext')}
-          onPress={goNext}
-          size="lg"
-          color={GameColors.primary}
-          textColor="#fff"
-        />
+        <View style={styles.footerRow}>
+          <GameButton
+            title={t('introSkip')}
+            onPress={goSkip}
+            size="lg"
+            color={GameColors.primary}
+            textColor="#fff"
+          />
+          <GameButton
+            title={isLast ? t('introStart') : t('introNext')}
+            onPress={goNext}
+            size="lg"
+            color={GameColors.primary}
+            textColor="#fff"
+          />
+        </View>
       </View>
 
       <StatusBar style="dark" />
@@ -105,9 +123,6 @@ export default function IntroConversationScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.xl * 2,
-    paddingBottom: Spacing.xl,
   },
   bgWhite: {
     ...StyleSheet.absoluteFillObject,
@@ -128,16 +143,11 @@ const styles = StyleSheet.create({
   },
   avatarWrap: {
     alignItems: 'center',
-    minWidth: SCREEN_H * 0.375,
   },
   avatar: {
-    width: SCREEN_H * 0.375,
-    height: SCREEN_H * 0.5,
-    backgroundColor: 'transparent',
+    backgroundColor: '#fff',
   },
   avatarPlaceholder: {
-    width: SCREEN_H * 0.375,
-    height: SCREEN_H * 0.5,
     alignItems: 'center',
     justifyContent: 'center',
     ...Shadow.sm,
@@ -155,7 +165,6 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   bubble: {
-    maxWidth: SCREEN_W * 0.55,
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.lg,
     borderRadius: 20,
@@ -175,5 +184,10 @@ const styles = StyleSheet.create({
   footer: {
     alignItems: 'center',
     paddingVertical: Spacing.lg,
+  },
+  footerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.lg,
   },
 });

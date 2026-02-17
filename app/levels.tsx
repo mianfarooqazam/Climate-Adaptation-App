@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { useGame } from '@/context/GameContext';
@@ -103,6 +104,7 @@ export default function LevelsScreen() {
   const { worldId } = useLocalSearchParams<{ worldId: string }>();
   const { player, isLevelUnlocked } = useGame();
   const { t, lang } = useLanguage();
+  const insets = useSafeAreaInsets();
 
   const world = getWorldById(worldId ?? 'w1');
   const levels = getLevelsForWorld(worldId ?? 'w1');
@@ -118,7 +120,7 @@ export default function LevelsScreen() {
       />
 
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + 14, paddingLeft: insets.left + Spacing.md, paddingRight: insets.right + Spacing.md }]}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <Text style={styles.backText}>{'\u2190'}</Text>
         </Pressable>
@@ -132,7 +134,7 @@ export default function LevelsScreen() {
 
       {/* Levels list */}
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + Spacing.xl, paddingLeft: Math.max(Spacing.lg, insets.left), paddingRight: Math.max(Spacing.lg, insets.right) }]}
         showsVerticalScrollIndicator={false}
       >
         {levels.map((level) => {

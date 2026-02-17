@@ -3,20 +3,23 @@
  *
  * Wraps the entire app in the GameProvider for global state.
  * Uses a Stack navigator with no headers (each screen handles its own).
+ * SafeAreaProvider ensures content respects notches on mobile/tablet.
  */
 
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { GameProvider } from '@/context/GameContext';
 import { LanguageProvider } from '@/context/LanguageContext';
 
 export default function RootLayout() {
   return (
-    <LanguageProvider>
-      <GameProvider>
-        <Stack
+    <SafeAreaProvider>
+      <LanguageProvider>
+        <GameProvider>
+          <Stack
           screenOptions={{
             headerShown: false,
             animation: 'slide_from_right',
@@ -40,9 +43,10 @@ export default function RootLayout() {
             options={{ animation: 'fade' }}
           />
           <Stack.Screen name="profile" />
-        </Stack>
-        <StatusBar style="auto" />
-      </GameProvider>
-    </LanguageProvider>
+          </Stack>
+          <StatusBar style="auto" />
+        </GameProvider>
+      </LanguageProvider>
+    </SafeAreaProvider>
   );
 }

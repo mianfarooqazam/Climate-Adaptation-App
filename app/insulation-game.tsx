@@ -24,6 +24,7 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import GameButton from '@/components/game/GameButton';
 import Thermometer from '@/components/game/Thermometer';
@@ -238,6 +239,7 @@ export default function InsulationGameScreen() {
   const router = useRouter();
   const { levelId } = useLocalSearchParams<{ levelId: string }>();
   const { completeLevel } = useGame();
+  const insets = useSafeAreaInsets();
 
   const { t } = useLanguage();
   const level = getLevelById(levelId ?? '');
@@ -433,7 +435,7 @@ export default function InsulationGameScreen() {
       <LinearGradient colors={['#81D4FA', '#B3E5FC', '#E1F5FE']} style={StyleSheet.absoluteFill} />
 
       {/* ===== COMPACT HEADER ===== */}
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top, paddingLeft: insets.left + Spacing.md, paddingRight: insets.right + Spacing.md }]}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <Text style={styles.backTxt}>{'\u2190'}</Text>
         </Pressable>

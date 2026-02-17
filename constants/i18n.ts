@@ -24,6 +24,7 @@ const translations = {
   introAyeshaReady: { en: "Ready to start? Tap Next to explore the world map!", ur: '\u0634\u0631\u0648\u0639 \u06A9\u0631\u0646\u06D2 \u06A9\u06D2 \u0644\u06CC\u06D2 \u062A\u06CC\u0627\u0631؟ \u0639\u0627\u0644\u0645\u06CC \u0646\u0642\u0634\u06C1 \u062F\u06CC\u06A9\u06BE\u0646\u06D2 \u06A9\u06D2 \u0644\u06CC\u06D2 \u0622\u06CC\u0646\u062F\u06D2 \u067E\u0631 \u0679\u067E \u06A9\u0631\u06CC\u06BA!' },
   introNext: { en: 'Next', ur: '\u0622\u06CC\u0646\u062F\u06D2' },
   introStart: { en: 'Start', ur: '\u0634\u0631\u0648\u0639 \u06A9\u0631\u06CC\u06BA' },
+  introSkip: { en: 'Skip', ur: '\u0686\u06BE\u0648\u0691\u06CC\u06BA' },
   introNameAyesha: { en: 'Ayesha', ur: '\u0639\u0627\u0626\u0634\u06C1' },
   introNameAli: { en: 'Ali', ur: '\u0639\u0644\u06CC' },
 
