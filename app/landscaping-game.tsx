@@ -54,8 +54,6 @@ const DROP_TOP = HEADER_H + HOUSE_OFFSET_Y - 15;
 const DROP_W = H_W * HOUSE_SCALE + DROP_MARGIN * 2;
 const DROP_H = H_H * HOUSE_SCALE + 70;
 
-const SUN_EMOJI = '\u2600\uFE0F';
-
 export default function LandscapingGameScreen() {
   const router = useRouter();
   const { levelId } = useLocalSearchParams<{ levelId: string }>();
@@ -146,7 +144,7 @@ export default function LandscapingGameScreen() {
 
           {/* Left column: house + trees, comfortable */}
           <View style={[styles.column, { width: colW }]}>
-            <Text style={[styles.sunIcon, { left: colW * 0.35 }]}>{SUN_EMOJI}</Text>
+            <Text style={[styles.sunIcon, { left: colW * 0.35 }]}>{'\u2600\uFE0F'}</Text>
             <LandscapingHouse
               left={colW * 0.08}
               top={HOUSE_OFFSET_Y}
@@ -164,7 +162,7 @@ export default function LandscapingGameScreen() {
 
           {/* Right column: house, no trees, hot */}
           <View style={[styles.column, { width: colW, left: colW }]}>
-            <Text style={[styles.sunIcon, { left: colW * 0.35 }]}>{SUN_EMOJI}</Text>
+            <Text style={[styles.sunIcon, { left: colW * 0.35 }]}>{'\u2600\uFE0F'}</Text>
             <LandscapingHouse
               left={colW * 0.08}
               top={HOUSE_OFFSET_Y}
@@ -208,7 +206,7 @@ export default function LandscapingGameScreen() {
         </View>
 
         {/* Left house: no trees, hot */}
-        <Text style={[styles.sunSmall, { left: HOUSE1_LEFT + 40 }]}>{SUN_EMOJI}</Text>
+        <Text style={[styles.sunSmall, { left: HOUSE1_LEFT + 40 }]}>{'\u2600\uFE0F'}</Text>
         <LandscapingHouse
           left={HOUSE1_LEFT}
           top={HOUSE_OFFSET_Y}
@@ -218,7 +216,7 @@ export default function LandscapingGameScreen() {
         />
 
         {/* Right house: tree when placed, else hot */}
-        <Text style={[styles.sunSmall, { left: HOUSE2_LEFT + 40 }]}>{SUN_EMOJI}</Text>
+        <Text style={[styles.sunSmall, { left: HOUSE2_LEFT + 40 }]}>{'\u2600\uFE0F'}</Text>
         {treePlaced && (
           <View style={[styles.placedTreeWrap, { left: HOUSE2_LEFT - 30, top: HOUSE_OFFSET_Y + 25 }]}>
             <Tree size={1.2} />

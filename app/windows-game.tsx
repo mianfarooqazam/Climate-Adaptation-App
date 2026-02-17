@@ -15,6 +15,7 @@ import {
   Animated,
   Dimensions,
   Easing,
+  Image,
   Modal,
   PanResponder,
   Pressable,
@@ -560,8 +561,8 @@ export default function WindowsGameScreen() {
                     />
                   </View>
                 ))}
-                <View style={[styles.learnWindowOverlay, { backgroundColor: 'rgba(179,229,252,0.92)' }]}>
-                  <Text style={styles.learnWindowLabel}>1x</Text>
+                <View style={styles.learnWindowOverlay}>
+                  <Image source={require('@/assets/images/single.png')} style={styles.learnWindowImage} resizeMode="contain" />
                 </View>
               </View>
             </View>
@@ -601,9 +602,8 @@ export default function WindowsGameScreen() {
                     />
                   </View>
                 ))}
-                <View style={[styles.learnWindowOverlay, { backgroundColor: 'rgba(129,212,250,0.92)' }]}>
-                  <View style={styles.learnWindowInner} />
-                  <Text style={styles.learnWindowLabel}>2x</Text>
+                <View style={styles.learnWindowOverlay}>
+                  <Image source={require('@/assets/images/double.png')} style={styles.learnWindowImage} resizeMode="contain" />
                 </View>
               </View>
             </View>
@@ -643,10 +643,8 @@ export default function WindowsGameScreen() {
                     />
                   </View>
                 ))}
-                <View style={[styles.learnWindowOverlay, { backgroundColor: 'rgba(77,208,225,0.92)' }]}>
-                  <View style={styles.learnWindowInner} />
-                  <View style={[styles.learnWindowInner, styles.learnWindowInner2]} />
-                  <Text style={styles.learnWindowLabel}>3x</Text>
+                <View style={styles.learnWindowOverlay}>
+                  <Image source={require('@/assets/images/tripple.png')} style={styles.learnWindowImage} resizeMode="contain" />
                 </View>
               </View>
             </View>
@@ -1080,15 +1078,16 @@ const styles = StyleSheet.create({
   learnWindowOverlay: {
     position: 'absolute',
     bottom: 0,
-    left: 40,
-    width: 120,
-    height: 88,
-    borderRadius: 8,
-    borderWidth: 3,
-    borderColor: '#5D4037',
+    left: 0,
+    width: 200,
+    height: 148,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
+  },
+  learnWindowImage: {
+    width: '100%',
+    height: '100%',
   },
   learnPeopleRow: {
     flexDirection: 'row',
