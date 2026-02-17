@@ -2,7 +2,7 @@
  * EcoHero: Flood Fighters — Intro conversation
  *
  * When the user taps Play, they see a short conversation between
- * Ali and Ayesha introducing the app. Tap Next to advance; last tap goes to World Map.
+ * Usman and Ayesha introducing the app. Tap Next to advance; last tap goes to World Map.
  */
 
 import React, { useState, useEffect } from 'react';
@@ -22,13 +22,13 @@ import { useLanguage } from '@/context/LanguageContext';
 import type { TranslationKey } from '@/constants/i18n';
 import { GameColors, Fonts, FontSizes, Spacing, Shadow } from '@/constants/theme';
 
-type Speaker = 'ali' | 'ayesha';
+type Speaker = 'usman' | 'ayesha';
 
 const CONVERSATION: { speaker: Speaker; key: TranslationKey }[] = [
   { speaker: 'ayesha', key: 'introAyeshaHello' },
-  { speaker: 'ali', key: 'introAliHello' },
+  { speaker: 'usman', key: 'introAliHello' },
   { speaker: 'ayesha', key: 'introAyeshaApp' },
-  { speaker: 'ali', key: 'introAliLearn' },
+  { speaker: 'usman', key: 'introAliLearn' },
   { speaker: 'ayesha', key: 'introAyeshaReady' },
 ];
 
@@ -59,40 +59,49 @@ export default function IntroConversationScreen() {
   };
 
   const isAyesha = step.speaker === 'ayesha';
-  const [avatarError, setAvatarError] = useState(false);
-
-  useEffect(() => {
-    setAvatarError(false);
-  }, [index]);
+  const [ayeshaImgError, setAyeshaImgError] = useState(false);
+  const [usmanImgError, setUsmanImgError] = useState(false);
 
   return (
     <View style={[styles.container, { paddingTop: insets.top + Spacing.xl, paddingBottom: insets.bottom + Spacing.xl, paddingLeft: insets.left + Spacing.lg, paddingRight: insets.right + Spacing.lg }]}>
       <View style={styles.bgWhite} />
 
       <View style={styles.content}>
-        {/* Speaker area: avatar + name + speech */}
-        <View style={[styles.speakerRow, isAyesha && styles.speakerRowReverse]}>
-          <View style={[styles.avatarWrap, { minWidth: avatarW }]}>
-            {!avatarError ? (
+        {/* Always show both characters; only the text changes on Next */}
+        <View style={styles.avatarsRow}>
+          <View style={[styles.avatarBox, isAyesha && styles.avatarActive, { width: avatarW, height: avatarH }]}>
+            {!ayeshaImgError ? (
               <Image
-                source={
-                  isAyesha
-                    ? require('@/assets/images/Ayesha.jpg')
-                    : require('@/assets/images/Usman.jpg')
-                }
-                style={[styles.avatar, { width: avatarW, height: avatarH }]}
+                source={require('@/assets/images/Ayesha.jpg')}
+                style={styles.avatarFill}
                 resizeMode="contain"
-                onError={() => setAvatarError(true)}
+                onError={() => setAyeshaImgError(true)}
               />
             ) : (
-              <View style={[styles.avatarPlaceholder, isAyesha ? styles.avatarAyesha : styles.avatarAli, { width: avatarW, height: avatarH }]}>
-                <Text style={styles.avatarInitial}>{isAyesha ? 'Ay' : 'Al'}</Text>
+              <View style={[styles.avatarPlaceholder, styles.avatarAyesha]}>
+                <Text style={styles.avatarInitial}>Ay</Text>
               </View>
             )}
           </View>
-          <View style={[styles.bubble, { maxWidth: bubbleMaxW }]}>
-            <Text style={[styles.bubbleText, lang === 'ur' && styles.rtl]}>{t(step.key)}</Text>
+
+          <View style={[styles.avatarBox, !isAyesha && styles.avatarActive, { width: avatarW, height: avatarH }]}>
+            {!usmanImgError ? (
+              <Image
+                source={require('@/assets/images/Usman.jpg')}
+                style={styles.avatarFill}
+                resizeMode="contain"
+                onError={() => setUsmanImgError(true)}
+              />
+            ) : (
+              <View style={[styles.avatarPlaceholder, styles.avatarUsman]}>
+                <Text style={styles.avatarInitial}>Us</Text>
+              </View>
+            )}
           </View>
+        </View>
+
+        <View style={[styles.bubble, { maxWidth: SCREEN_W * 0.72, alignSelf: isAyesha ? 'flex-start' : 'flex-end' }]}>
+          <Text style={[styles.bubbleText, lang === 'ur' && styles.rtl]}>{t(step.key)}</Text>
         </View>
       </View>
 
@@ -131,33 +140,39 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     justifyContent: 'center',
+    gap: Spacing.lg,
   },
-  speakerRow: {
+  avatarsRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: Spacing.md,
-    maxWidth: '100%',
+    justifyContent: 'space-between',
+    gap: Spacing.lg,
+    width: '100%',
   },
-  speakerRowReverse: {
-    flexDirection: 'row-reverse',
-  },
-  avatarWrap: {
-    alignItems: 'center',
-  },
-  avatar: {
+  avatarBox: {
     backgroundColor: '#fff',
-  },
-  avatarPlaceholder: {
     alignItems: 'center',
     justifyContent: 'center',
+    borderRadius: 16,
+    overflow: 'hidden',
     ...Shadow.sm,
   },
-  avatarAyesha: {
-    backgroundColor: '#F8BBD9',
+  avatarActive: {
+    borderWidth: 3,
+    borderColor: GameColors.primary,
   },
-  avatarAli: {
-    backgroundColor: '#90CAF9',
+  avatarFill: {
+    width: '100%',
+    height: '100%',
   },
+  avatarPlaceholder: {
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarAyesha: { backgroundColor: '#F8BBD9' },
+  avatarUsman: { backgroundColor: '#90CAF9' },
   avatarInitial: {
     fontFamily: Fonts.rounded,
     fontSize: 32,
