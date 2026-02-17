@@ -113,10 +113,12 @@ const RAYS: RayDef[] = [
 ];
 
 // Learn level: ray definitions per section (sun at 100,0 → end at endX, LEARN_RAY_END_Y)
+// Layer 2 and 3 use the same ray pattern; fewer pass through 3 layers.
+const LEARN_RAY_END_X_2_AND_3 = [75, 100, 125];
 const LEARN_RAY_END_X = [
   [50, 70, 90, 110, 130, 150],           // 6 rays (1 layer)
-  [75, 100, 125],                         // 3 rays (2 layers)
-  [100],                                  // 1 ray (3 layers)
+  LEARN_RAY_END_X_2_AND_3,                // 3 rays (2 layers)
+  LEARN_RAY_END_X_2_AND_3.slice(0, 1),   // 1 ray (3 layers) — same pattern, fewer pass
 ];
 const LEARN_RAY_START_X = 100;
 const LEARN_RAY_START_Y = 0;
