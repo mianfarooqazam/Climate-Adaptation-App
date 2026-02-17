@@ -29,6 +29,7 @@ import GameButton from '@/components/game/GameButton';
 import LanguageToggle from '@/components/game/LanguageToggle';
 import Thermometer from '@/components/game/Thermometer';
 import { getLevelById } from '@/constants/gameData';
+import type { TranslationKey } from '@/constants/i18n';
 import {
   FontSizes,
   Fonts,
@@ -36,7 +37,6 @@ import {
   Radius,
   Spacing,
 } from '@/constants/theme';
-import type { TranslationKey } from '@/constants/i18n';
 import { useGame } from '@/context/GameContext';
 import { useLanguage } from '@/context/LanguageContext';
 
