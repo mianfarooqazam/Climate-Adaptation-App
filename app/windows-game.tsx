@@ -518,8 +518,8 @@ export default function WindowsGameScreen() {
   // ===== LEARN LEVEL: Three sections — order: text → sun → layer (with rays) → humans =====
   if (isLearnLevel) {
     return (
-      <View style={styles.root}>
-        <LinearGradient colors={['#81D4FA', '#B3E5FC', '#E1F5FE']} style={StyleSheet.absoluteFill} />
+      <View style={[styles.root, { backgroundColor: '#fff' }]}>
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: '#fff' }]} />
         <View style={styles.header}>
           <Pressable onPress={() => router.back()} style={styles.backBtn}>
             <Text style={styles.backTxt}>{'\u2190'}</Text>
@@ -567,10 +567,7 @@ export default function WindowsGameScreen() {
               </View>
             </View>
             <View style={styles.learnPeopleRow}>
-              <CartoonPerson m={mood1} shirt="#42A5F5" pants="#1565C0" hair="#5D4037" />
-              <CartoonPerson m={mood1} shirt="#EC407A" pants="#880E4F" hair="#3E2723" isFemale />
-              <CartoonPerson m={mood1} shirt="#66BB6A" pants="#33691E" hair="#4E342E" isChild />
-              <CartoonPerson m={mood1} shirt="#FFB74D" pants="#E91E63" hair="#5D4037" isChild isFemale hairBow="#FF4081" />
+              <Image source={require('@/assets/images/Combined-Sweat.png')} style={styles.learnPeopleImage} resizeMode="contain" />
             </View>
           </View>
 
@@ -608,10 +605,7 @@ export default function WindowsGameScreen() {
               </View>
             </View>
             <View style={styles.learnPeopleRow}>
-              <CartoonPerson m={mood2} shirt="#42A5F5" pants="#1565C0" hair="#5D4037" />
-              <CartoonPerson m={mood2} shirt="#EC407A" pants="#880E4F" hair="#3E2723" isFemale />
-              <CartoonPerson m={mood2} shirt="#66BB6A" pants="#33691E" hair="#4E342E" isChild />
-              <CartoonPerson m={mood2} shirt="#FFB74D" pants="#E91E63" hair="#5D4037" isChild isFemale hairBow="#FF4081" />
+              <Image source={require('@/assets/images/Combined.png')} style={styles.learnPeopleImage} resizeMode="contain" />
             </View>
           </View>
 
@@ -649,10 +643,7 @@ export default function WindowsGameScreen() {
               </View>
             </View>
             <View style={styles.learnPeopleRow}>
-              <CartoonPerson m={mood3} shirt="#42A5F5" pants="#1565C0" hair="#5D4037" />
-              <CartoonPerson m={mood3} shirt="#EC407A" pants="#880E4F" hair="#3E2723" isFemale />
-              <CartoonPerson m={mood3} shirt="#66BB6A" pants="#33691E" hair="#4E342E" isChild />
-              <CartoonPerson m={mood3} shirt="#FFB74D" pants="#E91E63" hair="#5D4037" isChild isFemale hairBow="#FF4081" />
+              <Image source={require('@/assets/images/Combined.png')} style={styles.learnPeopleImage} resizeMode="contain" />
             </View>
           </View>
         </ScrollView>
@@ -1097,6 +1088,11 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 4,
     width: '100%',
+  },
+  learnPeopleImage: {
+    width: '100%',
+    maxWidth: 520,
+    height: 300,
   },
   learnWindowBox: {
     width: 120,
