@@ -144,7 +144,9 @@ export default function LevelCompleteScreen() {
 
         {/* Level name */}
         <Text style={styles.levelName}>
-          {levelId === 'w1-l1'
+          {levelId === 'w1-l0'
+            ? t('whatIsInsulationTitle')
+            : levelId === 'w1-l1'
             ? t('roofShield')
             : levelId === 'w1-l2'
             ? t('hotWalls')

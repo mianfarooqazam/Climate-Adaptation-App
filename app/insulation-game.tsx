@@ -21,6 +21,7 @@ import {
   PanResponder,
   Pressable,
   Modal,
+  ScrollView,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -101,6 +102,22 @@ const RAYS: RayDef[] = [
   { id: 'w3', zone: 'right-wall', startX: SUN_CX + 4, startY: SUN_CY + 42, endX: H_LEFT + H_W + SIDE_D * 0.8, endY: H_TOP + ROOF_H + 120 },
   { id: 'w4', zone: 'right-wall', startX: SUN_CX + 8, startY: SUN_CY + 46, endX: H_LEFT + H_W + SIDE_D * 0.6, endY: H_TOP + H_H - 30 },
 ];
+
+// Learn level (w1-l0): ray definitions per section — same layout as windows-game
+// Section 1: no insulation = many rays; Section 2: with insulation = fewer rays
+const LEARN_RAY_END_X_INSULATION = [
+  [50, 70, 90, 110, 130, 150],  // 6 rays (no insulation)
+  [75, 100, 125],                // 3 rays (with insulation)
+];
+const LEARN_RAY_START_X = 100;
+const LEARN_RAY_START_Y = 0;
+const LEARN_RAY_END_Y = 148;
+function learnRayAngle(endX: number) {
+  return Math.atan2(LEARN_RAY_END_Y - LEARN_RAY_START_Y, endX - LEARN_RAY_START_X) * (180 / Math.PI);
+}
+function learnRayLength(endX: number) {
+  return Math.sqrt((LEARN_RAY_END_Y - LEARN_RAY_START_Y) ** 2 + (endX - LEARN_RAY_START_X) ** 2);
+}
 
 // ---------------------------------------------------------------------------
 // Zone hit-boxes (relative to scene)
@@ -241,7 +258,7 @@ export default function InsulationGameScreen() {
   const { completeLevel } = useGame();
   const insets = useSafeAreaInsets();
 
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const level = getLevelById(levelId ?? '');
   const world = getWorldById(level?.worldId ?? '');
   const config = INSULATION_LEVEL_CONFIGS[levelId ?? ''];
@@ -269,15 +286,127 @@ export default function InsulationGameScreen() {
   const moodVal: Mood = { ...moodRaw, label: t(moodRaw.labelKey) };
   const activeSet = useMemo(() => new Set(config?.activeZones ?? []), [config]);
 
-  // ---- Animations ----
+  // Sun scale animation (used by learn level and main game)
   const sunScale = useRef(new Animated.Value(1)).current;
   useEffect(() => {
     Animated.loop(Animated.sequence([
       Animated.timing(sunScale, { toValue: 1.06, duration: 2000, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
       Animated.timing(sunScale, { toValue: 1, duration: 2000, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
     ])).start();
-  }, []);
+  }, [sunScale]);
 
+  const isLearnLevel = levelId === 'w1-l0';
+  const finishLearnLevel = useCallback(() => {
+    completeLevel('w1-l0', 30, 30);
+    router.replace({
+      pathname: '/level-complete',
+      params: { levelId: 'w1-l0', stars: '3', score: '30', maxScore: '30' },
+    });
+  }, [completeLevel, router]);
+
+  // ---- Learn level (w1-l0): What is Insulation? — same layout as windows (sun, rays, overlay, people) ----
+  if (isLearnLevel && level) {
+    return (
+      <View style={[styles.root, { backgroundColor: '#fff' }]}>
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: '#fff' }]} />
+        <View style={[styles.header, { paddingTop: insets.top, paddingLeft: insets.left + Spacing.md, paddingRight: insets.right + Spacing.md }]}>
+          <Pressable onPress={() => router.back()} style={styles.backBtn}>
+            <Text style={styles.backTxt}>{'\u2190'}</Text>
+          </Pressable>
+          <Text style={[styles.headerTitle, lang === 'ur' && styles.rtl]}>{t('whatIsInsulationTitle')}</Text>
+          <View style={{ flex: 1 }} />
+          <LanguageToggle />
+        </View>
+        <ScrollView
+          style={styles.learnScroll}
+          contentContainerStyle={styles.learnSectionsWrap}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Section 1: No insulation — many rays, people hot */}
+          <View style={styles.learnSection}>
+            <Text style={[styles.learnSectionText, lang === 'ur' && styles.rtl]}>{t('learnInsulationSection1')}</Text>
+            <View style={styles.learnSunRayWrap}>
+              <Animated.View style={[styles.learnSunWrap, { transform: [{ scale: sunScale }] }]}>
+                <View style={styles.learnSunGlow3} />
+                <View style={styles.learnSunGlow2} />
+                <View style={styles.learnSunGlow1} />
+                <Text style={styles.learnSunEmoji}>{'\u2600\uFE0F'}</Text>
+              </Animated.View>
+              <View style={styles.learnRayContainer}>
+                {LEARN_RAY_END_X_INSULATION[0].map((endX, i) => (
+                  <View
+                    key={i}
+                    style={[styles.learnRayBar, {
+                      left: LEARN_RAY_START_X,
+                      width: learnRayLength(endX),
+                      transform: [{ rotate: `${learnRayAngle(endX)}deg` }],
+                    }]}
+                  >
+                    <LinearGradient
+                      colors={['rgba(255,210,0,0.75)', 'rgba(255,165,0,0.3)', 'rgba(255,120,0,0.06)']}
+                      start={{ x: 0, y: 0.5 }}
+                      end={{ x: 1, y: 0.5 }}
+                      style={StyleSheet.absoluteFill}
+                    />
+                  </View>
+                ))}
+                <View style={styles.learnWindowOverlay}>
+                  <Image source={require('@/assets/images/insulation.jpeg')} style={styles.learnWindowImage} resizeMode="contain" />
+                </View>
+              </View>
+            </View>
+            <View style={styles.learnPeopleRow}>
+              <Image source={require('@/assets/images/Combined-Sweat.png')} style={styles.learnPeopleImage} resizeMode="contain" />
+            </View>
+          </View>
+
+          {/* Section 2: With insulation — fewer rays, people cool */}
+          <View style={styles.learnSection}>
+            <Text style={[styles.learnSectionText, lang === 'ur' && styles.rtl]}>{t('learnInsulationSection2')}</Text>
+            <View style={styles.learnSunRayWrap}>
+              <Animated.View style={[styles.learnSunWrap, { transform: [{ scale: sunScale }] }]}>
+                <View style={styles.learnSunGlow3} />
+                <View style={styles.learnSunGlow2} />
+                <View style={styles.learnSunGlow1} />
+                <Text style={styles.learnSunEmoji}>{'\u2600\uFE0F'}</Text>
+              </Animated.View>
+              <View style={styles.learnRayContainer}>
+                {LEARN_RAY_END_X_INSULATION[1].map((endX, i) => (
+                  <View
+                    key={i}
+                    style={[styles.learnRayBar, {
+                      left: LEARN_RAY_START_X,
+                      width: learnRayLength(endX),
+                      transform: [{ rotate: `${learnRayAngle(endX)}deg` }],
+                    }]}
+                  >
+                    <LinearGradient
+                      colors={['rgba(255,210,0,0.75)', 'rgba(255,165,0,0.3)', 'rgba(255,120,0,0.06)']}
+                      start={{ x: 0, y: 0.5 }}
+                      end={{ x: 1, y: 0.5 }}
+                      style={StyleSheet.absoluteFill}
+                    />
+                  </View>
+                ))}
+                <View style={styles.learnWindowOverlay}>
+                  <Image source={require('@/assets/images/insulation.jpeg')} style={styles.learnWindowImage} resizeMode="contain" />
+                </View>
+              </View>
+            </View>
+            <View style={styles.learnPeopleRow}>
+              <Image source={require('@/assets/images/Combined.png')} style={styles.learnPeopleImage} resizeMode="contain" />
+            </View>
+          </View>
+        </ScrollView>
+        <Pressable style={styles.learnContinueWrap} onPress={finishLearnLevel}>
+          <Text style={[styles.learnContinueText, lang === 'ur' && styles.rtl]}>{t('continueBtn')}</Text>
+          <Text style={styles.learnContinueArrow}>{'\u27A1'}</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
+  // ---- Animations ----
   const rayOpacities = useRef<Record<string, Animated.Value>>({
     roof: new Animated.Value(1),
     'right-wall': new Animated.Value(1),
@@ -757,6 +886,96 @@ const styles = StyleSheet.create({
   headerSub: { fontFamily: Fonts.rounded, fontSize: FontSizes.sm, color: 'rgba(255,255,255,0.8)', fontWeight: '600' },
   infoBtn: { width: 32, height: 32, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.25)', alignItems: 'center', justifyContent: 'center' },
   infoIcon: { fontSize: 20, color: '#fff', fontWeight: '700' },
+
+  // Learn level (w1-l0) — same layout as windows-game: sun, rays, overlay, people
+  rtl: { writingDirection: 'rtl' },
+  learnScroll: { flex: 1 },
+  learnSectionsWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around',
+    alignItems: 'flex-start',
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.md,
+    paddingBottom: 72,
+    gap: Spacing.lg,
+  },
+  learnSection: {
+    width: 200,
+    alignItems: 'center',
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.sm,
+  },
+  learnSectionText: {
+    fontFamily: Fonts.rounded,
+    fontSize: FontSizes.sm,
+    fontWeight: '800',
+    color: GameColors.textSecondary,
+    textAlign: 'center',
+    marginBottom: 14,
+    minHeight: 36,
+  },
+  learnSunRayWrap: { alignItems: 'center', width: '100%' },
+  learnSunWrap: {
+    width: 50,
+    height: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  learnSunGlow3: { position: 'absolute', width: 72, height: 72, borderRadius: 36, backgroundColor: 'rgba(255,235,59,0.12)' },
+  learnSunGlow2: { position: 'absolute', width: 60, height: 60, borderRadius: 30, backgroundColor: 'rgba(255,235,59,0.2)' },
+  learnSunGlow1: { position: 'absolute', width: 49, height: 49, borderRadius: 24.5, backgroundColor: 'rgba(255,235,59,0.35)' },
+  learnSunEmoji: { fontSize: 32 },
+  learnRayContainer: {
+    position: 'relative',
+    width: 200,
+    height: 148,
+    marginBottom: 0,
+  },
+  learnRayBar: {
+    position: 'absolute',
+    height: 9,
+    borderRadius: 5,
+    overflow: 'hidden',
+    transformOrigin: 'left center',
+    top: -4.5,
+  },
+  learnWindowOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    width: 200,
+    height: 148,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  learnWindowImage: { width: '100%', height: '100%' },
+  learnPeopleRow: {
+    flexDirection: 'row',
+    gap: 6,
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 4,
+    width: '100%',
+  },
+  learnPeopleImage: { width: '100%', maxWidth: 520, height: 300 },
+  learnContinueWrap: {
+    position: 'absolute',
+    right: Spacing.lg,
+    bottom: Spacing.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    backgroundColor: '#A5D6A7',
+    borderRadius: 12,
+    gap: 8,
+  },
+  learnContinueText: { fontFamily: Fonts.rounded, fontSize: FontSizes.md, fontWeight: '800', color: '#fff' },
+  learnContinueArrow: { fontSize: 20, color: '#fff', fontWeight: '700' },
 
   mainRow: { flex: 1, flexDirection: 'row' },
   leftDragColumn: {

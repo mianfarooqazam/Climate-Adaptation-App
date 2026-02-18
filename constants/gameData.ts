@@ -158,11 +158,22 @@ export const WORLDS: World[] = [
 // ---------------------------------------------------------------------------
 
 export const LEVELS: Level[] = [
-  // ---- World 1: Insulation (3 levels) ----
+  // ---- World 1: Insulation (4 levels: learn then Roof, Walls, Full Protection) ----
+  {
+    id: 'w1-l0',
+    worldId: 'w1',
+    order: 1,
+    title: 'What is Insulation?',
+    type: 'insulation-game',
+    description: 'Learn what insulation is and how it keeps buildings cool.',
+    difficulty: 1,
+    starsRequired: 0,
+    fact: 'Insulation acts as a barrier against heat. In hot weather it keeps heat out; in cold weather it keeps warmth in.',
+  },
   {
     id: 'w1-l1',
     worldId: 'w1',
-    order: 1,
+    order: 2,
     title: 'Roof',
     type: 'insulation-game',
     description: 'The sun is heating the roof! Add insulation to block the heat rays.',
@@ -173,7 +184,7 @@ export const LEVELS: Level[] = [
   {
     id: 'w1-l2',
     worldId: 'w1',
-    order: 2,
+    order: 3,
     title: 'Walls',
     type: 'insulation-game',
     description: 'Sun rays are blasting through the walls! Insulate the right side to keep cool.',
@@ -184,7 +195,7 @@ export const LEVELS: Level[] = [
   {
     id: 'w1-l3',
     worldId: 'w1',
-    order: 3,
+    order: 4,
     title: 'Full Protection',
     type: 'insulation-game',
     description: 'Insulate both the roof AND the wall to fully protect the house from heat.',
