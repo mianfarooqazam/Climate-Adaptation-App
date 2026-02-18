@@ -103,8 +103,9 @@ export default function TitleScreen() {
   const { totalStars, player } = useGame();
   const { t } = useLanguage();
   const [showCreditsModal, setShowCreditsModal] = useState(false);
-  const { width: SCREEN_W } = useWindowDimensions();
+  const { width: SCREEN_W, height: SCREEN_H } = useWindowDimensions();
   const insets = useSafeAreaInsets();
+  const creditsCardHeight = SCREEN_H * 0.5;
 
   // Logo bounce animation
   const bounce = useRef(new Animated.Value(0)).current;
@@ -212,23 +213,52 @@ export default function TitleScreen() {
       </View>
       </ScrollView>
 
-      {/* Credits modal: GIZ logo when Credits is pressed */}
+      {/* Credits modal: 50% screen, card UI with close */}
       <Modal
         visible={showCreditsModal}
         transparent
         animationType="fade"
         onRequestClose={() => setShowCreditsModal(false)}
       >
-        <Pressable
-          style={styles.creditsModalOverlay}
-          onPress={() => setShowCreditsModal(false)}
-        >
-          <Pressable style={styles.creditsModalContent} onPress={(e) => e.stopPropagation()}>
-            <Image
-              source={require('@/assets/images/GIZ.png')}
-              style={styles.creditsModalLogo}
-              resizeMode="contain"
-            />
+        <Pressable style={styles.creditsOverlay} onPress={() => setShowCreditsModal(false)}>
+          <Pressable
+            style={[styles.creditsCard, { height: creditsCardHeight }]}
+            onPress={(e) => e.stopPropagation()}
+          >
+            <View style={styles.creditsCardHeader}>
+              <Image
+                source={require('@/assets/images/GIZ.png')}
+                style={styles.creditsHeaderLogo}
+                resizeMode="contain"
+              />
+              <Pressable
+                style={({ pressed }) => [styles.creditsCloseBtn, pressed && styles.creditsCloseBtnPressed]}
+                onPress={() => setShowCreditsModal(false)}
+              >
+                <Text style={styles.creditsCloseBtnText}>✕</Text>
+              </Pressable>
+            </View>
+            <ScrollView
+              style={styles.creditsScroll}
+              contentContainerStyle={styles.creditsScrollContent}
+              showsVerticalScrollIndicator={true}
+            >
+              <Text style={styles.creditsProjectText}>
+                This app was developed under the project <Text style={styles.creditsProjectTextBold}>"Mainstreaming Green Skills for Climate
+                Adaptation: Capacity Building and Policy Advocacy in KP"</Text>.{'\n'}Funded by the <Text style={styles.creditsProjectTextBold}>German
+                Federal Ministry for Economic Cooperation and Development (BMZ)</Text> and supported by
+                the <Text style={styles.creditsProjectTextBold}>Deutsche Gesellschaft für
+                Internationale Zusammenarbeit (GIZ) GmbH</Text>.
+              </Text>
+              <Text style={styles.creditsSdgHeading}>Sustainable Development Goals</Text>
+              <View style={styles.creditsSdgRow}>
+                <Image source={require('@/assets/sdgs/E_WEB_04.png')} style={styles.creditsSdgImage} resizeMode="contain" />
+                <Image source={require('@/assets/sdgs/E_WEB_08.png')} style={styles.creditsSdgImage} resizeMode="contain" />
+                <Image source={require('@/assets/sdgs/E_WEB_09.png')} style={styles.creditsSdgImage} resizeMode="contain" />
+                <Image source={require('@/assets/sdgs/E_WEB_10.png')} style={styles.creditsSdgImage} resizeMode="contain" />
+                <Image source={require('@/assets/sdgs/E_WEB_13.png')} style={styles.creditsSdgImage} resizeMode="contain" />
+              </View>
+            </ScrollView>
           </Pressable>
         </Pressable>
       </Modal>
@@ -348,27 +378,96 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.85)',
     fontWeight: '700',
   },
-  creditsModalOverlay: {
+  creditsOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0,0,0,0.45)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: Spacing.xl,
   },
-  creditsModalContent: {
+  creditsCard: {
+    width: '100%',
+    maxWidth: 420,
     backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: Spacing.xl,
-    alignItems: 'center',
-    minWidth: 260,
-    maxWidth: 320,
+    borderRadius: 24,
+    overflow: 'hidden',
     ...Shadow.md,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 24,
   },
-  creditsModalLogo: {
-    width: 200,
-    height: 80,
-    marginTop: Spacing.lg,
-    marginBottom: Spacing.lg,
+  creditsCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.06)',
+    backgroundColor: 'rgba(67, 160, 71, 0.06)',
+  },
+  creditsHeaderLogo: {
+    width: 100,
+    height: 40,
+  },
+  creditsCloseBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(0,0,0,0.06)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  creditsCloseBtnPressed: {
+    opacity: 0.7,
+    backgroundColor: 'rgba(0,0,0,0.1)',
+  },
+  creditsCloseBtnText: {
+    fontSize: 18,
+    color: '#444',
+    fontWeight: '600',
+  },
+  creditsScroll: {
+    flex: 1,
+  },
+  creditsScrollContent: {
+    alignItems: 'center',
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.xl,
+  },
+  creditsProjectText: {
+    fontFamily: Fonts.rounded,
+    fontSize: FontSizes.sm,
+    color: '#444',
+    textAlign: 'justify',
+    lineHeight: 22,
+    marginBottom: Spacing.md,
+    width: '100%',
+  },
+  creditsProjectTextBold: {
+    fontWeight: '700',
+  },
+  creditsSdgHeading: {
+    fontFamily: Fonts.rounded,
+    fontSize: FontSizes.sm,
+    fontWeight: '700',
+    color: '#2E7D32',
+    marginBottom: Spacing.sm,
+    letterSpacing: 0.3,
+  },
+  creditsSdgRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 10,
+  },
+  creditsSdgImage: {
+    width: 52,
+    height: 52,
+    borderRadius: 10,
   },
   langToggle: {
     position: 'absolute',
