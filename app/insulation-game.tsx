@@ -9,45 +9,45 @@
  * with skewY transforms to create visible depth on the right side.
  */
 
-import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
   Animated,
-  Easing,
   Dimensions,
+  Easing,
   Image,
+  Modal,
   PanResponder,
   Pressable,
-  Modal,
   ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import GameButton from '@/components/game/GameButton';
-import Thermometer from '@/components/game/Thermometer';
 import LanguageToggle from '@/components/game/LanguageToggle';
-import { useGame } from '@/context/GameContext';
-import { useLanguage } from '@/context/LanguageContext';
+import Thermometer from '@/components/game/Thermometer';
 import {
   getLevelById,
   getWorldById,
-  INSULATION_MATERIALS,
   INSULATION_LEVEL_CONFIGS,
-  type InsulationZoneId,
+  INSULATION_MATERIALS,
   type InsulationMaterial,
+  type InsulationZoneId,
 } from '@/constants/gameData';
 import {
-  GameColors,
-  Spacing,
-  FontSizes,
   Fonts,
+  FontSizes,
+  GameColors,
   Radius,
   Shadow,
+  Spacing,
 } from '@/constants/theme';
+import { useGame } from '@/context/GameContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 // ---------------------------------------------------------------------------
 // Responsive dimensions — full-screen landscape
@@ -351,7 +351,9 @@ export default function InsulationGameScreen() {
                   </View>
                 ))}
                 <View style={styles.learnWindowOverlay}>
-                  <Image source={require('@/assets/images/insulation.jpeg')} style={styles.learnWindowImage} resizeMode="contain" />
+                  <View style={styles.learnRoofWrap}>
+                    <Image source={require('@/assets/images/wall.png')} style={styles.learnRoofImage} resizeMode="contain" />
+                  </View>
                 </View>
               </View>
             </View>
@@ -389,7 +391,9 @@ export default function InsulationGameScreen() {
                   </View>
                 ))}
                 <View style={styles.learnWindowOverlay}>
-                  <Image source={require('@/assets/images/insulation.jpeg')} style={styles.learnWindowImage} resizeMode="contain" />
+                  <View style={styles.learnRoofWrap}>
+                    <Image source={require('@/assets/images/insulated-wall.png')} style={styles.learnRoofImage} resizeMode="contain" />
+                  </View>
                 </View>
               </View>
             </View>
@@ -901,7 +905,7 @@ const styles = StyleSheet.create({
     gap: Spacing.lg,
   },
   learnSection: {
-    width: 200,
+    width: 220,
     alignItems: 'center',
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.sm,
@@ -929,8 +933,8 @@ const styles = StyleSheet.create({
   learnSunEmoji: { fontSize: 32 },
   learnRayContainer: {
     position: 'relative',
-    width: 200,
-    height: 148,
+    width: 220,
+    height: 165,
     marginBottom: 0,
   },
   learnRayBar: {
@@ -945,13 +949,55 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     left: 0,
-    width: 200,
-    height: 148,
+    width: 220,
+    height: 165,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
   },
   learnWindowImage: { width: '100%', height: '100%' },
+  learnRoofWrap: {
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    paddingBottom: 8,
+  },
+  learnRoofImage: {
+    width: 220,
+    height: 165,
+    borderRadius: 4,
+  },
+  learnRoofStraight: {
+    backgroundColor: '#8D6E63',
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  learnBrickRow: {
+    flexDirection: 'row',
+    gap: 2,
+    marginBottom: 2,
+  },
+  learnBrickRowStagger: { paddingLeft: 12 },
+  learnBrick: {
+    width: 16,
+    height: 10,
+    backgroundColor: '#BCAAA4',
+    borderRadius: 2,
+    borderWidth: 1,
+    borderColor: '#A1887F',
+  },
+  learnInsulationLayer: {
+    width: 130,
+    height: 20,
+    backgroundColor: '#BCAAA4',
+    marginBottom: 4,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#A1887F',
+  },
   learnPeopleRow: {
     flexDirection: 'row',
     gap: 6,
