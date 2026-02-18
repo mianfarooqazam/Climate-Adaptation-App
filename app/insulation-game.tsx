@@ -333,23 +333,6 @@ export default function InsulationGameScreen() {
                 <Text style={styles.learnSunEmoji}>{'\u2600\uFE0F'}</Text>
               </Animated.View>
               <View style={styles.learnRayContainer}>
-                {LEARN_RAY_END_X_INSULATION[0].map((endX, i) => (
-                  <View
-                    key={i}
-                    style={[styles.learnRayBar, {
-                      left: LEARN_RAY_START_X,
-                      width: learnRayLength(endX),
-                      transform: [{ rotate: `${learnRayAngle(endX)}deg` }],
-                    }]}
-                  >
-                    <LinearGradient
-                      colors={['rgba(255,210,0,0.75)', 'rgba(255,165,0,0.3)', 'rgba(255,120,0,0.06)']}
-                      start={{ x: 0, y: 0.5 }}
-                      end={{ x: 1, y: 0.5 }}
-                      style={StyleSheet.absoluteFill}
-                    />
-                  </View>
-                ))}
                 <View style={styles.learnWindowOverlay}>
                   <View style={styles.learnRoofWrap}>
                     <Image source={require('@/assets/images/wall.png')} style={styles.learnRoofImage} resizeMode="contain" />
@@ -373,23 +356,6 @@ export default function InsulationGameScreen() {
                 <Text style={styles.learnSunEmoji}>{'\u2600\uFE0F'}</Text>
               </Animated.View>
               <View style={styles.learnRayContainer}>
-                {LEARN_RAY_END_X_INSULATION[1].map((endX, i) => (
-                  <View
-                    key={i}
-                    style={[styles.learnRayBar, {
-                      left: LEARN_RAY_START_X,
-                      width: learnRayLength(endX),
-                      transform: [{ rotate: `${learnRayAngle(endX)}deg` }],
-                    }]}
-                  >
-                    <LinearGradient
-                      colors={['rgba(255,210,0,0.75)', 'rgba(255,165,0,0.3)', 'rgba(255,120,0,0.06)']}
-                      start={{ x: 0, y: 0.5 }}
-                      end={{ x: 1, y: 0.5 }}
-                      style={StyleSheet.absoluteFill}
-                    />
-                  </View>
-                ))}
                 <View style={styles.learnWindowOverlay}>
                   <View style={styles.learnRoofWrap}>
                     <Image source={require('@/assets/images/insulated-wall.png')} style={styles.learnRoofImage} resizeMode="contain" />
@@ -925,7 +891,7 @@ const styles = StyleSheet.create({
     height: 70,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 8,
+    marginBottom: 20,
   },
   learnSunGlow3: { position: 'absolute', width: 100, height: 100, borderRadius: 50, backgroundColor: 'rgba(255,235,59,0.12)' },
   learnSunGlow2: { position: 'absolute', width: 84, height: 84, borderRadius: 42, backgroundColor: 'rgba(255,235,59,0.2)' },
@@ -936,6 +902,7 @@ const styles = StyleSheet.create({
     width: 220,
     height: 165,
     marginBottom: 0,
+    marginTop: 4,
   },
   learnRayBar: {
     position: 'absolute',
