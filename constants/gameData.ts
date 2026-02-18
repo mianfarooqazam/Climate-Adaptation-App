@@ -158,7 +158,7 @@ export const WORLDS: World[] = [
 // ---------------------------------------------------------------------------
 
 export const LEVELS: Level[] = [
-  // ---- World 1: Insulation (4 levels: learn then Roof, Walls, Full Protection) ----
+  // ---- World 1: Insulation (3 levels: learn, Roof, Walls) ----
   {
     id: 'w1-l0',
     worldId: 'w1',
@@ -191,17 +191,6 @@ export const LEVELS: Level[] = [
     difficulty: 1,
     starsRequired: 1,
     fact: 'Uninsulated walls can let in 35% of unwanted heat during summer, making rooms uncomfortable.',
-  },
-  {
-    id: 'w1-l3',
-    worldId: 'w1',
-    order: 4,
-    title: 'Full Protection',
-    type: 'insulation-game',
-    description: 'Insulate both the roof AND the wall to fully protect the house from heat.',
-    difficulty: 2,
-    starsRequired: 3,
-    fact: 'Combining roof and wall insulation can reduce energy bills by up to 40%, saving money and the planet!',
   },
 
   // ---- World 5: Windows (2 levels: learn then practice) ----
@@ -771,12 +760,6 @@ export const INSULATION_LEVEL_CONFIGS: Record<string, InsulationLevelConfig> = {
     availableMaterials: ['insulation'],
     startTemp: 38,
     targetTemp: 30,
-  },
-  'w1-l3': {
-    activeZones: ['roof', 'right-wall'],
-    availableMaterials: ['insulation'],
-    startTemp: 38,
-    targetTemp: 24,
   },
 };
 

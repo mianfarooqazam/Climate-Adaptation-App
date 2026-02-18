@@ -539,7 +539,7 @@ export default function InsulationGameScreen() {
           <Text style={styles.backTxt}>{'\u2190'}</Text>
         </Pressable>
         <Text style={styles.headerTitle}>
-          {levelId === 'w1-l1' ? t('roofShield') : levelId === 'w1-l2' ? t('hotWalls') : levelId === 'w1-l3' ? t('fullProtection') : level.title}
+          {levelId === 'w1-l1' ? t('roofShield') : levelId === 'w1-l2' ? t('hotWalls') : level.title}
         </Text>
         <View style={{ flex: 1 }} />
         <Text style={styles.headerSub}>
