@@ -59,49 +59,36 @@ export default function IntroConversationScreen() {
   };
 
   const isAyesha = step.speaker === 'ayesha';
-  const [ayeshaImgError, setAyeshaImgError] = useState(false);
-  const [usmanImgError, setUsmanImgError] = useState(false);
+  const [imgError, setImgError] = useState(false);
+
+  useEffect(() => {
+    setImgError(false);
+  }, [index]);
 
   return (
     <View style={[styles.container, { paddingTop: insets.top + Spacing.xl, paddingBottom: insets.bottom + Spacing.xl, paddingLeft: insets.left + Spacing.lg, paddingRight: insets.right + Spacing.lg }]}>
       <View style={styles.bgWhite} />
 
       <View style={styles.content}>
-        {/* Always show both characters; only the text changes on Next */}
-        <View style={styles.avatarsRow}>
-          <View style={[styles.avatarBox, isAyesha && styles.avatarActive, { width: avatarW, height: avatarH }]}>
-            {!ayeshaImgError ? (
+        {/* One character at a time, text alongside; no frame around image */}
+        <View style={[styles.speakerRow, isAyesha && styles.speakerRowReverse]}>
+          <View style={[styles.avatarWrap, { width: avatarW, height: avatarH }]}>
+            {!imgError ? (
               <Image
-                source={require('@/assets/images/Ayesha.jpg')}
-                style={styles.avatarFill}
+                source={isAyesha ? require('@/assets/images/Ayesha.jpg') : require('@/assets/images/Usman.jpg')}
+                style={[styles.avatarImg, { width: avatarW, height: avatarH }]}
                 resizeMode="contain"
-                onError={() => setAyeshaImgError(true)}
+                onError={() => setImgError(true)}
               />
             ) : (
-              <View style={[styles.avatarPlaceholder, styles.avatarAyesha]}>
-                <Text style={styles.avatarInitial}>Ay</Text>
+              <View style={[styles.avatarPlaceholder, isAyesha ? styles.avatarAyesha : styles.avatarUsman, { width: avatarW, height: avatarH }]}>
+                <Text style={styles.avatarInitial}>{isAyesha ? 'Ay' : 'Us'}</Text>
               </View>
             )}
           </View>
-
-          <View style={[styles.avatarBox, !isAyesha && styles.avatarActive, { width: avatarW, height: avatarH }]}>
-            {!usmanImgError ? (
-              <Image
-                source={require('@/assets/images/Usman.jpg')}
-                style={styles.avatarFill}
-                resizeMode="contain"
-                onError={() => setUsmanImgError(true)}
-              />
-            ) : (
-              <View style={[styles.avatarPlaceholder, styles.avatarUsman]}>
-                <Text style={styles.avatarInitial}>Us</Text>
-              </View>
-            )}
+          <View style={[styles.bubble, { maxWidth: bubbleMaxW }]}>
+            <Text style={[styles.bubbleText, lang === 'ur' && styles.rtl]}>{t(step.key)}</Text>
           </View>
-        </View>
-
-        <View style={[styles.bubble, { maxWidth: SCREEN_W * 0.72, alignSelf: isAyesha ? 'flex-start' : 'flex-end' }]}>
-          <Text style={[styles.bubbleText, lang === 'ur' && styles.rtl]}>{t(step.key)}</Text>
         </View>
       </View>
 
@@ -140,34 +127,24 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     justifyContent: 'center',
-    gap: Spacing.lg,
   },
-  avatarsRow: {
+  speakerRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: Spacing.lg,
-    width: '100%',
+    gap: Spacing.md,
+    maxWidth: '100%',
   },
-  avatarBox: {
-    backgroundColor: '#fff',
+  speakerRowReverse: {
+    flexDirection: 'row-reverse',
+  },
+  avatarWrap: {
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 16,
-    overflow: 'hidden',
-    ...Shadow.sm,
   },
-  avatarActive: {
-    borderWidth: 3,
-    borderColor: GameColors.primary,
-  },
-  avatarFill: {
-    width: '100%',
-    height: '100%',
+  avatarImg: {
+    backgroundColor: 'transparent',
   },
   avatarPlaceholder: {
-    width: '100%',
-    height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
   },
