@@ -18,6 +18,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import GameButton from '@/components/game/GameButton';
+import LanguageToggle from '@/components/game/LanguageToggle';
 import { useLanguage } from '@/context/LanguageContext';
 import type { TranslationKey } from '@/constants/i18n';
 import { GameColors, Fonts, FontSizes, Spacing, Shadow } from '@/constants/theme';
@@ -68,6 +69,10 @@ export default function IntroConversationScreen() {
   return (
     <View style={[styles.container, { paddingTop: insets.top + Spacing.xl, paddingBottom: insets.bottom + Spacing.xl, paddingLeft: insets.left + Spacing.lg, paddingRight: insets.right + Spacing.lg }]}>
       <View style={styles.bgWhite} />
+
+      <View style={[styles.langToggle, { top: insets.top + Spacing.sm }]}>
+        <LanguageToggle variant="dark" />
+      </View>
 
       <View style={styles.content}>
         {/* One character at a time, text alongside; no frame around image */}
@@ -123,6 +128,11 @@ const styles = StyleSheet.create({
   bgWhite: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: '#fff',
+  },
+  langToggle: {
+    position: 'absolute',
+    right: Spacing.lg,
+    zIndex: 10,
   },
   content: {
     flex: 1,
