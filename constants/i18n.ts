@@ -6,7 +6,7 @@ export type Language = 'en' | 'ur';
 
 const translations = {
   // ---- Title screen ----
-  appTitle: { en: 'EcoHero', ur: '\u0627\u06CC\u06A9\u0648 \u06C1\u06CC\u0631\u0648' },
+  appTitle: { en: 'Little Climate Architects', ur: '\u0686\u06BE\u0648\u0679\u06D2 \u0622\u0628 \u0648 \u06C1\u0648\u0627 \u0645\u0639\u0645\u0627\u0631' },
   appSubtitle: { en: 'Flood Fighters', ur: '\u0633\u06CC\u0644\u0627\u0628 \u0633\u06D2 \u0628\u0686\u0627\u0624' },
   tagline: { en: 'Learn green skills. Save EcoVille!', ur: '\u0633\u0628\u0632 \u0645\u06C1\u0627\u0631\u062A\u06CC\u06BA \u0633\u06CC\u06A9\u06BE\u06CC\u06BA\u06D4 \u0627\u06CC\u06A9\u0648\u0648\u0644 \u0628\u0686\u0627\u0626\u06CC\u06BA!' },
   play: { en: 'Play', ur: '\u06A9\u06BE\u06CC\u0644\u06CC\u06BA' },

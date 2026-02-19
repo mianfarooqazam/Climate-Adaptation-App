@@ -5,36 +5,31 @@
  * profile shortcut. Cartoon-style with floating cloud/leaf animations.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Animated,
-  Easing,
-  Dimensions,
-  Image,
-  Modal,
-  Pressable,
-  ScrollView,
-  useWindowDimensions,
-} from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { LinearGradient } from 'expo-linear-gradient';
+import React, { useEffect, useRef } from 'react';
+import {
+  Animated,
+  Easing,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import GameButton from '@/components/game/GameButton';
-import LanguageToggle from '@/components/game/LanguageToggle';
-import { useGame } from '@/context/GameContext';
-import { useLanguage } from '@/context/LanguageContext';
 import {
-  GameColors,
-  Spacing,
   FontSizes,
   Fonts,
-  Shadow,
+  GameColors,
+  Spacing
 } from '@/constants/theme';
+import { useGame } from '@/context/GameContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 // Floating decorative elements
 function FloatingEmoji({
@@ -98,14 +93,15 @@ function FloatingEmoji({
   );
 }
 
+const MOBILE_BREAKPOINT = 420;
+
 export default function TitleScreen() {
   const router = useRouter();
-  const { totalStars, player } = useGame();
+  useGame();
   const { t } = useLanguage();
-  const [showCreditsModal, setShowCreditsModal] = useState(false);
-  const { width: SCREEN_W, height: SCREEN_H } = useWindowDimensions();
+  const { width: SCREEN_W } = useWindowDimensions();
   const insets = useSafeAreaInsets();
-  const creditsCardHeight = SCREEN_H * 0.5;
+  const isMobile = SCREEN_W < MOBILE_BREAKPOINT;
 
   // Logo bounce animation
   const bounce = useRef(new Animated.Value(0)).current;
@@ -129,7 +125,7 @@ export default function TitleScreen() {
   }, []);
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom, paddingLeft: insets.left + Spacing.lg, paddingRight: insets.right + Spacing.lg }]}>
+    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom, paddingLeft: insets.left + (isMobile ? Spacing.sm : Spacing.lg), paddingRight: insets.right + (isMobile ? Spacing.sm : Spacing.lg) }]}>
       <LinearGradient
         colors={['#81C784', '#43A047', '#2E7D32']}
         style={StyleSheet.absoluteFill}
@@ -142,53 +138,56 @@ export default function TitleScreen() {
       <FloatingEmoji emoji={'\u{1F331}'} delay={2400} startX={SCREEN_W * 0.85} duration={3800} />
       <FloatingEmoji emoji={'\u{2601}'} delay={600} startX={SCREEN_W * 0.15} duration={5500} />
 
-      {/* Language toggle (top-right) */}
-      <View style={[styles.langToggle, { top: insets.top + 14 }]}>
-        <LanguageToggle />
+      {/* GIZ logo — top left */}
+      <View style={[styles.topLeftLogo, { top: insets.top + (isMobile ? 8 : 14), left: insets.left + (isMobile ? Spacing.sm : Spacing.lg) }]}>
+        <Image
+          source={require('@/assets/images/GIZ.png')}
+          style={[styles.gizLogo, isMobile && styles.gizLogoMobile]}
+          resizeMode="contain"
+        />
       </View>
 
-      {/* ---- Main row: Logo left | Buttons right ---- */}
+      {/* SDGs (top-right) */}
+      <View style={[styles.sdgTopRight, { top: insets.top + (isMobile ? 8 : 14), right: insets.right + (isMobile ? Spacing.sm : Spacing.lg) }]}>
+        <View style={styles.sdgRow}>
+          <Image source={require('@/assets/sdgs/E_WEB_04.png')} style={[styles.sdgImage, isMobile && styles.sdgImageMobile]} resizeMode="contain" />
+          <Image source={require('@/assets/sdgs/E_WEB_08.png')} style={[styles.sdgImage, isMobile && styles.sdgImageMobile]} resizeMode="contain" />
+          <Image source={require('@/assets/sdgs/E_WEB_09.png')} style={[styles.sdgImage, isMobile && styles.sdgImageMobile]} resizeMode="contain" />
+          <Image source={require('@/assets/sdgs/E_WEB_10.png')} style={[styles.sdgImage, isMobile && styles.sdgImageMobile]} resizeMode="contain" />
+          <Image source={require('@/assets/sdgs/E_WEB_13.png')} style={[styles.sdgImage, isMobile && styles.sdgImageMobile]} resizeMode="contain" />
+        </View>
+      </View>
+
+      {/* ---- Main: logo + buttons (column on mobile, row on larger) ---- */}
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          isMobile && styles.scrollContentMobile,
+          { paddingBottom: isMobile ? 220 : 200 },
+        ]}
         showsVerticalScrollIndicator={false}
         bounces={false}
       >
-      <View style={styles.mainRow}>
-        {/* Left side: branding */}
-        <View style={styles.leftSide}>
+      <View style={[styles.mainRow, isMobile && styles.mainRowMobile]}>
+        {/* Branding */}
+        <View style={[styles.leftSide, isMobile && styles.leftSideMobile]}>
           <Animated.View
-            style={[styles.logoContainer, { transform: [{ translateY: bounce }] }]}
+            style={[styles.logoContainer, isMobile && styles.logoContainerMobile, { transform: [{ translateY: bounce }] }]}
           >
-            <Text style={styles.logoEmoji}>{'\u{1F30D}'}</Text>
-            <Text style={styles.logoTitle}>{t('appTitle')}</Text>
-            <Text style={styles.logoSubtitle}>{t('appSubtitle')}</Text>
-          </Animated.View>
-
-          {/* Tagline */}
-          <View style={styles.taglineBox}>
-            <Text style={styles.tagline}>
-              {t('tagline')}
+            <Text style={[styles.logoEmoji, isMobile && styles.logoEmojiMobile]}>{'\u{1F30D}'}</Text>
+            <Text style={[styles.logoTitle, isMobile && styles.logoTitleMobile]} numberOfLines={2}>
+              {t('appTitle')}
             </Text>
-          </View>
+          </Animated.View>
         </View>
 
-        {/* Right side: stats + buttons */}
-        <View style={styles.rightSide}>
-          {/* Stats pill */}
-          {totalStars > 0 && (
-            <View style={styles.statsPill}>
-              <Text style={styles.statsText}>
-                {'\u2B50'} {totalStars} {t('stars')} {'  '} {'\u{1F33F}'}{' '}
-                {player.greenScore} {t('greenScore')}
-              </Text>
-            </View>
-          )}
-
+        {/* Buttons */}
+        <View style={[styles.rightSide, isMobile && styles.rightSideMobile]}>
           <GameButton
             title={t('play')}
             emoji={'\u{1F3AE}'}
             onPress={() => router.push('/intro-conversation')}
-            size="lg"
+            size={isMobile ? 'md' : 'lg'}
             color={GameColors.sun}
             textColor={GameColors.primaryDark}
           />
@@ -197,75 +196,32 @@ export default function TitleScreen() {
             title={t('myProfile')}
             emoji={'\u{1F9B8}'}
             onPress={() => router.push('/profile')}
-            size="md"
-            color="rgba(255,255,255,0.25)"
+            size={isMobile ? 'md' : 'lg'}
+            color="#757575"
             textColor="#fff"
           />
-
-          {/* Credits (press to show GIZ logo) */}
-          <Pressable
-            onPress={() => setShowCreditsModal(true)}
-            style={({ pressed }) => [styles.creditsPressable, pressed && styles.creditsPressablePressed]}
-          >
-            <Text style={styles.creditsLabel}>{t('credits')}</Text>
-          </Pressable>
         </View>
       </View>
       </ScrollView>
 
-      {/* Credits modal: 50% screen, card UI with close */}
-      <Modal
-        visible={showCreditsModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowCreditsModal(false)}
-      >
-        <Pressable style={styles.creditsOverlay} onPress={() => setShowCreditsModal(false)}>
-          <Pressable
-            style={[styles.creditsCard, { height: creditsCardHeight }]}
-            onPress={(e) => e.stopPropagation()}
+      {/* Bottom: credits text */}
+      <View style={[styles.bottomBlock, { paddingBottom: insets.bottom + 14, paddingLeft: insets.left + (isMobile ? Spacing.md : Spacing.lg), paddingRight: insets.right + (isMobile ? Spacing.md : Spacing.lg) }]}>
+        <View style={[styles.creditsBox, isMobile && styles.creditsBoxMobile]}>
+          <ScrollView
+            style={[styles.creditsScrollInline, isMobile && styles.creditsScrollInlineMobile]}
+            contentContainerStyle={styles.creditsScrollContentInline}
+            showsVerticalScrollIndicator={true}
           >
-            <View style={styles.creditsCardHeader}>
-              <Image
-                source={require('@/assets/images/GIZ.png')}
-                style={styles.creditsHeaderLogo}
-                resizeMode="contain"
-              />
-              <Pressable
-                style={({ pressed }) => [styles.creditsCloseBtn, pressed && styles.creditsCloseBtnPressed]}
-                onPress={() => setShowCreditsModal(false)}
-              >
-                <Text style={styles.creditsCloseBtnText}>✕</Text>
-              </Pressable>
-            </View>
-            <ScrollView
-              style={styles.creditsScroll}
-              contentContainerStyle={styles.creditsScrollContent}
-              showsVerticalScrollIndicator={true}
-            >
-              <Text style={styles.creditsProjectText}>
-                This app was developed under the project <Text style={styles.creditsProjectTextBold}>"Mainstreaming Green Skills for Climate
-                Adaptation: Capacity Building and Policy Advocacy in KP"</Text>.{'\n'}Funded by the <Text style={styles.creditsProjectTextBold}>German
-                Federal Ministry for Economic Cooperation and Development (BMZ)</Text> and supported by
-                the <Text style={styles.creditsProjectTextBold}>Deutsche Gesellschaft für
-                Internationale Zusammenarbeit (GIZ) GmbH</Text>.
-              </Text>
-              <Text style={styles.creditsSdgHeading}>Sustainable Development Goals</Text>
-              <View style={styles.creditsSdgRow}>
-                <Image source={require('@/assets/sdgs/E_WEB_04.png')} style={styles.creditsSdgImage} resizeMode="contain" />
-                <Image source={require('@/assets/sdgs/E_WEB_08.png')} style={styles.creditsSdgImage} resizeMode="contain" />
-                <Image source={require('@/assets/sdgs/E_WEB_09.png')} style={styles.creditsSdgImage} resizeMode="contain" />
-                <Image source={require('@/assets/sdgs/E_WEB_10.png')} style={styles.creditsSdgImage} resizeMode="contain" />
-                <Image source={require('@/assets/sdgs/E_WEB_13.png')} style={styles.creditsSdgImage} resizeMode="contain" />
-              </View>
-            </ScrollView>
-          </Pressable>
-        </Pressable>
-      </Modal>
-
-      <Text style={[styles.footer, { bottom: insets.bottom + 14 }]}>
-        {t('footer')}
-      </Text>
+            <Text style={[styles.creditsProjectText, isMobile && styles.creditsProjectTextMobile]}>
+              This app is developed under the project <Text style={styles.creditsProjectTextBold}>"Mainstreaming Green Skills for Climate
+              Adaptation: Capacity Building and Policy Advocacy in KP"</Text>. Funded by the <Text style={styles.creditsProjectTextBold}>German
+              Federal Ministry for Economic Cooperation and Development (BMZ)</Text> and supported by
+              the <Text style={styles.creditsProjectTextBold}>Deutsche Gesellschaft für
+              Internationale Zusammenarbeit (GIZ) GmbH</Text>.
+            </Text>
+          </ScrollView>
+        </View>
+      </View>
 
       <StatusBar style="light" />
     </View>
@@ -287,13 +243,19 @@ const styles = StyleSheet.create({
     width: '100%',
     alignSelf: 'center',
   },
+  scrollContentMobile: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    paddingVertical: Spacing.sm,
+    paddingTop: 56,
+  },
   floatingEmoji: {
     position: 'absolute',
     bottom: 40,
     fontSize: 28,
   },
 
-  /* --- Landscape row layout --- */
+  /* --- Main layout: row on wide, column on mobile --- */
   mainRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -302,14 +264,32 @@ const styles = StyleSheet.create({
     maxWidth: 700,
     gap: Spacing.xl,
   },
+  mainRowMobile: {
+    flexDirection: 'column',
+    gap: Spacing.md,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+  },
   leftSide: {
     flex: 1,
     alignItems: 'center',
+    minWidth: 0,
+  },
+  leftSideMobile: {
+    flex: 0,
+    width: '100%',
   },
   rightSide: {
     flex: 1,
     alignItems: 'center',
     gap: Spacing.md,
+    minWidth: 0,
+  },
+  rightSideMobile: {
+    flex: 0,
+    width: '100%',
+    maxWidth: 280,
+    alignSelf: 'center',
   },
 
   /* --- Logo --- */
@@ -317,9 +297,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: Spacing.sm,
   },
+  logoContainerMobile: {
+    marginBottom: Spacing.xs,
+  },
   logoEmoji: {
     fontSize: 60,
     marginBottom: Spacing.xs,
+  },
+  logoEmojiMobile: {
+    fontSize: 36,
   },
   logoTitle: {
     fontFamily: Fonts.rounded,
@@ -327,161 +313,86 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: '#fff',
     letterSpacing: 2,
+    textAlign: 'center',
     textShadowColor: 'rgba(0,0,0,0.3)',
     textShadowOffset: { width: 0, height: 3 },
     textShadowRadius: 6,
   },
-  logoSubtitle: {
-    fontFamily: Fonts.rounded,
-    fontSize: FontSizes.xl - 2,
-    fontWeight: '700',
-    color: GameColors.sunLight,
-    letterSpacing: 1,
-    marginTop: -2,
+  logoTitleMobile: {
+    fontSize: 14,
+    letterSpacing: 0.5,
   },
-  taglineBox: {
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    borderRadius: 16,
-    paddingHorizontal: 18,
-    paddingVertical: 8,
+  topLeftLogo: {
+    position: 'absolute',
+    zIndex: 10,
   },
-  tagline: {
-    fontFamily: Fonts.rounded,
-    fontSize: FontSizes.md,
-    color: '#fff',
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  statsPill: {
-    backgroundColor: 'rgba(0,0,0,0.15)',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-  },
-  statsText: {
-    fontFamily: Fonts.rounded,
-    fontSize: FontSizes.sm,
-    color: '#fff',
-    fontWeight: '600',
-  },
-  creditsPressable: {
-    marginTop: Spacing.lg,
-    paddingVertical: Spacing.xs,
-    paddingHorizontal: Spacing.sm,
-  },
-  creditsPressablePressed: {
-    opacity: 0.7,
-  },
-  creditsLabel: {
-    fontFamily: Fonts.rounded,
-    fontSize: FontSizes.sm,
-    color: 'rgba(255,255,255,0.85)',
-    fontWeight: '700',
-  },
-  creditsOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.45)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: Spacing.xl,
-  },
-  creditsCard: {
-    width: '100%',
-    maxWidth: 420,
-    backgroundColor: '#fff',
-    borderRadius: 24,
-    overflow: 'hidden',
-    ...Shadow.md,
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 24,
-  },
-  creditsCardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.06)',
-    backgroundColor: 'rgba(67, 160, 71, 0.06)',
-  },
-  creditsHeaderLogo: {
+  gizLogo: {
     width: 100,
     height: 40,
   },
-  creditsCloseBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(0,0,0,0.06)',
-    justifyContent: 'center',
-    alignItems: 'center',
+  gizLogoMobile: {
+    width: 72,
+    height: 28,
   },
-  creditsCloseBtnPressed: {
-    opacity: 0.7,
-    backgroundColor: 'rgba(0,0,0,0.1)',
+  bottomBlock: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 10,
   },
-  creditsCloseBtnText: {
-    fontSize: 18,
-    color: '#444',
-    fontWeight: '600',
+  creditsBox: {
+    maxHeight: 100,
+    width: '100%',
+    marginBottom: Spacing.sm,
   },
-  creditsScroll: {
-    flex: 1,
+  creditsBoxMobile: {
+    maxHeight: 72,
+    marginBottom: Spacing.xs,
   },
-  creditsScrollContent: {
-    alignItems: 'center',
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.md,
-    paddingBottom: Spacing.xl,
+  creditsScrollInline: {
+    maxHeight: 80,
+  },
+  creditsScrollInlineMobile: {
+    maxHeight: 58,
+  },
+  creditsScrollContentInline: {
+    paddingVertical: 2,
   },
   creditsProjectText: {
     fontFamily: Fonts.rounded,
     fontSize: FontSizes.sm,
-    color: '#444',
+    color: '#fff',
     textAlign: 'justify',
-    lineHeight: 22,
-    marginBottom: Spacing.md,
+    lineHeight: 20,
     width: '100%',
+  },
+  creditsProjectTextMobile: {
+    fontSize: 7,
+    lineHeight: 11,
   },
   creditsProjectTextBold: {
     fontWeight: '700',
   },
-  creditsSdgHeading: {
-    fontFamily: Fonts.rounded,
-    fontSize: FontSizes.sm,
-    fontWeight: '700',
-    color: '#2E7D32',
-    marginBottom: Spacing.sm,
-    letterSpacing: 0.3,
-  },
-  creditsSdgRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: 10,
-  },
-  creditsSdgImage: {
-    width: 52,
-    height: 52,
-    borderRadius: 10,
-  },
-  langToggle: {
+  sdgTopRight: {
     position: 'absolute',
-    top: 14,
-    right: 20,
     zIndex: 10,
   },
-  footer: {
-    position: 'absolute',
-    bottom: 14,
-    fontFamily: Fonts.rounded,
-    fontSize: FontSizes.xs,
-    color: 'rgba(255,255,255,0.6)',
-    textAlign: 'center',
-    fontWeight: '600',
+  sdgRow: {
+    flexDirection: 'row',
+    flexWrap: 'nowrap',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: 6,
+  },
+  sdgImage: {
+    width: 36,
+    height: 36,
+    borderRadius: 6,
+  },
+  sdgImageMobile: {
+    width: 28,
+    height: 28,
+    borderRadius: 4,
   },
 });
