@@ -6,7 +6,7 @@
 // Types
 // ---------------------------------------------------------------------------
 
-export type MiniGameType = 'quiz' | 'flood-defense' | 'eco-builder' | 'sorting' | 'insulation-game' | 'windows-game' | 'roof-garden-game' | 'build-home';
+export type MiniGameType = 'quiz' | 'flood-defense' | 'eco-builder' | 'sorting' | 'insulation-game' | 'windows-game' | 'roof-garden-game';
 
 export interface QuizQuestion {
   id: string;
@@ -139,18 +139,6 @@ export const WORLDS: World[] = [
       'Green roofs keep buildings cooler and help nature. Drag plants onto the roof to create your roof garden.',
     starsToUnlock: 6,
   },
-  {
-    id: 'w7',
-    order: 4,
-    title: 'Build your home',
-    subtitle: 'Explore in 3D',
-    emoji: '\u{1F3D7}', // 🏗
-    color: '#5D4037',
-    gradientEnd: '#8D6E63',
-    description:
-      'Walk around in a 3D world. Use the joystick to move your character and explore your home.',
-    starsToUnlock: 12,
-  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -225,19 +213,6 @@ export const LEVELS: Level[] = [
     difficulty: 1,
     starsRequired: 0,
     fact: 'Triple-layer windows block the most heat and keep families comfortable on hot days.',
-  },
-
-  // ---- World 7: Build your home ----
-  {
-    id: 'w7-l1',
-    worldId: 'w7',
-    order: 1,
-    title: 'Explore Your Home',
-    type: 'build-home',
-    description: 'Move around with the joystick and explore the 3D world.',
-    difficulty: 1,
-    starsRequired: 0,
-    fact: 'Exploring your space helps you understand how to make it more climate-friendly.',
   },
 
   // ---- World 8: Roof Garden (1 level) ----

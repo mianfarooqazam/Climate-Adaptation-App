@@ -45,7 +45,6 @@ const TYPE_ROUTE: Record<MiniGameType, string> = {
   'insulation-game': '/insulation-game',
   'windows-game': '/windows-game',
   'roof-garden-game': '/roof-garden-game',
-  'build-home': '/build-home',
 };
 
 const TYPE_EMOJI: Record<MiniGameType, string> = {
@@ -56,7 +55,6 @@ const TYPE_EMOJI: Record<MiniGameType, string> = {
   'insulation-game': '\u{1F3E0}', // 🏠
   'windows-game': '\u{1FA9F}',    // 🪟
   'roof-garden-game': '\u{1F33B}', // 🌻
-  'build-home': '\u{1F3D7}',      // 🏗
 };
 
 const TYPE_LABEL_EN: Record<MiniGameType, string> = {
@@ -67,36 +65,31 @@ const TYPE_LABEL_EN: Record<MiniGameType, string> = {
   'insulation-game': 'Insulation',
   'windows-game': 'Windows',
   'roof-garden-game': 'Roof Garden',
-  'build-home': 'Build Home',
 };
 
 // Maps for insulation world translated titles & descriptions
-const LEVEL_TITLE_KEY: Record<string, 'whatIsInsulationTitle' | 'roofShield' | 'hotWalls' | 'compareLevel' | 'learnLayersTitle' | 'addRightWindowTitle' | 'buildHomeExplore' | 'roofGardenLevelTitle'> = {
+const LEVEL_TITLE_KEY: Record<string, 'whatIsInsulationTitle' | 'roofShield' | 'hotWalls' | 'compareLevel' | 'learnLayersTitle' | 'addRightWindowTitle' | 'roofGardenLevelTitle'> = {
   'w1-l0': 'whatIsInsulationTitle',
   'w1-l1': 'roofShield',
   'w1-l2': 'hotWalls',
   'w1-l3': 'compareLevel',
   'w5-l1': 'learnLayersTitle',
   'w5-l2': 'addRightWindowTitle',
-  'w7-l1': 'buildHomeExplore',
   'w8-l1': 'roofGardenLevelTitle',
 };
-const WORLD_TITLE_KEY: Record<string, 'w1Title' | 'w5Title' | 'w7Title' | 'w8Title'> = {
+const WORLD_TITLE_KEY: Record<string, 'w1Title' | 'w5Title' | 'w8Title'> = {
   w1: 'w1Title',
   w5: 'w5Title',
-  w7: 'w7Title',
   w8: 'w8Title',
 };
-const WORLD_SUBTITLE_KEY: Record<string, 'w1Subtitle' | 'w5Subtitle' | 'w7Subtitle' | 'w8Subtitle'> = {
+const WORLD_SUBTITLE_KEY: Record<string, 'w1Subtitle' | 'w5Subtitle' | 'w8Subtitle'> = {
   w1: 'w1Subtitle',
   w5: 'w5Subtitle',
-  w7: 'w7Subtitle',
   w8: 'w8Subtitle',
 };
-const WORLD_DESC_KEY: Record<string, 'w1Description' | 'w5Description' | 'w7Description' | 'w8Description'> = {
+const WORLD_DESC_KEY: Record<string, 'w1Description' | 'w5Description' | 'w8Description'> = {
   w1: 'w1Description',
   w5: 'w5Description',
-  w7: 'w7Description',
   w8: 'w8Description',
 };
 

@@ -177,7 +177,6 @@ export default function LevelCompleteScreen() {
                 'insulation-game': '/insulation-game',
                 'windows-game': '/windows-game',
                 'roof-garden-game': '/roof-garden-game',
-                'build-home': '/build-home',
               };
               router.replace({
                 pathname: typeRoute[nextLevel.type] as any,
@@ -200,7 +199,7 @@ export default function LevelCompleteScreen() {
               sorting: '/sorting',
               'insulation-game': '/insulation-game',
               'windows-game': '/windows-game',
-              'build-home': '/build-home',
+              'roof-garden-game': '/roof-garden-game',
             };
             router.replace({
               pathname: typeRoute[level?.type ?? 'quiz'] as any,
