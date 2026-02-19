@@ -376,6 +376,43 @@ export default function InsulationGameScreen() {
     );
   }
 
+  // ---- Compare level (w1-l3): blank screen, 50% 1.jpg | 50% 2.jpg ----
+  const isCompareLevel = levelId === 'w1-l3';
+  const finishCompareLevel = useCallback(() => {
+    completeLevel('w1-l3', 30, 30);
+    router.replace({
+      pathname: '/level-complete',
+      params: { levelId: 'w1-l3', stars: '3', score: '30', maxScore: '30' },
+    });
+  }, [completeLevel, router]);
+
+  if (isCompareLevel && level) {
+    return (
+      <View style={[styles.root, styles.compareRoot]}>
+        <View style={[styles.header, { paddingTop: insets.top, paddingLeft: insets.left + Spacing.md, paddingRight: insets.right + Spacing.md }]}>
+          <Pressable onPress={() => router.back()} style={styles.backBtn}>
+            <Text style={styles.backTxt}>{'\u2190'}</Text>
+          </Pressable>
+          <Text style={[styles.headerTitle, lang === 'ur' && styles.rtl]}>{t('compareLevel')}</Text>
+          <View style={{ flex: 1 }} />
+          <LanguageToggle />
+        </View>
+        <View style={styles.compareRow}>
+          <View style={styles.compareHalf}>
+            <Image source={require('@/assets/images/1.jpg')} style={styles.compareImage} resizeMode="contain" />
+          </View>
+          <View style={styles.compareHalf}>
+            <Image source={require('@/assets/images/2.jpg')} style={styles.compareImage} resizeMode="contain" />
+          </View>
+        </View>
+        <Pressable style={styles.learnContinueWrap} onPress={finishCompareLevel}>
+          <Text style={[styles.learnContinueText, lang === 'ur' && styles.rtl]}>{t('continueBtn')}</Text>
+          <Text style={styles.learnContinueArrow}>{'\u27A1'}</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
   // ---- Animations ----
   const rayOpacities = useRef<Record<string, Animated.Value>>({
     roof: new Animated.Value(1),
@@ -989,6 +1026,11 @@ const styles = StyleSheet.create({
   },
   learnContinueText: { fontFamily: Fonts.rounded, fontSize: FontSizes.md, fontWeight: '800', color: '#fff' },
   learnContinueArrow: { fontSize: 20, color: '#fff', fontWeight: '700' },
+
+  compareRoot: { backgroundColor: '#fff' },
+  compareRow: { flex: 1, flexDirection: 'row', width: '100%' },
+  compareHalf: { flex: 1, width: '50%' },
+  compareImage: { width: '100%', height: '100%' },
 
   mainRow: { flex: 1, flexDirection: 'row' },
   leftDragColumn: {

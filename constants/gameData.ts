@@ -192,6 +192,16 @@ export const LEVELS: Level[] = [
     starsRequired: 1,
     fact: 'Uninsulated walls can let in 35% of unwanted heat during summer, making rooms uncomfortable.',
   },
+  {
+    id: 'w1-l3',
+    worldId: 'w1',
+    order: 4,
+    title: 'Compare',
+    type: 'insulation-game',
+    description: 'Compare two images side by side.',
+    difficulty: 1,
+    starsRequired: 2,
+  },
 
   // ---- World 5: Windows (2 levels: learn then practice) ----
   {

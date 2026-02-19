@@ -121,6 +121,7 @@ const translations = {
   },
   roofShield: { en: 'Roof', ur: '\u0686\u06BE\u062A' },
   hotWalls: { en: 'Walls', ur: '\u062F\u06CC\u0648\u0627\u0631\u06CC\u06BA' },
+  compareLevel: { en: 'Compare', ur: '\u0645\u0642\u0627\u0628\u0644\u06C1' },
   fullProtection: { en: 'Full Protection', ur: '\u0645\u06A9\u0645\u0644 \u062A\u062D\u0641\u0638' },
   windowLayers: { en: 'Window Layers', ur: '\u06A9\u06BE\u0691\u06A9\u06CC \u06A9\u06CC \u062A\u06C1\u06C1\u06CC\u06BA' },
   learnLayersTitle: { en: 'What Are Window Layers?', ur: '\u06A9\u06BE\u0691\u06A9\u06CC \u06A9\u06CC \u062A\u06C1\u06C1\u06CC\u06BA \u06A9\u06CC\u0627 \u06C1\u06CC\u06BA؟' },

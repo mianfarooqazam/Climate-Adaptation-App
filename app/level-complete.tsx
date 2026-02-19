@@ -150,6 +150,8 @@ export default function LevelCompleteScreen() {
             ? t('roofShield')
             : levelId === 'w1-l2'
             ? t('hotWalls')
+            : levelId === 'w1-l3'
+            ? t('compareLevel')
             : levelId === 'w5-l1'
             ? t('learnLayersTitle')
             : levelId === 'w5-l2'
