@@ -51,6 +51,8 @@ export default function LevelCompleteScreen() {
   const { t } = useLanguage();
   const insets = useSafeAreaInsets();
 
+  const isLearnOnlyLevel = levelId === 'w1-l0' || levelId === 'w5-l1';
+
   const level = getLevelById(levelId ?? '');
   const world = getWorldById(level?.worldId ?? '');
   const starCount = parseInt(stars ?? '0', 10);
@@ -116,52 +118,52 @@ export default function LevelCompleteScreen() {
         <LanguageToggle />
       </View>
 
-      <Animated.View
-        style={[
-          styles.card,
-          Shadow.lg,
-          {
-            transform: [{ scale: containerScale }],
-            opacity: containerOpacity,
-          },
-        ]}
-      >
-        {/* Stars */}
-        <Animated.View style={{ transform: [{ scale: starScale }] }}>
-          <StarRating stars={starCount} size={44} />
-        </Animated.View>
+      {!isLearnOnlyLevel && (
+        <Animated.View
+          style={[
+            styles.card,
+            Shadow.lg,
+            {
+              transform: [{ scale: containerScale }],
+              opacity: containerOpacity,
+            },
+          ]}
+        >
+          {/* Stars */}
+          <Animated.View style={{ transform: [{ scale: starScale }] }}>
+            <StarRating stars={starCount} size={44} />
+          </Animated.View>
 
-        {/* Message */}
-        <Text style={styles.message}>{getMessage()}</Text>
+          {/* Message */}
+          <Text style={styles.message}>{getMessage()}</Text>
 
-        {/* Score */}
-        <View style={styles.scoreRow}>
-          <Text style={styles.scoreLabel}>{t('score')}</Text>
-          <Text style={styles.scoreValue}>
-            {scoreNum} / {maxScoreNum}
+          {/* Score */}
+          <View style={styles.scoreRow}>
+            <Text style={styles.scoreLabel}>{t('score')}</Text>
+            <Text style={styles.scoreValue}>
+              {scoreNum} / {maxScoreNum}
+            </Text>
+          </View>
+
+          {/* Level name */}
+          <Text style={styles.levelName}>
+            {levelId === 'w1-l1'
+              ? t('roofShield')
+              : levelId === 'w1-l2'
+              ? t('hotWalls')
+              : levelId === 'w5-l1'
+              ? t('learnLayersTitle')
+              : levelId === 'w5-l2'
+              ? t('addRightWindowTitle')
+              : levelId === 'w8-l1'
+              ? t('roofGardenLevelTitle')
+              : level?.title ?? 'Level'}
           </Text>
-        </View>
-
-        {/* Level name */}
-        <Text style={styles.levelName}>
-          {levelId === 'w1-l0'
-            ? t('whatIsInsulationTitle')
-            : levelId === 'w1-l1'
-            ? t('roofShield')
-            : levelId === 'w1-l2'
-            ? t('hotWalls')
-            : levelId === 'w5-l1'
-            ? t('learnLayersTitle')
-            : levelId === 'w5-l2'
-            ? t('addRightWindowTitle')
-            : levelId === 'w8-l1'
-            ? t('roofGardenLevelTitle')
-            : level?.title ?? 'Level'}
-        </Text>
-      </Animated.View>
+        </Animated.View>
+      )}
 
       {/* Buttons */}
-      <View style={styles.buttons}>
+      <View style={[styles.buttons, isLearnOnlyLevel && styles.buttonsLearnOnly]}>
         {nextLevel && nextUnlocked && (
           <GameButton
             title={t('nextLevel')}
@@ -284,5 +286,8 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 340,
     alignItems: 'center',
+  },
+  buttonsLearnOnly: {
+    marginTop: 0,
   },
 });
