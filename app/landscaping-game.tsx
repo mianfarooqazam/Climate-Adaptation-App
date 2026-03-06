@@ -319,6 +319,6 @@ const styles = StyleSheet.create({
     gap: Spacing.lg,
     backgroundColor: 'rgba(46,125,50,0.9)',
   },
-  trayLabel: { fontFamily: Fonts.rounded, fontSize: FontSizes.sm, fontWeight: '700', color: '#fff' },
+  trayLabel: { fontFamily: Fonts.rounded, fontSize: FontSizes.sm, fontWeight: '700', color: '#000' },
   dragTreeWrap: { alignItems: 'center', justifyContent: 'center' },
 });

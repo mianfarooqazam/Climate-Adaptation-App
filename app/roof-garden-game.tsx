@@ -978,7 +978,7 @@ const styles = StyleSheet.create({
   helper: {
     fontFamily: Fonts.rounded,
     fontWeight: '700',
-    color: '#C8E6C9',
+    color: '#000',
     textAlign: 'center',
     fontSize: FontSizes.sm,
     maxWidth: 180,
