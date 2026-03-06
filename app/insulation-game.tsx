@@ -61,9 +61,8 @@ const SCENE_H = SCR_H - HEADER_H;
 
 const THERMO_W = 80;
 
-// 3D depth
+// 3D depth (same as roof garden / windows game)
 const SIDE_D = 50;
-const SIDE_WALL_W = 70; // right side wall (same brick as left, a little bigger)
 
 // House front-face dimensions (centered: house + side + thermo block)
 const PAD_H = 24;
@@ -653,11 +652,11 @@ export default function InsulationGameScreen() {
           {/* ---- GROUND SHADOW ---- */}
           <View style={styles.groundShadow} />
 
-          {/* ---- 3D: RIGHT SIDE WALL (same as left wall, like windows world — no brown block) ---- */}
-          <View style={styles.sideWall}>
+          {/* ---- 3D: RIGHT SIDE WALL (same as roof garden — brick, same dimensions and borders) ---- */}
+          <View style={[styles.sideWall, { backgroundColor: '#BCAAA4' }]}>
             {Array.from({ length: Math.floor(WALL_H / 18) }).map((_, i) => (
-              <View key={i} style={[styles.brickRow, i % 2 === 1 && { paddingLeft: 12 }]}>
-                {Array.from({ length: 3 }).map((__, j) => (
+              <View key={i} style={[styles.brickRow, i % 2 === 1 && { paddingLeft: 8 }]}>
+                {Array.from({ length: 2 }).map((__, j) => (
                   <View key={j} style={styles.brick} />
                 ))}
               </View>
@@ -1056,20 +1055,21 @@ const styles = StyleSheet.create({
     zIndex: 0,
   },
 
-  // ---- 3D: Right side wall (same as left wall brick, like windows world — no brown block) ----
+  // ---- 3D: Right side wall (same as roof garden — brick, same dimensions and borders) ----
   sideWall: {
     position: 'absolute',
     left: H_W,
     top: ROOF_H,
-    width: SIDE_WALL_W,
+    width: SIDE_D,
     height: WALL_H,
-    backgroundColor: '#D7CCC8',
-    transform: [{ skewY: '-6deg' }],
     overflow: 'hidden',
-    zIndex: 1,
-    borderRightWidth: 2,
-    borderBottomWidth: 1,
-    borderColor: '#8D6E63',
+    zIndex: 2,
+    borderRightWidth: 3,
+    borderBottomWidth: 2,
+    borderLeftWidth: 2,
+    borderTopWidth: 2,
+    borderColor: '#5D4037',
+    borderRadius: 2,
   },
 
   // ---- Chimney (front face only) ----
