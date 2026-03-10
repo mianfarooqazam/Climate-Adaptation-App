@@ -882,9 +882,9 @@ export default function WindowsGameScreen() {
 
         {/* ===== Drag tray at bottom ===== */}
         <View style={styles.bottomDragTray}>
-          {!isPracticeLevel && (
-            <Text style={[styles.helper, lang === 'ur' && styles.rtl]}>{t('chooseWindow')}</Text>
-          )}
+          <Text style={[styles.helper, lang === 'ur' && styles.rtl]}>
+            {isPracticeLevel ? t('dragWindow') : t('chooseWindow')}
+          </Text>
           <View style={styles.layerButtons}>
             {isPracticeLevel ? (
               <>
