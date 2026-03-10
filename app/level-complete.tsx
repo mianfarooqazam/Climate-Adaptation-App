@@ -52,6 +52,7 @@ export default function LevelCompleteScreen() {
   const insets = useSafeAreaInsets();
 
   const isLearnOnlyLevel = levelId === 'w1-l0' || levelId === 'w5-l1';
+  const hideScore = levelId === 'w1-l1' || levelId === 'w1-l2'; // roof & walls in insulation world
 
   const level = getLevelById(levelId ?? '');
   const world = getWorldById(level?.worldId ?? '');
@@ -137,13 +138,15 @@ export default function LevelCompleteScreen() {
           {/* Message */}
           <Text style={styles.message}>{getMessage()}</Text>
 
-          {/* Score */}
-          <View style={styles.scoreRow}>
-            <Text style={styles.scoreLabel}>{t('score')}</Text>
-            <Text style={styles.scoreValue}>
-              {scoreNum} / {maxScoreNum}
-            </Text>
-          </View>
+          {/* Score — hidden for insulation roof (w1-l1) and walls (w1-l2) */}
+          {!hideScore && (
+            <View style={styles.scoreRow}>
+              <Text style={styles.scoreLabel}>{t('score')}</Text>
+              <Text style={styles.scoreValue}>
+                {scoreNum} / {maxScoreNum}
+              </Text>
+            </View>
+          )}
 
           {/* Level name */}
           <Text style={styles.levelName}>

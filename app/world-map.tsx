@@ -116,9 +116,10 @@ function WorldCard({
 
             {unlocked ? (
               <View style={styles.starRow}>
-                <Text style={styles.starCount}>
-                  {'\u2B50'} {starsEarned} / {totalStars}
-                </Text>
+                <StarRating
+                  stars={totalStars > 0 ? Math.round(3 * (starsEarned / totalStars)) : 0}
+                  size={20}
+                />
               </View>
             ) : (
               <Text style={styles.lockText}>
