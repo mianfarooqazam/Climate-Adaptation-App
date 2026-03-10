@@ -319,8 +319,8 @@ const styles = StyleSheet.create({
     textShadowRadius: 6,
   },
   logoTitleMobile: {
-    fontSize: 14,
-    letterSpacing: 0.5,
+    fontSize: FontSizes.lg,
+    letterSpacing: 1.2,
   },
   topLeftLogo: {
     position: 'absolute',

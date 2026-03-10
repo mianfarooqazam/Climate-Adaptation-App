@@ -767,9 +767,7 @@ export default function InsulationGameScreen() {
         <View style={styles.bottomDragTray}>
           {remaining > 0 && selectedMaterial ? (
             <>
-              <Text style={styles.trayLabel}>
-                {t('dragInsulation')} {'\u2191'}
-              </Text>
+              <Text style={styles.trayLabel}>{t('dragInsulation')}</Text>
               <View style={styles.bottomTrayRow}>
                 {activeSet.has('roof') && !insulatedZones['roof'] && (
                   <Animated.View
@@ -782,12 +780,8 @@ export default function InsulationGameScreen() {
                       },
                     ]}
                   >
-                    <View style={styles.dragImageWrap}>
-                      <Image
-                        source={require('@/assets/images/insulation.jpeg')}
-                        style={styles.dragInsulationImage}
-                        resizeMode="cover"
-                      />
+                    <View style={styles.dragBlock}>
+                      <View style={styles.dragBlockInner} />
                     </View>
                   </Animated.View>
                 )}
@@ -802,12 +796,8 @@ export default function InsulationGameScreen() {
                       },
                     ]}
                   >
-                    <View style={styles.dragImageWrap}>
-                      <Image
-                        source={require('@/assets/images/insulation.jpeg')}
-                        style={styles.dragInsulationImage}
-                        resizeMode="cover"
-                      />
+                    <View style={styles.dragBlock}>
+                      <View style={styles.dragBlockInner} />
                     </View>
                   </Animated.View>
                 )}
@@ -1298,8 +1288,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xl, gap: Spacing.xl,
     backgroundColor: 'rgba(62,39,35,0.88)',
   },
-  trayLabel: { fontFamily: Fonts.rounded, fontSize: FontSizes.md, fontWeight: '700', color: '#000' },
+  trayLabel: { fontFamily: Fonts.rounded, fontSize: FontSizes.md, fontWeight: '700', color: '#fff' },
   dragItem: { alignItems: 'center', gap: 4 },
+  dragBlock: {
+    width: 72,
+    height: 56,
+    borderRadius: 8,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2,
+    borderColor: '#CFD8DC',
+    justifyContent: 'center',
+    alignItems: 'center',
+    ...Shadow.md,
+  },
+  dragBlockInner: {
+    width: '80%',
+    height: '55%',
+    borderRadius: 6,
+    backgroundColor: '#ECEFF1',
+    borderWidth: 1,
+    borderColor: '#B0BEC5',
+  },
   dragImageWrap: {
     width: 72,
     height: 56,

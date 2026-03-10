@@ -260,6 +260,8 @@ const PLANTS = [
   { id: 'p2', emoji: '\u{1F33F}', labelKey: 'plantHerb' as TranslationKey },
   { id: 'p3', emoji: '\u{1F33B}', labelKey: 'plantSunflower' as TranslationKey },
 ];
+// Only the seedling is draggable; roof will show all three
+const DRAGGABLE_PLANTS = [PLANTS[0]];
 
 // ============================================================================
 // SCREEN
@@ -376,7 +378,7 @@ export default function RoofGardenGameScreen() {
   const [showDragHintModal, setShowDragHintModal] = useState(false);
   const dragXY = useRef<Record<string, Animated.ValueXY>>({});
   const scaleVal = useRef<Record<string, Animated.Value>>({});
-  PLANTS.forEach((p) => {
+  DRAGGABLE_PLANTS.forEach((p) => {
     if (!dragXY.current[p.id]) dragXY.current[p.id] = new Animated.ValueXY({ x: 0, y: 0 });
     if (!scaleVal.current[p.id]) scaleVal.current[p.id] = new Animated.Value(1);
   });
@@ -409,7 +411,10 @@ export default function RoofGardenGameScreen() {
   []);
 
   const panResponders = useRef(
-    PLANTS.reduce((acc, p) => ({ ...acc, [p.id]: makePlantPanResponder(p.id) }), {} as Record<string, ReturnType<typeof PanResponder.create>>)
+    DRAGGABLE_PLANTS.reduce(
+      (acc, p) => ({ ...acc, [p.id]: makePlantPanResponder(p.id) }),
+      {} as Record<string, ReturnType<typeof PanResponder.create>>,
+    )
   ).current;
 
   return (
@@ -600,7 +605,7 @@ export default function RoofGardenGameScreen() {
         <View style={styles.bottomDragTray}>
           <Text style={[styles.helper, lang === 'ur' && styles.rtl]}>{t('dragPlantsToRoof')}</Text>
           <View style={styles.plantButtonsRow}>
-            {PLANTS.map((plant) => (
+            {DRAGGABLE_PLANTS.map((plant) => (
               <Animated.View
                 key={plant.id}
                 {...panResponders[plant.id].panHandlers}
@@ -983,7 +988,7 @@ const styles = StyleSheet.create({
   helper: {
     fontFamily: Fonts.rounded,
     fontWeight: '700',
-    color: '#000',
+    color: '#fff',
     textAlign: 'center',
     fontSize: FontSizes.sm,
     maxWidth: 180,
@@ -991,8 +996,8 @@ const styles = StyleSheet.create({
   plantButtons: { flexDirection: 'row', gap: 12 },
   plantButtonWrap: { alignItems: 'center', justifyContent: 'center' },
   plantBtn: {
-    backgroundColor: '#E8F5E9',
-    borderColor: '#81C784',
+    backgroundColor: '#FFFFFF',
+    borderColor: '#CFD8DC',
     borderWidth: 2,
     borderRadius: 12,
     paddingHorizontal: 14,
