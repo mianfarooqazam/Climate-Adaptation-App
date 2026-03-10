@@ -46,9 +46,9 @@ const SIDE_D = 50;
 const PAD_H = 24;
 const AVAIL_W = SCR_W - PAD_H * 2;
 const H_W = Math.min((AVAIL_W - SIDE_D) * 0.46, 360);
-const H_H = Math.min(SCENE_H * 0.6, 320);
+const H_H = Math.max(Math.min(SCENE_H * 0.6, 320), 220);
 const H_LEFT = Math.round(PAD_H + (AVAIL_W - H_W - SIDE_D) / 2);
-const H_TOP = SCENE_H * 0.26;
+const H_TOP = Math.max(SCENE_H * 0.26, 32);
 
 const ROOF_H = 70;
 const ROOF_OVERHANG = 24;

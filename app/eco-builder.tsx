@@ -323,6 +323,7 @@ const styles = StyleSheet.create({
   },
   houseArea: {
     flex: 1,
+    minHeight: 260,
     height: 300,
     position: 'relative',
   },
@@ -332,6 +333,7 @@ const styles = StyleSheet.create({
     right: '15%',
     top: '10%',
     bottom: '15%',
+    minHeight: 200,
     alignItems: 'center',
   },
   roof: {

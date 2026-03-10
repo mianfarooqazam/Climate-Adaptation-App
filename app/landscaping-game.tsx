@@ -43,7 +43,7 @@ const SCENE_H = SCR_H - HEADER_H - TRAY_H;
 const HOUSE_SCALE = 0.48;
 const H_W = 180;
 const H_H = 124;
-const HOUSE_OFFSET_Y = SCENE_H * 0.18;
+const HOUSE_OFFSET_Y = Math.max(SCENE_H * 0.18, 44);
 const HOUSE1_LEFT = SCR_W * 0.06;
 const HOUSE2_LEFT = SCR_W * 0.52;
 

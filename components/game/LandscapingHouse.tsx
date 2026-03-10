@@ -281,6 +281,7 @@ export function LandscapingHouse({
           <View style={[houseStyles.doorInner, { width: 32 * z, height: 44 * z }]}>
             <View style={[houseStyles.doorKnob, { width: 6 * z, height: 6 * z, borderRadius: 3 * z }]} />
           </View>
+          <View style={[houseStyles.doorArch, { height: 22 * z }]} />
         </View>
         <View style={[houseStyles.doorStep, { width: 52 * z, height: 8 * z }]} />
       </View>
@@ -291,7 +292,7 @@ export function LandscapingHouse({
 
 const houseStyles = StyleSheet.create({
   groundShadow: { position: 'absolute', backgroundColor: 'rgba(0,0,0,0.12)', zIndex: 0 },
-  sideWall: { position: 'absolute', backgroundColor: '#B3E5FC', borderRightWidth: 3, borderBottomWidth: 2, borderLeftWidth: 2, borderTopWidth: 2, borderColor: '#5D4037', borderRadius: 2 },
+  sideWall: { position: 'absolute', backgroundColor: '#BCAAA4', borderRightWidth: 3, borderBottomWidth: 2, borderLeftWidth: 2, borderTopWidth: 2, borderColor: '#5D4037', borderRadius: 2 },
   chimney: { position: 'absolute', zIndex: 5 },
   chimneyTop: { backgroundColor: '#5D4037', zIndex: 2 },
   chimneyFront: { backgroundColor: '#795548', borderBottomLeftRadius: 2, borderBottomRightRadius: 2 },
@@ -316,6 +317,7 @@ const houseStyles = StyleSheet.create({
   door: { backgroundColor: '#5D4037', borderTopLeftRadius: 20, borderTopRightRadius: 20, alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 6, overflow: 'hidden' },
   doorInner: { backgroundColor: '#4E342E', borderTopLeftRadius: 16, borderTopRightRadius: 16, alignItems: 'flex-end', justifyContent: 'center', paddingRight: 6 },
   doorKnob: { backgroundColor: '#FFD54F' },
+  doorArch: { position: 'absolute', top: 0, left: 2, right: 2, borderTopLeftRadius: 18, borderTopRightRadius: 18, backgroundColor: 'rgba(255,255,255,0.06)' },
   doorStep: { backgroundColor: '#78909C', borderRadius: 2, marginTop: 1 },
   foundation: { position: 'absolute', backgroundColor: '#78909C', borderRadius: 2, zIndex: 2 },
 });
