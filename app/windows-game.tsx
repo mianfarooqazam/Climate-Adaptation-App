@@ -683,70 +683,8 @@ export default function WindowsGameScreen() {
         </Pressable>
       </View>
 
-      {/* ===== LEFT: drag items | CENTER/RIGHT: scene + thermometer ===== */}
+      {/* ===== Scene (flex) | Drag tray at bottom ===== */}
       <View style={styles.mainRow}>
-        <View style={styles.leftDragColumn}>
-          {!isPracticeLevel && (
-            <Text style={[styles.helper, lang === 'ur' && styles.rtl]}>{t('chooseWindow')}</Text>
-          )}
-          <View style={styles.layerButtonsColumn}>
-            {isPracticeLevel ? (
-              <>
-                <Animated.View
-                  {...panL1.panHandlers}
-                  style={[
-                    styles.layerButtonWrap,
-                    { transform: [...dragL1.getTranslateTransform(), { scale: scaleL1 }], zIndex: isDraggingL1 ? 100 : 1 },
-                  ]}
-                >
-                  <Pressable style={[styles.layerBtn, layer === 1 && styles.layerBtnActive]} onPress={() => handleLayerPress(1)}>
-                    <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F'}</Text>
-                    <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('singleLayer')}</Text>
-                  </Pressable>
-                </Animated.View>
-                <Animated.View
-                  {...panL2.panHandlers}
-                  style={[
-                    styles.layerButtonWrap,
-                    { transform: [...dragL2.getTranslateTransform(), { scale: scaleL2 }], zIndex: isDraggingL2 ? 100 : 1 },
-                  ]}
-                >
-                  <Pressable style={[styles.layerBtn, layer === 2 && styles.layerBtnActive2]} onPress={() => handleLayerPress(2)}>
-                    <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F\uD83E\uDE9F'}</Text>
-                    <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('doubleLayer')}</Text>
-                  </Pressable>
-                </Animated.View>
-                <Animated.View
-                  {...panL3.panHandlers}
-                  style={[
-                    styles.layerButtonWrap,
-                    { transform: [...dragL3.getTranslateTransform(), { scale: scaleL3 }], zIndex: isDraggingL3 ? 100 : 1 },
-                  ]}
-                >
-                  <Pressable style={[styles.layerBtn, layer === 3 && styles.layerBtnActive3]} onPress={() => handleLayerPress(3)}>
-                    <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F\uD83E\uDE9F\uD83E\uDE9F'}</Text>
-                    <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('tripleLayer')}</Text>
-                  </Pressable>
-                </Animated.View>
-              </>
-            ) : (
-              <>
-                <Pressable style={[styles.layerBtn, layer === 1 && styles.layerBtnActive]} onPress={() => handleLayerPress(1)}>
-                  <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F'}</Text>
-                  <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('singleLayer')}</Text>
-                </Pressable>
-                <Pressable style={[styles.layerBtn, layer === 2 && styles.layerBtnActive2]} onPress={() => handleLayerPress(2)}>
-                  <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F\uD83E\uDE9F'}</Text>
-                  <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('doubleLayer')}</Text>
-                </Pressable>
-                <Pressable style={[styles.layerBtn, layer === 3 && styles.layerBtnActive3]} onPress={() => handleLayerPress(3)}>
-                  <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F\uD83E\uDE9F\uD83E\uDE9F'}</Text>
-                  <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('tripleLayer')}</Text>
-                </Pressable>
-              </>
-            )}
-          </View>
-        </View>
         <View ref={sceneRef} style={styles.scene} collapsable={false}>
         <LinearGradient colors={['#81D4FA', '#B3E5FC', '#E8F5E9']} locations={[0, 0.55, 1]} style={StyleSheet.absoluteFill} />
 
@@ -941,6 +879,70 @@ export default function WindowsGameScreen() {
           </View>
         )}
       </View>
+
+        {/* ===== Drag tray at bottom ===== */}
+        <View style={styles.bottomDragTray}>
+          {!isPracticeLevel && (
+            <Text style={[styles.helper, lang === 'ur' && styles.rtl]}>{t('chooseWindow')}</Text>
+          )}
+          <View style={styles.layerButtons}>
+            {isPracticeLevel ? (
+              <>
+                <Animated.View
+                  {...panL1.panHandlers}
+                  style={[
+                    styles.layerButtonWrap,
+                    { transform: [...dragL1.getTranslateTransform(), { scale: scaleL1 }], zIndex: isDraggingL1 ? 100 : 1 },
+                  ]}
+                >
+                  <Pressable style={[styles.layerBtn, layer === 1 && styles.layerBtnActive]} onPress={() => handleLayerPress(1)}>
+                    <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F'}</Text>
+                    <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('singleLayer')}</Text>
+                  </Pressable>
+                </Animated.View>
+                <Animated.View
+                  {...panL2.panHandlers}
+                  style={[
+                    styles.layerButtonWrap,
+                    { transform: [...dragL2.getTranslateTransform(), { scale: scaleL2 }], zIndex: isDraggingL2 ? 100 : 1 },
+                  ]}
+                >
+                  <Pressable style={[styles.layerBtn, layer === 2 && styles.layerBtnActive2]} onPress={() => handleLayerPress(2)}>
+                    <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F\uD83E\uDE9F'}</Text>
+                    <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('doubleLayer')}</Text>
+                  </Pressable>
+                </Animated.View>
+                <Animated.View
+                  {...panL3.panHandlers}
+                  style={[
+                    styles.layerButtonWrap,
+                    { transform: [...dragL3.getTranslateTransform(), { scale: scaleL3 }], zIndex: isDraggingL3 ? 100 : 1 },
+                  ]}
+                >
+                  <Pressable style={[styles.layerBtn, layer === 3 && styles.layerBtnActive3]} onPress={() => handleLayerPress(3)}>
+                    <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F\uD83E\uDE9F\uD83E\uDE9F'}</Text>
+                    <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('tripleLayer')}</Text>
+                  </Pressable>
+                </Animated.View>
+              </>
+            ) : (
+              <>
+                <Pressable style={[styles.layerBtn, layer === 1 && styles.layerBtnActive]} onPress={() => handleLayerPress(1)}>
+                  <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F'}</Text>
+                  <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('singleLayer')}</Text>
+                </Pressable>
+                <Pressable style={[styles.layerBtn, layer === 2 && styles.layerBtnActive2]} onPress={() => handleLayerPress(2)}>
+                  <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F\uD83E\uDE9F'}</Text>
+                  <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('doubleLayer')}</Text>
+                </Pressable>
+                <Pressable style={[styles.layerBtn, layer === 3 && styles.layerBtnActive3]} onPress={() => handleLayerPress(3)}>
+                  <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F\uD83E\uDE9F\uD83E\uDE9F'}</Text>
+                  <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('tripleLayer')}</Text>
+                </Pressable>
+              </>
+            )}
+          </View>
+        </View>
       </View>
 
       {/* Try Again modal (practice level: wrong layer chosen) */}
@@ -1580,15 +1582,16 @@ const styles = StyleSheet.create({
     zIndex: 20,
   },
 
-  // Left column for drag items (thermometer stays right in scene)
-  mainRow: { flex: 1, flexDirection: 'row' },
-  leftDragColumn: {
-    width: 100,
-    justifyContent: 'center',
+  mainRow: { flex: 1, flexDirection: 'column' },
+  bottomDragTray: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.sm,
-    gap: Spacing.sm,
+    paddingHorizontal: Spacing.lg,
+    gap: Spacing.lg,
+    backgroundColor: 'rgba(62,39,35,0.88)',
+    minHeight: 80,
   },
   layerButtonsColumn: { flexDirection: 'column', gap: 8, alignItems: 'center' },
   windowDropZone: {

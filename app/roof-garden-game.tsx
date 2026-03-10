@@ -429,32 +429,6 @@ export default function RoofGardenGameScreen() {
       </View>
 
       <View style={styles.mainRow}>
-        <View style={styles.leftDragColumn}>
-          <Text style={[styles.helper, lang === 'ur' && styles.rtl]}>{t('dragPlantsToRoof')}</Text>
-          <View style={styles.plantButtonsColumn}>
-            {PLANTS.map((plant) => (
-              <Animated.View
-                key={plant.id}
-                {...panResponders[plant.id].panHandlers}
-                style={[
-                  styles.plantButtonWrap,
-                  {
-                    transform: [
-                      ...dragXY.current[plant.id].getTranslateTransform(),
-                      { scale: scaleVal.current[plant.id] },
-                    ],
-                    zIndex: draggingId === plant.id ? 100 : 1,
-                  },
-                ]}
-              >
-                <View style={styles.plantBtn}>
-                  <Text style={styles.plantBtnEmoji}>{plant.emoji}</Text>
-                  <Text style={[styles.plantBtnText, lang === 'ur' && styles.rtl]}>{t(plant.labelKey)}</Text>
-                </View>
-              </Animated.View>
-            ))}
-          </View>
-        </View>
         <View ref={sceneRef} style={styles.scene} collapsable={false}>
         <LinearGradient colors={['#81D4FA', '#B3E5FC', '#E8F5E9']} locations={[0, 0.55, 1]} style={StyleSheet.absoluteFill} />
 
@@ -621,6 +595,34 @@ export default function RoofGardenGameScreen() {
           </View>
         )}
       </View>
+
+        {/* ===== Drag tray at bottom ===== */}
+        <View style={styles.bottomDragTray}>
+          <Text style={[styles.helper, lang === 'ur' && styles.rtl]}>{t('dragPlantsToRoof')}</Text>
+          <View style={styles.plantButtonsRow}>
+            {PLANTS.map((plant) => (
+              <Animated.View
+                key={plant.id}
+                {...panResponders[plant.id].panHandlers}
+                style={[
+                  styles.plantButtonWrap,
+                  {
+                    transform: [
+                      ...dragXY.current[plant.id].getTranslateTransform(),
+                      { scale: scaleVal.current[plant.id] },
+                    ],
+                    zIndex: draggingId === plant.id ? 100 : 1,
+                  },
+                ]}
+              >
+                <View style={styles.plantBtn}>
+                  <Text style={styles.plantBtnEmoji}>{plant.emoji}</Text>
+                  <Text style={[styles.plantBtnText, lang === 'ur' && styles.rtl]}>{t(plant.labelKey)}</Text>
+                </View>
+              </Animated.View>
+            ))}
+          </View>
+        </View>
       </View>
 
       <Modal visible={showDragHintModal} transparent animationType="fade" onRequestClose={() => setShowDragHintModal(false)}>
@@ -671,16 +673,19 @@ const styles = StyleSheet.create({
   infoBtn: { width: 32, height: 32, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.25)', alignItems: 'center', justifyContent: 'center' },
   infoIcon: { fontSize: 20, color: '#fff', fontWeight: '700' },
 
-  mainRow: { flex: 1, flexDirection: 'row' },
-  leftDragColumn: {
-    width: 100,
-    justifyContent: 'center',
+  mainRow: { flex: 1, flexDirection: 'column' },
+  bottomDragTray: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.sm,
-    gap: Spacing.sm,
+    paddingHorizontal: Spacing.lg,
+    gap: Spacing.lg,
+    backgroundColor: 'rgba(62,39,35,0.88)',
+    minHeight: 80,
   },
   plantButtonsColumn: { flexDirection: 'column', gap: 12, alignItems: 'center' },
+  plantButtonsRow: { flexDirection: 'row', gap: 12, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' },
   scene: { flex: 1, position: 'relative', overflow: 'hidden' },
 
   sun: {

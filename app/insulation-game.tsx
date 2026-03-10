@@ -550,61 +550,8 @@ export default function InsulationGameScreen() {
         </Pressable>
       </View>
 
-      {/* ===== LEFT: drag items | CENTER/RIGHT: scene + thermometer ===== */}
+      {/* ===== Scene (flex) | Drag tray at bottom ===== */}
       <View style={styles.mainRow}>
-        <View style={styles.leftDragColumn}>
-          {remaining > 0 && selectedMaterial ? (
-            <>
-              <Text style={styles.trayLabel}>
-                {t('dragInsulation')} {'\u2191'}
-              </Text>
-              {activeSet.has('roof') && !insulatedZones['roof'] && (
-                <Animated.View
-                  {...roofPanResponder.panHandlers}
-                  style={[
-                    styles.dragItem,
-                    {
-                      transform: [...dragRoof.getTranslateTransform(), { scale: dragRoofScale }],
-                      zIndex: isDraggingRoof ? 100 : 10,
-                    },
-                  ]}
-                >
-                  <View style={styles.dragImageWrap}>
-                    <Image
-                      source={require('@/assets/images/insulation.jpeg')}
-                      style={styles.dragInsulationImage}
-                      resizeMode="cover"
-                    />
-                  </View>
-                </Animated.View>
-              )}
-              {activeSet.has('right-wall') && !insulatedZones['right-wall'] && (
-                <Animated.View
-                  {...wallPanResponder.panHandlers}
-                  style={[
-                    styles.dragItem,
-                    {
-                      transform: [...dragWall.getTranslateTransform(), { scale: dragWallScale }],
-                      zIndex: isDraggingWall ? 100 : 10,
-                    },
-                  ]}
-                >
-                  <View style={styles.dragImageWrap}>
-                    <Image
-                      source={require('@/assets/images/insulation.jpeg')}
-                      style={styles.dragInsulationImage}
-                      resizeMode="cover"
-                    />
-                  </View>
-                </Animated.View>
-              )}
-            </>
-          ) : !allDone ? (
-            <Text style={styles.trayLabel}>Select a material to begin</Text>
-          ) : (
-            <Text style={styles.trayLabel}>{t('allInsulated')}</Text>
-          )}
-        </View>
         <View ref={sceneRef} style={styles.scene} collapsable={false}>
         <LinearGradient colors={['#81D4FA', '#B3E5FC', '#E8F5E9']} locations={[0, 0.55, 1]} style={StyleSheet.absoluteFill} />
 
@@ -815,6 +762,63 @@ export default function InsulationGameScreen() {
         {/* Flash */}
         <Animated.View style={[styles.flash, { opacity: shieldFlash }]} pointerEvents="none" />
       </View>
+
+        {/* ===== Drag tray at bottom ===== */}
+        <View style={styles.bottomDragTray}>
+          {remaining > 0 && selectedMaterial ? (
+            <>
+              <Text style={styles.trayLabel}>
+                {t('dragInsulation')} {'\u2191'}
+              </Text>
+              <View style={styles.bottomTrayRow}>
+                {activeSet.has('roof') && !insulatedZones['roof'] && (
+                  <Animated.View
+                    {...roofPanResponder.panHandlers}
+                    style={[
+                      styles.dragItem,
+                      {
+                        transform: [...dragRoof.getTranslateTransform(), { scale: dragRoofScale }],
+                        zIndex: isDraggingRoof ? 100 : 10,
+                      },
+                    ]}
+                  >
+                    <View style={styles.dragImageWrap}>
+                      <Image
+                        source={require('@/assets/images/insulation.jpeg')}
+                        style={styles.dragInsulationImage}
+                        resizeMode="cover"
+                      />
+                    </View>
+                  </Animated.View>
+                )}
+                {activeSet.has('right-wall') && !insulatedZones['right-wall'] && (
+                  <Animated.View
+                    {...wallPanResponder.panHandlers}
+                    style={[
+                      styles.dragItem,
+                      {
+                        transform: [...dragWall.getTranslateTransform(), { scale: dragWallScale }],
+                        zIndex: isDraggingWall ? 100 : 10,
+                      },
+                    ]}
+                  >
+                    <View style={styles.dragImageWrap}>
+                      <Image
+                        source={require('@/assets/images/insulation.jpeg')}
+                        style={styles.dragInsulationImage}
+                        resizeMode="cover"
+                      />
+                    </View>
+                  </Animated.View>
+                )}
+              </View>
+            </>
+          ) : !allDone ? (
+            <Text style={styles.trayLabel}>Select a material to begin</Text>
+          ) : (
+            <Text style={styles.trayLabel}>{t('allInsulated')}</Text>
+          )}
+        </View>
       </View>
 
       <Modal visible={showDragHintModal} transparent animationType="fade" onRequestClose={() => setShowDragHintModal(false)}>
@@ -989,17 +993,19 @@ const styles = StyleSheet.create({
   learnContinueText: { fontFamily: Fonts.rounded, fontSize: FontSizes.md, fontWeight: '800', color: '#fff' },
   learnContinueArrow: { fontSize: 20, color: '#fff', fontWeight: '700' },
 
-  mainRow: { flex: 1, flexDirection: 'row' },
-  leftDragColumn: {
-    width: 88,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.sm,
-    gap: Spacing.md,
-  },
-  // Scene
+  mainRow: { flex: 1, flexDirection: 'column' },
   scene: { flex: 1, position: 'relative', overflow: 'hidden' },
+  bottomDragTray: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    gap: Spacing.lg,
+    backgroundColor: 'rgba(62,39,35,0.88)',
+    minHeight: TRAY_H,
+  },
+  bottomTrayRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.lg },
 
   // Sun
   sun: {
