@@ -32,7 +32,7 @@ export interface PlayerData {
 const STORAGE_KEY = '@ecohero_player';
 
 export const DEFAULT_PLAYER: PlayerData = {
-  name: 'EcoHero',
+  name: 'Player',
   greenScore: 0,
   totalCorrectAnswers: 0,
   levelProgress: {},

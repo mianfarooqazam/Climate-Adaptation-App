@@ -3,8 +3,8 @@
     "cli": {
       "appVersionSource": "local"
     },
-    "name": "EcoHero: Flood Fighters",
-    "slug": "ecohero-flood-fighters",
+    "name": "Climate Builder",
+    "slug": "climate-builder",
     "version": "1.0.0",
     "orientation": "landscape",
     "icon": "./assets/images/icon.png",

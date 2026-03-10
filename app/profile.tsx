@@ -98,7 +98,7 @@ export default function ProfileScreen() {
             <Text style={styles.avatarEmoji}>{'\u{1F9B8}'}</Text>
           </View>
           <Text style={styles.playerName}>{player.name}</Text>
-          <Text style={styles.playerTitle}>EcoHero in Training</Text>
+          <Text style={styles.playerTitle}>Climate Builder in Training</Text>
         </View>
 
         {/* Stats grid */}
