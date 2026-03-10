@@ -39,15 +39,7 @@ export default function GameHeader({
           </Text>
         ) : null}
       </View>
-      {score !== undefined && maxScore !== undefined ? (
-        <View style={styles.scoreBox}>
-          <Text style={styles.scoreText}>
-            {score}/{maxScore}
-          </Text>
-        </View>
-      ) : (
-        <View style={styles.backBtn} />
-      )}
+      <View style={styles.backBtn} />
     </View>
   );
 }

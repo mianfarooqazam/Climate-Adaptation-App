@@ -51,14 +51,9 @@ export default function LevelCompleteScreen() {
   const { t } = useLanguage();
   const insets = useSafeAreaInsets();
 
-  const isLearnOnlyLevel = levelId === 'w1-l0' || levelId === 'w5-l1';
-  const hideScore = levelId === 'w1-l1' || levelId === 'w1-l2'; // roof & walls in insulation world
-
   const level = getLevelById(levelId ?? '');
   const world = getWorldById(level?.worldId ?? '');
   const starCount = parseInt(stars ?? '0', 10);
-  const scoreNum = parseInt(score ?? '0', 10);
-  const maxScoreNum = parseInt(maxScore ?? '1', 10);
 
   // Find next level
   const worldLevels = level ? getLevelsForWorld(level.worldId) : [];
@@ -119,54 +114,42 @@ export default function LevelCompleteScreen() {
         <LanguageToggle />
       </View>
 
-      {!isLearnOnlyLevel && (
-        <Animated.View
-          style={[
-            styles.card,
-            Shadow.lg,
-            {
-              transform: [{ scale: containerScale }],
-              opacity: containerOpacity,
-            },
-          ]}
-        >
-          {/* Stars */}
-          <Animated.View style={{ transform: [{ scale: starScale }] }}>
-            <StarRating stars={starCount} size={44} />
-          </Animated.View>
-
-          {/* Message */}
-          <Text style={styles.message}>{getMessage()}</Text>
-
-          {/* Score — hidden for insulation roof (w1-l1) and walls (w1-l2) */}
-          {!hideScore && (
-            <View style={styles.scoreRow}>
-              <Text style={styles.scoreLabel}>{t('score')}</Text>
-              <Text style={styles.scoreValue}>
-                {scoreNum} / {maxScoreNum}
-              </Text>
-            </View>
-          )}
-
-          {/* Level name */}
-          <Text style={styles.levelName}>
-            {levelId === 'w1-l1'
-              ? t('roofShield')
-              : levelId === 'w1-l2'
-              ? t('hotWalls')
-              : levelId === 'w5-l1'
-              ? t('learnLayersTitle')
-              : levelId === 'w5-l2'
-              ? t('addRightWindowTitle')
-              : levelId === 'w8-l1'
-              ? t('roofGardenLevelTitle')
-              : level?.title ?? 'Level'}
-          </Text>
+      <Animated.View
+        style={[
+          styles.card,
+          Shadow.lg,
+          {
+            transform: [{ scale: containerScale }],
+            opacity: containerOpacity,
+          },
+        ]}
+      >
+        {/* Stars */}
+        <Animated.View style={{ transform: [{ scale: starScale }] }}>
+          <StarRating stars={starCount} size={44} />
         </Animated.View>
-      )}
+
+        {/* Message */}
+        <Text style={styles.message}>{getMessage()}</Text>
+
+        {/* Level name */}
+        <Text style={styles.levelName}>
+          {levelId === 'w1-l1'
+            ? t('roofShield')
+            : levelId === 'w1-l2'
+            ? t('hotWalls')
+            : levelId === 'w5-l1'
+            ? t('learnLayersTitle')
+            : levelId === 'w5-l2'
+            ? t('addRightWindowTitle')
+            : levelId === 'w8-l1'
+            ? t('roofGardenLevelTitle')
+            : level?.title ?? 'Level'}
+        </Text>
+      </Animated.View>
 
       {/* Buttons */}
-      <View style={[styles.buttons, isLearnOnlyLevel && styles.buttonsLearnOnly]}>
+      <View style={styles.buttons}>
         {nextLevel && nextUnlocked && (
           <GameButton
             title={t('nextLevel')}

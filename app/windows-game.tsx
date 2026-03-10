@@ -415,7 +415,7 @@ export default function WindowsGameScreen() {
         clearTimeout(tryAgainTimeoutRef.current);
         tryAgainTimeoutRef.current = null;
       }
-      if (l === 3) {
+      if (l === 2 || l === 3) {
         finishLevel(30, 30);
       } else {
         tryAgainTimeoutRef.current = setTimeout(() => {
@@ -888,18 +888,6 @@ export default function WindowsGameScreen() {
           <View style={styles.layerButtons}>
             {isPracticeLevel ? (
               <>
-                <Animated.View
-                  {...panL1.panHandlers}
-                  style={[
-                    styles.layerButtonWrap,
-                    { transform: [...dragL1.getTranslateTransform(), { scale: scaleL1 }], zIndex: isDraggingL1 ? 100 : 1 },
-                  ]}
-                >
-                  <Pressable style={[styles.layerBtn, layer === 1 && styles.layerBtnActive]} onPress={() => handleLayerPress(1)}>
-                    <Text style={styles.layerBtnEmoji}>{'\uD83E\uDE9F'}</Text>
-                    <Text style={[styles.layerBtnText, lang === 'ur' && styles.rtl]}>{t('singleLayer')}</Text>
-                  </Pressable>
-                </Animated.View>
                 <Animated.View
                   {...panL2.panHandlers}
                   style={[
